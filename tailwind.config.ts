@@ -88,10 +88,20 @@ const config: Config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "skill-pulse": {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.05)" },
+        },
+        "skill-glow": {
+          "0%, 100%": { boxShadow: "0 0 0 rgba(255, 255, 255, 0)" },
+          "50%": { boxShadow: "0 0 10px rgba(255, 255, 255, 0.3)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "skill-pulse": "skill-pulse 2s ease-in-out infinite",
+        "skill-glow": "skill-glow 2s ease-in-out infinite",
       },
     },
   },
