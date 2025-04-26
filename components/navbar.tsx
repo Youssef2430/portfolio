@@ -1,12 +1,13 @@
 "use client";
 
-import type React from "react";
+import type React from "react"; // Keep React import if needed elsewhere
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MoonIcon, SunIcon, Menu, X, FileText } from "lucide-react";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
+import { GlitchText } from "./glitch-text";
 
 type NavLinkProps = {
   href: string;
@@ -105,6 +106,25 @@ export function Navbar() {
     setMobileMenuOpen(false);
   };
 
+  // Function to handle smooth scrolling for links
+  const handleSmoothScroll = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+    isMobileClick: boolean = false,
+  ) => {
+    e.preventDefault();
+    const targetId = href.replace("#", "");
+    const element = document.getElementById(targetId);
+
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+      window.history.pushState(null, "", href); // Update URL without reload
+      if (isMobileClick) {
+        closeMobileMenu(); // Close mobile menu after clicking a link
+      }
+    }
+  };
+
   // Resume URL - replace with actual URL when available
   const resumeUrl = "data/resume.pdf";
 
@@ -121,32 +141,47 @@ export function Navbar() {
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-14 sm:h-16 items-center justify-between">
+          {/* Site Title */}
           <div className="flex-1">
             <Link
               href="/"
-              className="text-base sm:text-lg font-medium tracking-wider"
+              className="text-base sm:text-lg font-medium tracking-wider inline-block" // Use inline-block for GlitchText
               onClick={(e) => {
                 e.preventDefault();
                 window.scrollTo({ top: 0, behavior: "smooth" });
                 closeMobileMenu();
               }}
             >
-              YOUSSEF CHOUAY
+              {/* Apply GlitchText to the title */}
+              <GlitchText
+                japanese="YOUSSEF CHOUAY"
+                english="又瀨否 打又雅囲" // Or a different version if desired
+                index={-1} // Animate first
+                autoAnimate={true}
+                className="font-medium" // Maintain font weight
+              />
             </Link>
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             {navLinks.map((link, index) => (
-              <NavLink
+              <a
                 key={index}
                 href={link.href}
-                japanese={link.japanese}
-                english={link.english}
-              />
+                className="text-sm tracking-widest hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer"
+                onClick={(e) => handleSmoothScroll(e, link.href)}
+              >
+                <GlitchText
+                  japanese={link.japanese}
+                  english={link.english}
+                  index={index} // Stagger animation
+                  autoAnimate={true}
+                />
+              </a>
             ))}
 
-            {/* Resume/CV Link */}
+            {/* Resume/CV Link (Tooltip remains) */}
             <a
               href={resumeUrl}
               target="_blank"
@@ -157,7 +192,6 @@ export function Navbar() {
               onMouseLeave={() => setIsResumeHovered(false)}
             >
               <FileText className="h-5 w-5" />
-
               <AnimatePresence>
                 {isResumeHovered && (
                   <motion.div
@@ -175,6 +209,7 @@ export function Navbar() {
               </AnimatePresence>
             </a>
 
+            {/* Theme Toggle */}
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -200,7 +235,7 @@ export function Navbar() {
             </button>
           </nav>
 
-          {/* Mobile Navigation Button */}
+          {/* Mobile Controls */}
           <div className="flex md:hidden items-center">
             {/* Resume/CV Link for Mobile */}
             <a
@@ -213,6 +248,7 @@ export function Navbar() {
               <FileText className="h-4 w-4" />
             </a>
 
+            {/* Theme Toggle for Mobile */}
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="p-2 mr-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -237,6 +273,7 @@ export function Navbar() {
               </AnimatePresence>
             </button>
 
+            {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
