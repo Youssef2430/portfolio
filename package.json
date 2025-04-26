@@ -22,6 +22,7 @@
     "next-themes": "^0.2.1",
     "openai": "^4.96.0",
     "pdf-parse": "github:iamh2o/pdf-parse#1.1.3",
+    "posthog-js": "^1.236.7",
     "qss": "^3.0.0",
     "react": "^18",
     "react-dom": "^18",
