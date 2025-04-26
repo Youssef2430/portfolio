@@ -51,7 +51,8 @@ const TypingCursor = () => {
       transition={{
         duration: 0.8,
         repeat: Number.POSITIVE_INFINITY,
-        ease: "steps(3)",
+        times: [0, 0.5, 1],
+        ease: "linear",
       }}
     />
   );
@@ -76,17 +77,18 @@ export function AskInput() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [nextId, setNextId] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isTyping, setIsTyping] = useState(false); // Used to show cursor during typing effect
+  const [isTyping, setIsTyping] = useState(false);
   const [showBubbles, setShowBubbles] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const isStreamingRef = useRef(false); // Tracks if API call OR typing effect is active
-  const typingIntervalRef = useRef<NodeJS.Timeout | null>(null); // Ref for interval ID
+  const submitButtonRef = useRef<HTMLButtonElement>(null); // <-- Add ref for submit button
+  const isStreamingRef = useRef(false);
+  const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load messages from localStorage on mount
+  // Load messages from localStorage on mount (remains the same)
   useEffect(() => {
     const savedMessages = localStorage.getItem("chatMessages");
     const savedNextId = localStorage.getItem("chatNextId");
@@ -95,7 +97,7 @@ export function AskInput() {
       try {
         const parsedMessages: Message[] = JSON.parse(savedMessages);
         setMessages(parsedMessages);
-        setIsTyping(false); // Ensure no initial typing state
+        setIsTyping(false);
       } catch (e) {
         console.error("Failed to parse saved messages", e);
         localStorage.removeItem("chatMessages");
@@ -112,13 +114,11 @@ export function AskInput() {
     }
   }, []);
 
-  // Save messages to localStorage whenever they change
+  // Save messages to localStorage whenever they change (remains the same)
   useEffect(() => {
-    // Only save completed messages (or user questions)
     const messagesToSave = messages.filter(
       (msg) => msg.text || msg.type === "question",
     );
-    // Avoid saving empty placeholder during typing
     if (messagesToSave.length > 0) {
       localStorage.setItem("chatMessages", JSON.stringify(messagesToSave));
     }
@@ -140,25 +140,32 @@ export function AskInput() {
     return () => window.removeEventListener("scroll", checkFooterVisibility);
   }, []);
 
-  // Scroll to bottom (adjusted dependency)
+  // Scroll to bottom (remains the same)
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]); // Trigger scroll on any message change
+  }, [messages]);
 
-  // Handle click outside (remains the same)
+  // --- MODIFIED: Handle click outside ---
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+
       if (
         isExpanded &&
         chatContainerRef.current &&
-        !chatContainerRef.current.contains(event.target as Node)
+        !chatContainerRef.current.contains(target) && // Click is outside the message container
+        inputRef.current &&
+        !inputRef.current.contains(target) && // Click is not the input field
+        submitButtonRef.current &&
+        !submitButtonRef.current.contains(target) // Click is not the submit button
       ) {
-        setIsExpanded(false);
+        setIsExpanded(false); // Only close if click is outside all these elements
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isExpanded]);
+    // Add refs to dependency array
+  }, [isExpanded, inputRef, submitButtonRef, chatContainerRef]); // <-- Added refs
 
   // Show/hide bubbles (remains the same)
   useEffect(() => {
@@ -170,7 +177,7 @@ export function AskInput() {
     }
   }, [isExpanded]);
 
-  // --- Cleanup interval on unmount ---
+  // Cleanup interval on unmount (remains the same)
   useEffect(() => {
     return () => {
       if (typingIntervalRef.current) {
@@ -179,7 +186,7 @@ export function AskInput() {
     };
   }, []);
 
-  // --- MODIFIED: Handle API Call and Typing Effect ---
+  // Handle API Call and Typing Effect (remains the same)
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -189,18 +196,16 @@ export function AskInput() {
       setInputValue("");
       setApiError(null);
 
-      // 1. Add user question
       const questionId = nextId;
       const newUserMessage: Message = {
         id: questionId,
         text: currentInput,
         type: "question",
       };
-      // 2. Add placeholder for answer
-      const answerId = nextId + 1; // Keep track of the ID for updating state
+      const answerId = nextId + 1;
       const placeholderAnswer: Message = {
         id: answerId,
-        text: "", // Start empty for typing effect
+        text: "",
         type: "answer",
       };
 
@@ -211,23 +216,19 @@ export function AskInput() {
         setIsExpanded(true);
       }
 
-      // 3. Prepare history
       const history: ApiHistoryItem[] = messages.map((msg) => ({
         role: msg.type === "question" ? "user" : "assistant",
         content: msg.text,
       }));
       history.push({ role: "user", content: currentInput });
 
-      // 4. Start API call
-      setIsTyping(true); // Show cursor immediately
-      isStreamingRef.current = true; // Block new submissions
+      setIsTyping(true);
+      isStreamingRef.current = true;
 
-      // --- Clear any previous interval ---
       if (typingIntervalRef.current) {
         clearInterval(typingIntervalRef.current);
         typingIntervalRef.current = null;
       }
-      // ---
 
       try {
         const response = await fetch("/api/ask", {
@@ -242,7 +243,6 @@ export function AskInput() {
           );
         }
 
-        // Assuming the API returns the full response text at once
         const data = await response.json();
         const fullText = data.response;
 
@@ -250,14 +250,12 @@ export function AskInput() {
           throw new Error("Invalid response format from API.");
         }
 
-        // --- Start Typing Effect ---
         let index = 0;
-        const typingSpeed = 30; // Adjust speed (milliseconds per character)
+        const typingSpeed = 30;
 
         typingIntervalRef.current = setInterval(() => {
           setMessages((prev) =>
             prev.map((msg) =>
-              // Use the answerId captured earlier to target the correct message
               msg.id === answerId
                 ? { ...msg, text: fullText.substring(0, index + 1) }
                 : msg,
@@ -271,11 +269,10 @@ export function AskInput() {
               clearInterval(typingIntervalRef.current);
               typingIntervalRef.current = null;
             }
-            setIsTyping(false); // Hide cursor
-            isStreamingRef.current = false; // Allow new submissions
+            setIsTyping(false);
+            isStreamingRef.current = false;
           }
         }, typingSpeed);
-        // --- End Typing Effect ---
       } catch (error) {
         console.error("API call or typing effect failed:", error);
         const errorMessage =
@@ -283,20 +280,17 @@ export function AskInput() {
         setApiError(`Failed to get response: ${errorMessage}`);
         setMessages((prev) =>
           prev.map((msg) =>
-            // Use the answerId captured earlier to target the correct message
             msg.id === answerId
-              ? { ...msg, text: "Sorry, an error occurred." } // Show error in placeholder
+              ? { ...msg, text: "Sorry, an error occurred." }
               : msg,
           ),
         );
-        // --- Cleanup on error ---
         if (typingIntervalRef.current) {
           clearInterval(typingIntervalRef.current);
           typingIntervalRef.current = null;
         }
         setIsTyping(false);
         isStreamingRef.current = false;
-        // ---
       }
     },
     [
@@ -309,23 +303,22 @@ export function AskInput() {
       setIsExpanded,
       setApiError,
       setIsTyping,
-    ], // Added state setters to dependencies
+    ],
   );
 
+  // Clear messages (remains the same)
   const clearMessages = () => {
-    // --- Clear interval if running ---
     if (typingIntervalRef.current) {
       clearInterval(typingIntervalRef.current);
       typingIntervalRef.current = null;
     }
-    // ---
     setMessages([]);
     localStorage.removeItem("chatMessages");
     localStorage.removeItem("chatNextId");
     setNextId(0);
     setApiError(null);
-    setIsTyping(false); // Ensure typing state is reset
-    isStreamingRef.current = false; // Ensure streaming state is reset
+    setIsTyping(false);
+    isStreamingRef.current = false;
   };
 
   if (!isVisible) return null;
@@ -338,7 +331,7 @@ export function AskInput() {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
     >
-      {/* Bubble particles */}
+      {/* Bubble particles (remains the same) */}
       {showBubbles && (
         <>
           {Array.from({ length: 15 }).map((_, i) => (
@@ -347,7 +340,7 @@ export function AskInput() {
         </>
       )}
 
-      {/* Messages container */}
+      {/* Messages container (remains the same) */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -363,9 +356,8 @@ export function AskInput() {
               mass: 0.8,
             }}
           >
-            {/* Bubble shine effect */}
+            {/* Header and messages content remains the same */}
             <div className="absolute top-0 left-1/4 w-1/2 h-1 bg-gradient-to-r from-transparent via-white/60 dark:via-blue-400/30 to-transparent rounded-full"></div>
-
             <div className="flex justify-between items-center mb-3 sm:mb-4 pb-2 border-b border-gray-100/50 dark:border-gray-700/20">
               <h3 className="text-xs sm:text-sm font-medium">
                 Conversation with Youssef
@@ -387,9 +379,7 @@ export function AskInput() {
                 </button>
               </div>
             </div>
-
             <div className="overflow-y-auto max-h-[50vh] sm:max-h-[280px] pr-2 space-y-3 sm:space-y-4 scrollbar-thin">
-              {/* Display API Error if any */}
               {apiError && (
                 <motion.div
                   className="text-center text-red-600 dark:text-red-400 text-xs sm:text-sm p-2 bg-red-100/50 dark:bg-red-900/30 rounded-lg"
@@ -403,7 +393,7 @@ export function AskInput() {
                 {messages.map((message, index) => (
                   <motion.div
                     key={message.id}
-                    layout // Animate layout changes smoothly
+                    layout
                     className={`flex ${message.type === "question" ? "justify-end" : "justify-start"}`}
                     initial={{ opacity: 0, y: 20, scale: 0.9 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -422,24 +412,16 @@ export function AskInput() {
                           : "bg-gradient-to-br from-white/90 to-gray-100/90 text-black dark:from-gray-800/80 dark:to-gray-900/80 dark:text-gray-200 rounded-tl-none shadow-[0_4px_10px_rgba(0,0,0,0.1)]"
                       }`}
                     >
-                      {/* Bubble shine effect */}
                       <div
                         className={`absolute top-0 left-1/4 w-1/2 h-0.5 bg-gradient-to-r from-transparent ${message.type === "question" ? "via-white/30" : "via-white/50 dark:via-blue-400/20"} to-transparent rounded-full`}
                       ></div>
-
-                      {/* Message text with cursor effect during typing */}
                       <p className="text-xs sm:text-sm whitespace-pre-wrap break-words">
                         {message.text}
-                        {/* --- FIX APPLIED HERE --- */}
-                        {/* Show cursor only for the last message if it's an answer and currently typing */}
                         {message.type === "answer" &&
-                          index === messages.length - 1 && // Check if it's the last message
+                          index === messages.length - 1 &&
                           isTyping && <TypingCursor />}
-
-                        {/* --- FIX APPLIED HERE --- */}
-                        {/* Show placeholder space if the last message is an answer, typing, and empty */}
                         {message.type === "answer" &&
-                          index === messages.length - 1 && // Check if it's the last message
+                          index === messages.length - 1 &&
                           isTyping &&
                           !message.text && <span>&nbsp;</span>}
                       </p>
@@ -459,24 +441,25 @@ export function AskInput() {
         className="relative bg-white/90 dark:bg-zinc-800/80 backdrop-blur-sm h-10 sm:h-12 rounded-full overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.1),_0_0_0_1px_rgba(255,255,255,0.1)]"
       >
         <input
-          ref={inputRef}
+          ref={inputRef} // Ref already exists
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder="Ask about Youssef..."
           className="w-full h-full px-3 sm:px-6 pr-10 sm:pr-12 bg-transparent border-none focus:outline-none focus:ring-0 text-xs sm:text-base"
-          disabled={isStreamingRef.current} // Disable input during API call AND typing
+          disabled={isStreamingRef.current}
         />
         <button
+          ref={submitButtonRef} // <-- Attach the ref here
           type="submit"
-          disabled={!inputValue.trim() || isStreamingRef.current} // Disable button during API call AND typing
+          disabled={!inputValue.trim() || isStreamingRef.current}
           className="absolute right-1.5 sm:right-2 top-1/2 transform -translate-y-1/2 h-7 w-7 sm:h-8 sm:w-8 rounded-full disabled:bg-gray-100/80 bg-black dark:bg-gray-700 dark:disabled:bg-zinc-700/30 transition duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Send className="h-3 w-3 sm:h-4 sm:w-4 text-gray-300 dark:text-white/90" />
         </button>
       </form>
 
-      {/* Add CSS for scrollbar styling */}
+      {/* CSS for scrollbar styling (remains the same) */}
       <style jsx>{`
         .scrollbar-thin::-webkit-scrollbar {
           width: 4px;
