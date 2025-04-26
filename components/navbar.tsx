@@ -106,7 +106,7 @@ export function Navbar() {
   };
 
   // Resume URL - replace with actual URL when available
-  const resumeUrl = "/resume.pdf";
+  const resumeUrl = "data/resume.pdf";
 
   return (
     <motion.header

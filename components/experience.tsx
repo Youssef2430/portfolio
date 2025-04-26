@@ -187,11 +187,7 @@ export function Experience() {
 
         // Add the highlighted company name with link preview
         elements.push(
-          <LinkPreview
-            key={`highlight-${index}`}
-            url={highlight.url}
-            previewImage={highlight.previewImage}
-          >
+          <LinkPreview key={`highlight-${index}`} url={highlight.url}>
             <span className="font-medium text-black dark:text-white">
               {highlight.name}
             </span>
@@ -259,10 +255,7 @@ export function Experience() {
                 </div>
                 <h3 className="text-xl font-medium mb-1">{item.role}</h3>
                 <div className="text-gray-600 dark:text-gray-300 mb-2">
-                  <LinkPreview
-                    url={item.companyUrl}
-                    previewImage={item.companyPreviewImage}
-                  >
+                  <LinkPreview url={item.companyUrl}>
                     <span className="font-medium text-black dark:text-white">
                       {item.company}
                     </span>

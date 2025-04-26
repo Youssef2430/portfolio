@@ -1,34 +1,34 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
-import Image from "next/image"
-import { ArrowLeft, ExternalLink } from "lucide-react"
-import { motion } from "framer-motion"
-import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
-import { ParallaxSection } from "@/components/parallax-section"
-import { getProjectById, type ProjectDetail } from "@/lib/project-data"
-import ProjectPin from "@/components/project-pin"
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
+import { ArrowLeft, ExternalLink } from "lucide-react";
+import { motion } from "framer-motion";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
+import { ParallaxSection } from "@/components/parallax-section";
+import { getProjectById, type ProjectDetail } from "@/lib/project-data";
+import ProjectPin from "@/components/project-pin";
 
 export default function ProjectPage() {
-  const params = useParams()
-  const router = useRouter()
-  const [project, setProject] = useState<ProjectDetail | null>(null)
-  const [loading, setLoading] = useState(true)
+  const params = useParams();
+  const router = useRouter();
+  const [project, setProject] = useState<ProjectDetail | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (params.id) {
-      const projectData = getProjectById(params.id as string)
+      const projectData = getProjectById(params.id as string);
       if (projectData) {
-        setProject(projectData)
+        setProject(projectData);
       } else {
         // Project not found, redirect to projects section
-        router.push("/#projects")
+        router.push("/#projects");
       }
-      setLoading(false)
+      setLoading(false);
     }
-  }, [params.id, router])
+  }, [params.id, router]);
 
   if (loading) {
     return (
@@ -38,11 +38,11 @@ export default function ProjectPage() {
           <p className="mt-4">Loading project...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (!project) {
-    return null
+    return null;
   }
 
   return (
@@ -58,14 +58,27 @@ export default function ProjectPage() {
         </button>
 
         <div className="max-w-5xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <h1 className="text-4xl font-light tracking-tight mb-2">{project.title}</h1>
-            <p className="text-gray-500 dark:text-gray-400 mb-8">{project.category}</p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h1 className="text-4xl font-light tracking-tight mb-2">
+              {project.title}
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400 mb-8">
+              {project.category}
+            </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
               <div>
                 <div className="relative aspect-video overflow-hidden rounded-lg mb-8">
-                  <Image src={project.image || "/placeholder.svg"} alt={project.title} fill className="object-cover" />
+                  <Image
+                    src={project.image || "/placeholder.svg"}
+                    alt={project.title}
+                    fill
+                    className="object-cover"
+                  />
                 </div>
 
                 <div className="space-y-6">
@@ -75,7 +88,10 @@ export default function ProjectPage() {
                     </h2>
                     <div className="flex flex-wrap gap-2">
                       {project.technologies.map((tech, idx) => (
-                        <span key={idx} className="inline-block px-2 py-1 text-xs bg-gray-100 dark:bg-gray-800 rounded">
+                        <span
+                          key={idx}
+                          className="inline-block px-2 py-1 text-xs bg-gray-100 dark:bg-gray-800 rounded"
+                        >
                           {tech}
                         </span>
                       ))}
@@ -87,7 +103,9 @@ export default function ProjectPage() {
                       <h2 className="text-sm font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
                         Timeline
                       </h2>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">{project.timeline}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        {project.timeline}
+                      </p>
                     </div>
                   )}
 
@@ -98,7 +116,10 @@ export default function ProjectPage() {
                       </h2>
                       <div className="space-y-1">
                         {project.contributors.map((contributor, idx) => (
-                          <p key={idx} className="text-sm text-gray-600 dark:text-gray-300">
+                          <p
+                            key={idx}
+                            className="text-sm text-gray-600 dark:text-gray-300"
+                          >
                             {contributor}
                           </p>
                         ))}
@@ -131,7 +152,10 @@ export default function ProjectPage() {
                   </h2>
                   <div className="space-y-4">
                     {project.description.map((paragraph, idx) => (
-                      <p key={idx} className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                      <p
+                        key={idx}
+                        className="text-gray-600 dark:text-gray-300 leading-relaxed"
+                      >
                         {paragraph}
                       </p>
                     ))}
@@ -146,9 +170,11 @@ export default function ProjectPage() {
                     </h2>
                     <ProjectPin
                       title={project.title}
-                      description={project.description[0].substring(0, 100) + "..."}
+                      description={
+                        project.description[0].substring(0, 100) + "..."
+                      }
                       href={project.link || "#"}
-                      image={project.image}
+                      image={project.imageLink}
                     />
                   </div>
                 </ParallaxSection>
@@ -159,5 +185,5 @@ export default function ProjectPage() {
       </div>
       <Footer />
     </main>
-  )
+  );
 }

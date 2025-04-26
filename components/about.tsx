@@ -80,10 +80,7 @@ export function About() {
                   const Icon = link.icon;
                   return (
                     <li key={index}>
-                      <LinkPreview
-                        url={link.href}
-                        previewImage={link.previewImage}
-                      >
+                      <LinkPreview url={link.href}>
                         <div className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">
                           <Icon className="h-5 w-5 mr-3" />
                           <span>{link.label}</span>
