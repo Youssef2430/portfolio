@@ -8,10 +8,9 @@ import { PostHogProvider } from "./providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Youssef Chouay | Software Engineer",
+  title: "Youssef Chouay",
   description:
     "Portfolio of Youssef Chouay, Software Engineer and AI Researcher",
-  generator: "v0.dev",
 };
 
 export default function RootLayout({
@@ -21,6 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/icon.png" />
+      </head>
       <body className={inter.className}>
         <PostHogProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
