@@ -155,7 +155,7 @@ export function Navbar() {
               {/* Apply GlitchText to the title */}
               <GlitchText
                 japanese="YOUSSEF CHOUAY"
-                english="又瀨否 打又雅囲" // Or a different version if desired
+                english="ユーセフ・チュワイ"
                 index={-1} // Animate first
                 autoAnimate={true}
                 className="font-medium" // Maintain font weight
@@ -166,19 +166,27 @@ export function Navbar() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             {navLinks.map((link, index) => (
-              <a
+              <NavLink
                 key={index}
                 href={link.href}
-                className="text-sm tracking-widest hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer"
-                onClick={(e) => handleSmoothScroll(e, link.href)}
-              >
-                <GlitchText
-                  japanese={link.japanese}
-                  english={link.english}
-                  index={index} // Stagger animation
-                  autoAnimate={true}
-                />
-              </a>
+                japanese={link.japanese}
+                english={link.english}
+                onClick={closeMobileMenu}
+                isMobile={true}
+              />
+              // <a
+              //   key={index}
+              //   href={link.href}
+              //   className="text-sm tracking-widest hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer"
+              //   onClick={(e) => handleSmoothScroll(e, link.href)}
+              // >
+              //   <GlitchText
+              //     japanese={link.japanese}
+              //     english={link.english}
+              //     index={index} // Stagger animation
+              //     autoAnimate={true}
+              //   />
+              // </a>
             ))}
 
             {/* Resume/CV Link (Tooltip remains) */}

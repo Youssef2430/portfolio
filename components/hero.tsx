@@ -46,8 +46,8 @@ export function Hero() {
           transition={{ duration: 0.8 }}
         >
           <GlitchText
-            japanese="コード"
-            english="Code"
+            japanese="好奇心"
+            english="Curiosity"
             className="mt-2"
             index={0}
           />
@@ -71,8 +71,8 @@ export function Hero() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.3 }}
         >
-          Software Engineer & AI Researcher crafting elegant solutions through
-          code, where engineering meets artistry.
+          Crafting elegant solutions through code, where engineering meets
+          artistry.
         </motion.p>
       </motion.div>
 

@@ -30,12 +30,13 @@ export function SectionHeading({ japanese, english, id }: SectionHeadingProps) {
         onMouseLeave={() => setIsHovering(false)}
         style={{ cursor: isHovering ? "default" : "pointer" }}
       >
-        <GlitchText
+        <span className="mt-2">{english}</span>
+        {/* <GlitchText
           japanese={japanese}
           english={english}
           className="mt-2"
           index={0}
-        />
+        /> */}
       </motion.h2>
       <motion.div
         className="h-px w-16 bg-black dark:bg-white"

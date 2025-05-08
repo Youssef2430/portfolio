@@ -49,23 +49,28 @@ export function About() {
               transition={{ duration: 0.5, delay: 0.3 }}
             >
               <p className="text-lg leading-relaxed mb-6 text-gray-800 dark:text-gray-200">
-                I'm a software engineer and AI researcher with a passion for
-                creating elegant, efficient solutions to complex problems. With
-                experience in full-stack development and artificial
-                intelligence, I specialize in building responsive web
-                applications and implementing AI solutions for real-world
-                problems.
+                I'm a software engineer and researcher with a passion for
+                creating elegant, efficient solutions to complex problems.
+                <sup>
+                  <span className="text-xs font-normal">
+                    {" "}
+                    (This is not contractual promise, I will do my best
+                    though!!)
+                  </span>
+                </sup>
               </p>
               <p className="text-lg leading-relaxed mb-6 text-gray-800 dark:text-gray-200">
-                My approach combines technical expertise with a deep
-                appreciation for clean design and intuitive user experiences. I
-                believe that the best software is not only functional but also
-                beautiful and accessible.
+                Growing up curious about the world and my surroundings, I've
+                always wanted to understand how they worked. I've kept that
+                approach and mindset throughout my whole life and I'm slowly
+                chipping the iceberg of knowledge hoping to make a big enough
+                dent to make my younger self proud.
               </p>
               <p className="text-lg leading-relaxed text-gray-800 dark:text-gray-200">
                 Currently pursuing a Master's in Computer Science with a focus
-                on AI and machine learning, I'm constantly exploring new
-                technologies and contributing to open-source projects.
+                on Graph Theory, and working as an AI researcher for the
+                Canadian National Research Council. I'm constantly exploring new
+                technologies and ways to contribute.
               </p>
             </motion.div>
 

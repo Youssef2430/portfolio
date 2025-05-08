@@ -4,6 +4,7 @@ import OpenAI from "openai";
 import { createClient } from "@supabase/supabase-js";
 
 // --- Configuration ---
+const USE_RAG = false;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; // Use Service Role Key for server-side RPC
@@ -12,7 +13,7 @@ const EMBEDDING_MODEL = "text-embedding-3-small"; // Needed for query embedding
 const EMBEDDING_DIMENSIONS = 1536; // Needed for query embedding
 const COMPLETION_MODEL = "gpt-4.1-nano";
 const TOP_K_CONTEXT = 3;
-const SIMILARITY_THRESHOLD = 0.2; // Minimum similarity score for matches
+const SIMILARITY_THRESHOLD = 0.5; // Minimum similarity score for matches
 const SUPABASE_MATCH_FUNCTION = "match_documents"; // Must match your SQL function name
 
 // --- Validate Environment Variables ---
@@ -130,13 +131,34 @@ export async function POST(req: Request) {
         ? relevantContexts.join("\n\n")
         : "No specific context found matching the query.";
 
-    // --- RAG Step 2: Augment the prompt ---
-    const systemPrompt = `You are an AI assistant answering questions about Youssef based *primarily* on the provided context and the ongoing conversation. If the context doesn't contain the answer, state that you don't have that information based on the provided details. Refer to previous messages if relevant. Keep responses concise and professional.
+    let systemPrompt = "";
+    if (USE_RAG) {
+      systemPrompt = `You are an AI assistant answering questions about Youssef based *primarily* on the provided context and the ongoing conversation. If the context doesn't contain the answer, state that you don't have that information based on the provided details. Refer to previous messages if relevant. Keep responses concise and professional.
+              Context about Youssef:
+              --- START CONTEXT ---
+              ${contextString}
+              --- END CONTEXT ---`;
+    } else {
+      systemPrompt = `You are an AI assistant answering questions about Youssef based *primarily* on the provided context and the ongoing conversation. If the context doesn't contain the answer, state that you don't have that information based on the provided details. Refer to previous messages if relevant. Keep responses concise and professional.
+              Context about Youssef:
+              --- START CONTEXT ---
+              Youssef Chouay is a driven software engineer and AI researcher currently pursuing a Master’s in Computer Science at the University of Ottawa (January 2025–December 2026), under the supervision of Prof. Vida Dujmović, having earned over \$52 000 in research scholarships. He previously completed a Bachelor of Applied Science in Software Engineering at the same institution (September 2020–December 2024), where he excelled in courses such as Data Structures & Algorithms, Embedded Systems, Databases, Discrete Mathematics, Real-Time Systems Design, and Enterprise Architecture .
 
-Context about Youssef:
---- START CONTEXT ---
-${contextString}
---- END CONTEXT ---`;
+              Since May 2024, Youssef has worked as an Artificial Intelligence Researcher at the National Research Council (NRC) in Ottawa, designing and deploying Python-based systems using LangChain to integrate Building Automation Systems (BAS). His solutions reduced data-processing times and manual workload by 49 % and—through partnerships with Delta Controls and Carleton University—achieved a 56 % drop in maintenance costs via predictive maintenance and real-time alerts, leveraging SQLite for efficient stream processing .
+
+              Before that, he served as a Junior Software Engineer at Wind River Systems (September 2022–August 2023), where he built an Automation Dashboard with Angular, TypeScript, Django, and PostgreSQL—optimizing API endpoints to deliver over 90 % faster queries and UI responsiveness. Concurrently, as a Software Developer at the University of Ottawa (May 2022–April 2024), he redesigned the university’s search engine in PHP/MySQL, cutting response times by 80 % and saving the institution over \$30 000 annually, while automating data workflows with Bash and Cron jobs .
+
+              An active Teaching Assistant since September 2023, Youssef supports both graduate and undergraduate courses—ranging from Machine Learning for Bio-informatics to Data Structures & Algorithms, Programming Paradigms, and Discrete Structures .
+
+              Beyond his roles, Youssef has spearheaded several high-impact projects:
+
+              * **NLP Phishing Detection (Bell Canada Research):** Built a CNN-based classifier achieving 98.4 % accuracy, integrated via a Chrome extension and automated AWS S3 retraining pipelines.
+              * **GeeGee’s Intramural Sports Hub:** Developed with Next.js/TypeScript/Tailwind and a high-throughput Rust + Actix-web API, streaming real-time standings and match analytics at sub-20 ms latency.
+              * **Distributed File Storage System (Go):** Engineered a fault-tolerant, gRPC/Protocol Buffers-backed storage network using consistent hashing and replication, reducing transfer latency by 35 % .
+
+              His technical toolkit spans Python, Java, Go, Rust, C/C++, JavaScript/TypeScript, SQL, and LaTeX, alongside frameworks and tools like AWS CDK, React, Node.js, TensorFlow, Docker, Kubernetes, and Firebase. An avid open-source contributor (GitHub: github.com/Youssef2430), Youssef is passionate about leveraging cutting-edge AI and scalable architectures to solve real-world challenges—particularly in smart buildings, predictive analytics, and high-performance systems.&#x20;
+              --- END CONTEXT ---`;
+    }
 
     // --- Construct the full message list for the LLM ---
     const messagesForAPI: OpenAI.Chat.ChatCompletionMessageParam[] = [

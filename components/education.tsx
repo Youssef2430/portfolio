@@ -5,6 +5,7 @@ import { useInView } from "react-intersection-observer";
 import { SectionHeading } from "./section-heading";
 import { useState, useEffect, useRef } from "react";
 import { ParallaxSection } from "./parallax-section";
+import { LinkPreview } from "./ui/link-preview";
 
 type EducationItem = {
   degree: string;
@@ -12,6 +13,11 @@ type EducationItem = {
   location: string;
   period: string;
   details: string[];
+  highlights?: Array<{
+    name: string;
+    url: string;
+    previewImage: string;
+  }>;
 };
 
 const educationItems: EducationItem[] = [
@@ -21,8 +27,16 @@ const educationItems: EducationItem[] = [
     location: "Ottawa, ON",
     period: "Jan 2025 – Dec 2026",
     details: [
-      "Supervisor: Vida Dujmovic (Wikipedia Link)",
+      "Supervisor: Vida Dujmovic",
       "Received over $52,000 in research scholarships",
+    ],
+    highlights: [
+      {
+        name: "Vida Dujmovic",
+        url: "https://en.wikipedia.org/wiki/Vida_Dujmovi%C4%87",
+        previewImage:
+          "/placeholder.svg?height=400&width=640&text=Vida+Dujmovic",
+      },
     ],
   },
   {
@@ -35,6 +49,50 @@ const educationItems: EducationItem[] = [
     ],
   },
 ];
+
+// Function to highlight company names with link previews
+const highlightCompanyNames = (
+  text: string,
+  highlights?: Array<{ name: string; url: string; previewImage: string }>,
+) => {
+  if (!highlights || highlights.length === 0) return <span>{text}</span>;
+
+  const result = text;
+  const elements: React.JSX.Element[] = [];
+  let lastIndex = 0;
+
+  highlights.forEach((highlight, index) => {
+    const startIndex = result.indexOf(highlight.name, lastIndex);
+    if (startIndex !== -1) {
+      // Add text before the highlight
+      if (startIndex > lastIndex) {
+        elements.push(
+          <span key={`text-${index}-1`}>
+            {result.substring(lastIndex, startIndex)}
+          </span>,
+        );
+      }
+
+      // Add the highlighted company name with link preview
+      elements.push(
+        <LinkPreview key={`highlight-${index}`} url={highlight.url}>
+          <span className="font-medium text-black dark:text-white">
+            {highlight.name}
+          </span>
+        </LinkPreview>,
+      );
+
+      lastIndex = startIndex + highlight.name.length;
+    }
+  });
+
+  // Add any remaining text
+  if (lastIndex < result.length) {
+    elements.push(<span key="text-last">{result.substring(lastIndex)}</span>);
+  }
+
+  return <>{elements}</>;
+};
 
 export function Education() {
   const [ref, inView] = useInView({
@@ -146,7 +204,10 @@ export function Education() {
                       key={detailIndex}
                       className="text-gray-600 dark:text-gray-400"
                     >
-                      • {detail}
+                      {/* • {detail} */}
+                      {item.highlights
+                        ? highlightCompanyNames(detail, item.highlights)
+                        : detail}
                     </li>
                   ))}
                 </ul>
