@@ -139,17 +139,54 @@ export function AskInput() {
       const footer = document.querySelector("footer");
       if (footer) {
         const footerRect = footer.getBoundingClientRect();
-        setIsVisible(!(footerRect.top < window.innerHeight + 100));
+        const mobileOffset = window.innerWidth < 640 ? 150 : 100;
+        setIsVisible(!(footerRect.top < window.innerHeight + mobileOffset));
       }
     };
     window.addEventListener("scroll", checkFooterVisibility);
+    window.addEventListener("resize", checkFooterVisibility);
     checkFooterVisibility();
-    return () => window.removeEventListener("scroll", checkFooterVisibility);
+    return () => {
+      window.removeEventListener("scroll", checkFooterVisibility);
+      window.removeEventListener("resize", checkFooterVisibility);
+    };
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Scroll to bottom of messages
+    if (messagesEndRef.current && messages.length > 0) {
+      const parent = messagesEndRef.current.parentElement;
+      if (parent) {
+        // Use scrollTop instead of scrollIntoView to avoid page scroll issues
+        parent.scrollTop = parent.scrollHeight;
+      }
+    }
   }, [messages]);
+
+  // Clean implementation to prevent scroll-to-top on mobile input focus
+  useEffect(() => {
+    // Simple function to prevent iOS from scrolling to focused input
+    const preventScrollOnFocus = () => {
+      // Store the current scroll position
+      const scrollPosition = window.pageYOffset;
+
+      // Use a short timeout to reset scroll after browser's default behavior
+      setTimeout(() => {
+        window.scrollTo(0, scrollPosition);
+      }, 0);
+    };
+
+    // Only apply to the input element
+    if (inputRef.current) {
+      inputRef.current.addEventListener("focus", preventScrollOnFocus);
+    }
+
+    return () => {
+      if (inputRef.current) {
+        inputRef.current.removeEventListener("focus", preventScrollOnFocus);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -475,7 +512,7 @@ export function AskInput() {
   // --- JSX Rendering ---
   return (
     <motion.div
-      className="fixed bottom-8 left-1/2 transform -translate-x-1/2 w-full max-w-xl px-4 sm:px-6 z-40"
+      className="fixed bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 w-[98%] sm:w-full max-w-xl px-3 sm:px-6 z-40"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -495,7 +532,7 @@ export function AskInput() {
         {isExpanded && (
           <motion.div
             ref={chatContainerRef}
-            className="relative mb-4 max-h-[60vh] sm:max-h-[400px] overflow-hidden rounded-3xl bg-white/70 dark:bg-zinc-900/50 backdrop-blur-lg p-3 sm:p-4 border border-white/50 dark:border-blue-500/20 shadow-[0_8px_30px_rgba(0,0,0,0.12),_0_0_10px_rgba(120,120,255,0.1)] pointer-events-auto"
+            className="relative mb-3 sm:mb-4 max-h-[70vh] sm:max-h-[400px] overflow-hidden rounded-2xl sm:rounded-3xl bg-white/70 dark:bg-zinc-900/50 backdrop-blur-lg p-2.5 sm:p-4 border border-white/50 dark:border-blue-500/20 shadow-[0_8px_30px_rgba(0,0,0,0.12),_0_0_10px_rgba(120,120,255,0.1)] pointer-events-auto"
             initial={{ opacity: 0, y: 60, scale: 0.8, height: 0 }}
             animate={{ opacity: 1, y: 0, scale: 1, height: "auto" }}
             exit={{ opacity: 0, y: 60, scale: 0.8, height: 0 }}
@@ -507,30 +544,30 @@ export function AskInput() {
             }}
           >
             {/* Header */}
-            <div className="absolute top-0 left-1/4 w-1/2 h-1 bg-gradient-to-r from-transparent via-white/60 dark:via-blue-400/30 to-transparent rounded-full"></div>
-            <div className="flex justify-between items-center mb-3 sm:mb-4 pb-2 border-b border-gray-100/50 dark:border-gray-700/20">
-              <h3 className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+            <div className="absolute top-0 left-1/4 w-1/2 h-1 bg-gradient-to-r from-transparent via-white/60 dark:via-blue-400/30 to-transparent rounded-full hidden sm:block"></div>
+            <div className="flex justify-between items-center mb-2.5 sm:mb-4 pb-2 border-b border-gray-100/50 dark:border-gray-700/20">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Conversation with Youssef
               </h3>
-              <div className="flex space-x-1 sm:space-x-2">
+              <div className="flex space-x-2">
                 <button
                   onClick={clearMessages}
-                  className="p-1 sm:p-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-blue-500/10 transition-colors"
+                  className="p-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-blue-500/10 transition-colors active:scale-95 touch-manipulation"
                   aria-label="Clear conversation"
                 >
-                  <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <Trash2 className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setIsExpanded(false)}
-                  className="p-1 sm:p-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-blue-500/10 transition-colors"
+                  className="p-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-blue-500/10 transition-colors active:scale-95 touch-manipulation"
                   aria-label="Close conversation"
                 >
-                  <X className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <X className="h-4 w-4" />
                 </button>
               </div>
             </div>
             {/* Messages Area */}
-            <div className="overflow-y-auto max-h-[50vh] sm:max-h-[280px] pr-2 space-y-3 sm:space-y-4 scrollbar-thin">
+            <div className="overflow-y-auto max-h-[55vh] sm:max-h-[280px] pr-2 space-y-3 sm:space-y-4 scrollbar-thin overscroll-contain -mr-2 pr-4 pb-1">
               {apiError && (
                 <motion.div
                   className="text-center text-red-600 dark:text-red-400 text-xs sm:text-sm p-2 bg-red-100/50 dark:bg-red-900/30 rounded-lg"
@@ -545,7 +582,7 @@ export function AskInput() {
                   <motion.div
                     key={message.id}
                     layout
-                    className={`flex ${message.type === "question" ? "justify-end" : "justify-start"}`}
+                    className={`flex ${message.type === "question" ? "justify-end" : "justify-start"} mb-1 sm:mb-0`}
                     initial={{ opacity: 0, y: 20, scale: 0.9 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -558,7 +595,7 @@ export function AskInput() {
                   >
                     <div
                       className={cn(
-                        "relative max-w-[85%] sm:max-w-[80%] rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm whitespace-pre-wrap break-words",
+                        "relative max-w-[90%] sm:max-w-[80%] rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-2.5 text-[15px] sm:text-sm whitespace-pre-wrap break-words leading-relaxed",
                         message.type === "question"
                           ? "bg-gradient-to-br from-black to-gray-800 text-white dark:from-gray-800 dark:to-gray-900 dark:text-gray-100 rounded-tr-none shadow-[0_4px_10px_rgba(0,0,0,0.15)]"
                           : "bg-gradient-to-br from-white/90 to-gray-100/90 text-black dark:from-gray-800/80 dark:to-gray-900/80 dark:text-gray-200 rounded-tl-none shadow-[0_4px_10px_rgba(0,0,0,0.1)]",
@@ -570,6 +607,7 @@ export function AskInput() {
                           message.type === "question"
                             ? "via-white/30"
                             : "via-white/50 dark:via-blue-400/20",
+                          "hidden sm:block", // Hide decorative element on mobile for cleaner look
                         )}
                       ></div>
                       <p>
@@ -595,7 +633,7 @@ export function AskInput() {
       {/* Input form */}
       <form
         onSubmit={handleSubmit}
-        className="relative bg-white/90 dark:bg-zinc-800/80 backdrop-blur-sm h-10 sm:h-12 rounded-full overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.1),_0_0_0_1px_rgba(255,255,255,0.1)] pointer-events-auto"
+        className="relative h-[52px] sm:h-14 overflow-hidden rounded-full bg-white/70 dark:bg-zinc-900/50 backdrop-blur-lg pl-4 pr-2 sm:pl-6 sm:pr-3 flex items-center border border-white/50 dark:border-blue-500/20 shadow-[0_8px_30px_rgba(0,0,0,0.12),_0_0_10px_rgba(120,120,255,0.1)] pointer-events-auto"
       >
         {/* Canvas for vanishing effect */}
         <canvas
@@ -615,20 +653,33 @@ export function AskInput() {
           onChange={(e) => {
             if (!animating) setInputValue(e.target.value);
           }}
-          onFocus={() => !isExpanded && setIsExpanded(true)}
-          placeholder="Ask about Youssef..."
+          onFocus={(e) => {
+            if (!isExpanded) setIsExpanded(true);
+            // Prevent default scrolling behavior
+            e.preventDefault();
+            // Store current scroll position
+            const scrollY = window.scrollY;
+            // Set timeout to restore scroll position after browserUse the input's focus method with preventScroll option to avoid scrolling
+            e.currentTarget.focus({ preventScroll: true });
+          }}
+          placeholder="Ask me anything..."
           className={cn(
-            "relative z-10 w-full h-full px-4 sm:px-6 pr-10 sm:pr-12",
+            "relative z-10 w-full h-full px-4 sm:px-6 pr-12",
             "bg-transparent border-none focus:outline-none focus:ring-0",
-            "text-xs sm:text-sm placeholder-gray-500 dark:placeholder-gray-400",
+            "text-base sm:text-sm leading-normal placeholder-gray-500 dark:placeholder-gray-400",
+            "min-h-[44px] py-2.5 sm:py-2", // Taller input for better touch targets on mobile
             // Make text transparent when animating and particles exist
             animating && newDataRef.current.length > 0
               ? "text-transparent dark:text-transparent caret-transparent"
               : "text-black dark:text-white",
             "transition-colors duration-100", // Transition text color change
+            "touch-manipulation", // Improve touch behavior
           )}
           disabled={isStreamingRef.current} // Only disable during API call stream
           autoComplete="off"
+          enterKeyHint="send"
+          spellCheck="true"
+          // onFocus handled above - removing duplicate handler
         />
         {/* Submit Button */}
         <button
@@ -636,16 +687,19 @@ export function AskInput() {
           type="submit"
           disabled={!inputValue.trim() || isStreamingRef.current || animating} // Disable during stream OR animation
           className={cn(
-            "absolute right-1.5 sm:right-2 top-1/2 transform -translate-y-1/2 z-20",
-            "h-7 w-7 sm:h-8 sm:w-8 rounded-full",
+            "absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 z-20",
+            "h-10 w-10 sm:h-8 sm:w-8 rounded-full",
             "bg-black dark:bg-gray-700",
             "transition duration-200 flex items-center justify-center",
+            "active:scale-95 touch-manipulation", // Better touch feedback
+            "hover:bg-gray-800 dark:hover:bg-gray-600",
+            "tap-highlight-transparent", // Remove tap highlight on mobile
             "disabled:bg-gray-300 dark:disabled:bg-zinc-700/50",
             "disabled:opacity-60 disabled:cursor-not-allowed",
           )}
           aria-label="Send message"
         >
-          <Send className="h-3 w-3 sm:h-4 sm:w-4 text-gray-300 dark:text-white/90" />
+          <Send className="h-[18px] w-[18px] sm:h-4 sm:w-4 text-gray-300 dark:text-white/90" />
         </button>
       </form>
 
@@ -670,6 +724,38 @@ export function AskInput() {
         .break-words {
           word-break: break-word;
           overflow-wrap: break-word;
+        }
+
+        /* iOS-specific fixes to prevent auto-scrolling */
+        @supports (-webkit-touch-callout: none) {
+          input[type="text"],
+          input,
+          textarea,
+          select {
+            font-size: 16px; /* Prevents zoom */
+            -webkit-user-select: text; /* Better touch handling */
+            user-select: text;
+          }
+          /* Prevent scroll anchoring behavior */
+          * {
+            overflow-anchor: none;
+          }
+          /* Additional fixes for iOS focus behavior */
+          body {
+            position: relative;
+            width: 100%;
+            height: 100%;
+          }
+          .fixed {
+            position: fixed !important;
+          }
+          /* Additional iOS fixes */
+          .scrollbar-thin {
+            -webkit-overflow-scrolling: auto; /* Prevent momentum scrolling */
+          }
+        }
+        .tap-highlight-transparent {
+          -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         }
       `}</style>
     </motion.div>
