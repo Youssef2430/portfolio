@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import Image from "next/image";
-import { X, Code, Server, Database } from "lucide-react";
+import { X, Code, Server, Database, Crown } from "lucide-react";
 import { SectionHeading } from "./section-heading";
 import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
 import { ParallaxSection } from "./parallax-section";
@@ -65,7 +65,9 @@ export function Projects() {
                     }
                     icon={
                       <div className="flex items-center space-x-1">
-                        {project.id === "nlp-phishing-detection" ? (
+                        {project.id === "chess-llm-benchmark" ? (
+                          <Crown className="h-4 w-4 text-neutral-500" />
+                        ) : project.id === "nlp-phishing-detection" ? (
                           <Code className="h-4 w-4 text-neutral-500" />
                         ) : project.id === "geegees-intramural" ? (
                           <Server className="h-4 w-4 text-neutral-500" />
