@@ -27,18 +27,24 @@ function NavLink({
   const [isHovering, setIsHovering] = useState(false);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    const targetId = href.replace("#", "");
-    const element = document.getElementById(targetId);
+    // Only intercept in-page hash links
+    if (href.startsWith("#")) {
+      e.preventDefault();
+      const targetId = href.replace("#", "");
+      const element = document.getElementById(targetId);
 
-    if (element) {
-      // Smooth scroll to the element
-      element.scrollIntoView({ behavior: "smooth" });
+      if (element) {
+        // Smooth scroll to the element
+        element.scrollIntoView({ behavior: "smooth" });
 
-      // Update URL without triggering a page reload
-      window.history.pushState(null, "", href);
+        // Update URL without triggering a page reload
+        window.history.pushState(null, "", href);
+      }
 
       // Call onClick if provided (for mobile menu)
+      if (onClick) onClick();
+    } else {
+      // For normal routes, let Next.js handle navigation
       if (onClick) onClick();
     }
   };
@@ -98,6 +104,7 @@ export function Navbar() {
     { href: "#education", japanese: "教育", english: "Education" },
     { href: "#experience", japanese: "経験", english: "Experience" },
     { href: "#projects", japanese: "プロジェクト", english: "Projects" },
+    { href: "/blog", japanese: "ブログ", english: "Blog" },
     { href: "#skills", japanese: "スキル", english: "Skills" },
     { href: "#about", japanese: "私について", english: "About Me" },
   ];
@@ -146,11 +153,6 @@ export function Navbar() {
             <Link
               href="/"
               className="text-base sm:text-lg font-medium tracking-wider inline-block" // Use inline-block for GlitchText
-              onClick={(e) => {
-                e.preventDefault();
-                window.scrollTo({ top: 0, behavior: "smooth" });
-                closeMobileMenu();
-              }}
             >
               {/* Apply GlitchText to the title */}
               <GlitchText

@@ -54,7 +54,7 @@ export function About() {
                 <sup>
                   <span className="text-xs font-normal">
                     {" "}
-                    (This is not contractual promise, I will do my best
+                    (This is not a contractual promise, I will do my best
                     though!!)
                   </span>
                 </sup>
