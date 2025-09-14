@@ -104,7 +104,7 @@ export function Navbar() {
     { href: "/#education", japanese: "教育", english: "Education" },
     { href: "/#experience", japanese: "経験", english: "Experience" },
     { href: "/#projects", japanese: "プロジェクト", english: "Projects" },
-    { href: "/blog", japanese: "ブログ", english: "Blog" },
+    { href: "/#blog", japanese: "ブログ", english: "Blog" },
     { href: "/#skills", japanese: "スキル", english: "Skills" },
     { href: "/#about", japanese: "私について", english: "About Me" },
   ];
