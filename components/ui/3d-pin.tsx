@@ -52,7 +52,7 @@ export const PinContainer = ({
           style={{
             transform: transform,
           }}
-          className="absolute left-1/2 p-4 top-1/2 flex justify-start items-start rounded-2xl shadow-[0_8px_16px_rgb(0_0_0/0.4)] bg-card text-card-foreground border border-border transition duration-700 overflow-hidden"
+          className="absolute left-1/2 top-1/2 p-4 flex justify-start items-start rounded-2xl glass-card transition duration-700 overflow-hidden"
         >
           <div className={cn("relative z-50", className)}>{children}</div>
         </div>
@@ -70,7 +70,7 @@ export const PinPerspective = ({ title }: { title?: string }) => {
       <div className="w-full h-full -mt-7 flex-none inset-0">
         <div className="absolute top-0 inset-x-0 flex justify-center">
           {/* Changed this from <a> to <div> and removed link attributes */}
-          <div className="relative flex space-x-2 items-center z-10 rounded-full bg-card text-card-foreground py-0.5 px-4 ring-1 ring-border/20">
+          <div className="relative flex space-x-2 items-center z-10 rounded-full glass-card py-0.5 px-4">
             <span className="relative z-20 text-card-foreground text-xs font-bold inline-block py-0.5">
               {title}
             </span>
