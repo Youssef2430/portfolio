@@ -72,11 +72,13 @@ export type RaycastAnimatedBackgroundProps = {
    * Unicorn Studio project ID for dark mode.
    */
   projectIdDark: string;
+  jsonFilePathDark: string;
 
   /**
    * Unicorn Studio project ID for light mode.
    */
   projectIdLight: string;
+  jsonFilePathLight: string;
 
   /**
    * Use production CDN (recommended).
@@ -135,6 +137,8 @@ export const Component = ({
   className,
   projectIdDark,
   projectIdLight,
+  jsonFilePathDark,
+  jsonFilePathLight,
   production = true,
   lazyLoad = true,
   scale = 1,
@@ -148,6 +152,7 @@ export const Component = ({
   const isDark = useTheme();
 
   const projectId = isDark ? projectIdDark : projectIdLight;
+  const jsonFilePath = isDark ? jsonFilePathDark : jsonFilePathLight;
 
   // Avoid rendering until we have non-zero viewport dimensions (CSR only)
   const canRender = width > 0 && height > 0 && projectId;
@@ -161,7 +166,8 @@ export const Component = ({
       {canRender ? (
         <UnicornScene
           production={production}
-          projectId={projectId}
+          // projectId={projectId}
+          jsonFilePath={jsonFilePath}
           width={width}
           height={height}
           scale={scale}

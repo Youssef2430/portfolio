@@ -35,8 +35,10 @@ export default function RootLayout({
         <PostHogProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <RaycastAnimatedBackground
-              projectIdDark="cbmTT38A0CcuYxeiyj5H"
+              projectIdDark="masbuaiTYfU0XI8OeDl8"
               projectIdLight="zcTTWpmdUZjykDScfsUY"
+              jsonFilePathDark="/shaders/dark.json"
+              jsonFilePathLight="/shaders/light.json"
             />
             {children}
           </ThemeProvider>
