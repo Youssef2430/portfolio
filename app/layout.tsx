@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PostHogProvider } from "./providers";
+import { Component as RaycastAnimatedBackground } from "@/components/ui/raycast-animated-background";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,6 +27,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <PostHogProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <RaycastAnimatedBackground
+              projectIdDark="cbmTT38A0CcuYxeiyj5H"
+              projectIdLight="zcTTWpmdUZjykDScfsUY"
+            />
             {children}
           </ThemeProvider>
         </PostHogProvider>

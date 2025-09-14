@@ -11,7 +11,7 @@ import { BlogSection } from "@/components/blog-section";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white dark:bg-black text-black dark:text-white">
+    <main className="relative z-10 min-h-screen">
       <Navbar />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <Hero />
