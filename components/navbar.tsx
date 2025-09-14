@@ -84,7 +84,7 @@ function NavLink({
 
 export function Navbar() {
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isResumeHovered, setIsResumeHovered] = useState(false);
@@ -221,20 +221,22 @@ export function Navbar() {
 
             {/* Theme Toggle */}
             <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              onClick={() =>
+                setTheme(resolvedTheme === "dark" ? "light" : "dark")
+              }
               className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               aria-label="Toggle theme"
             >
               <AnimatePresence mode="wait" initial={false}>
                 {mounted && (
                   <motion.div
-                    key={theme === "dark" ? "dark" : "light"}
+                    key={resolvedTheme === "dark" ? "dark" : "light"}
                     initial={{ y: -20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: 20, opacity: 0 }}
                     transition={{ duration: 0.2 }}
                   >
-                    {theme === "dark" ? (
+                    {resolvedTheme === "dark" ? (
                       <SunIcon className="h-5 w-5" />
                     ) : (
                       <MoonIcon className="h-5 w-5" />
@@ -260,20 +262,22 @@ export function Navbar() {
 
             {/* Theme Toggle for Mobile */}
             <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              onClick={() =>
+                setTheme(resolvedTheme === "dark" ? "light" : "dark")
+              }
               className="p-2 mr-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               aria-label="Toggle theme"
             >
               <AnimatePresence mode="wait" initial={false}>
                 {mounted && (
                   <motion.div
-                    key={theme === "dark" ? "dark" : "light"}
+                    key={resolvedTheme === "dark" ? "dark" : "light"}
                     initial={{ y: -20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: 20, opacity: 0 }}
                     transition={{ duration: 0.2 }}
                   >
-                    {theme === "dark" ? (
+                    {resolvedTheme === "dark" ? (
                       <SunIcon className="h-4 w-4" />
                     ) : (
                       <MoonIcon className="h-4 w-4" />
