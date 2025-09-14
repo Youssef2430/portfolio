@@ -532,7 +532,7 @@ export function AskInput() {
         {isExpanded && (
           <motion.div
             ref={chatContainerRef}
-            className="relative mb-3 sm:mb-4 max-h-[70vh] sm:max-h-[400px] overflow-hidden rounded-2xl sm:rounded-3xl bg-white/70 dark:bg-zinc-900/50 backdrop-blur-lg p-2.5 sm:p-4 border border-white/50 dark:border-blue-500/20 shadow-[0_8px_30px_rgba(0,0,0,0.12),_0_0_10px_rgba(120,120,255,0.1)] pointer-events-auto"
+            className="relative mb-3 sm:mb-4 max-h-[70vh] sm:max-h-[400px] overflow-hidden rounded-2xl sm:rounded-3xl glass-card p-2.5 sm:p-4 pointer-events-auto"
             initial={{ opacity: 0, y: 60, scale: 0.8, height: 0 }}
             animate={{ opacity: 1, y: 0, scale: 1, height: "auto" }}
             exit={{ opacity: 0, y: 60, scale: 0.8, height: 0 }}
@@ -597,8 +597,8 @@ export function AskInput() {
                       className={cn(
                         "relative max-w-[90%] sm:max-w-[80%] rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-2.5 text-[15px] sm:text-sm whitespace-pre-wrap break-words leading-relaxed",
                         message.type === "question"
-                          ? "bg-gradient-to-br from-black to-gray-800 text-white dark:from-gray-800 dark:to-gray-900 dark:text-gray-100 rounded-tr-none shadow-[0_4px_10px_rgba(0,0,0,0.15)]"
-                          : "bg-gradient-to-br from-white/90 to-gray-100/90 text-black dark:from-gray-800/80 dark:to-gray-900/80 dark:text-gray-200 rounded-tl-none shadow-[0_4px_10px_rgba(0,0,0,0.1)]",
+                          ? "glass-card-strong text-card-foreground rounded-tr-none"
+                          : "glass-card text-card-foreground rounded-tl-none",
                       )}
                     >
                       <div

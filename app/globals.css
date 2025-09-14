@@ -304,6 +304,55 @@ html.dark {
 }
 
 /* Dark mode tuning for glass */
+
+/* Darker glass utility for question bubbles */
+.glass-card-strong {
+    background-image: linear-gradient(
+        to bottom right,
+        hsl(var(--card) / 0.6),
+        hsl(var(--card) / 0.35)
+    );
+    background-color: hsl(var(--card) / 0.5);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border: 1px solid hsl(var(--border) / 0.5);
+    color: hsl(var(--card-foreground));
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+}
+
+.dark .glass-card-strong {
+    background-image: linear-gradient(
+        to bottom right,
+        hsl(var(--card) / 0.25),
+        hsl(var(--card) / 0.15)
+    );
+    background-color: hsl(var(--card) / 0.2);
+    border-color: hsl(var(--border) / 0.35);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+}
+
+/* Apply stronger glass to AskInput question bubbles without changing markup */
+.bg-gradient-to-br.from-black.to-gray-800.rounded-tr-none {
+    position: relative;
+    overflow: hidden;
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    background-image: linear-gradient(
+        to bottom right,
+        rgba(0, 0, 0, 0.65),
+        rgba(0, 0, 0, 0.4)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.dark .bg-gradient-to-br.from-black.to-gray-800.rounded-tr-none {
+    background-image: linear-gradient(
+        to bottom right,
+        rgba(0, 0, 0, 0.45),
+        rgba(0, 0, 0, 0.28)
+    );
+    border-color: rgba(255, 255, 255, 0.18);
+}
 .dark .glass-card {
     background-image: linear-gradient(
         to bottom right,
