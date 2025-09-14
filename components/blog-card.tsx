@@ -41,7 +41,7 @@ export function BlogCard({
   return (
     <Card
       className={cn(
-        "group overflow-hidden border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black transition duration-200 hover:shadow-xl dark:shadow-none rounded-xl",
+        "group overflow-hidden border-border bg-card text-card-foreground transition duration-200 hover:shadow-xl dark:shadow-none rounded-xl",
         className,
       )}
     >
@@ -119,7 +119,7 @@ export function BlogCardSkeleton({ className }: { className?: string }) {
   return (
     <Card
       className={cn(
-        "overflow-hidden border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black rounded-xl",
+        "overflow-hidden border-border bg-card text-card-foreground rounded-xl",
         className,
       )}
     >

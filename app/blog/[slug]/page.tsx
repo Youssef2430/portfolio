@@ -179,7 +179,8 @@ export default async function BlogPostPage({
   return (
     <main className="min-h-screen bg-white dark:bg-black text-black dark:text-white">
       <Navbar />
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+      <div className="pointer-events-none fixed inset-0 z-0 dark:hidden bg-black/20"></div>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 relative z-10">
         <div className="max-w-3xl mx-auto">
           <Link
             href="/blog"

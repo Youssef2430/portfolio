@@ -48,7 +48,8 @@ export default function ProjectPage() {
   return (
     <main className="min-h-screen bg-white dark:bg-black text-black dark:text-white">
       <Navbar />
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24">
+      <div className="pointer-events-none fixed inset-0 z-0 dark:hidden bg-black/20"></div>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 relative z-10">
         <button
           onClick={() => router.push("/#projects")}
           className="flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors mb-8"

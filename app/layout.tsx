@@ -4,7 +4,14 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PostHogProvider } from "./providers";
-import { Component as RaycastAnimatedBackground } from "@/components/ui/raycast-animated-background";
+import dynamic from "next/dynamic";
+const RaycastAnimatedBackground = dynamic(
+  () =>
+    import("@/components/ui/raycast-animated-background").then(
+      (m) => m.Component,
+    ),
+  { ssr: false },
+);
 
 const inter = Inter({ subsets: ["latin"] });
 

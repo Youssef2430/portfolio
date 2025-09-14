@@ -139,8 +139,8 @@ export function Navbar() {
     <motion.header
       className={`fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300 ${
         scrolled
-          ? "border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-black/90 backdrop-blur-md"
-          : "border-transparent bg-white/50 dark:bg-black/50 backdrop-blur-sm"
+          ? "border-gray-200 dark:border-gray-800 bg-black/20 backdrop-blur-md dark:bg-black/90 dark:backdrop-blur-md"
+          : "border-transparent bg-black/10 backdrop-blur-sm dark:bg-black/50 dark:backdrop-blur-sm"
       }`}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
@@ -303,7 +303,7 @@ export function Navbar() {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            className="md:hidden bg-white dark:bg-black border-t border-gray-200 dark:border-gray-800"
+            className="md:hidden bg-transparent dark:bg-black border-t border-gray-200 dark:border-gray-800"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
