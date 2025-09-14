@@ -15,6 +15,7 @@ export type BlogPost = {
   coverImage?: string; // path to public/ asset (e.g. /blog/cover.jpg)
   readingTimeMinutes: number;
   published: boolean;
+  blurBehindText?: boolean;
 };
 
 const blogPostsData: BlogPost[] = [
@@ -30,6 +31,7 @@ const blogPostsData: BlogPost[] = [
     coverImage: "/blog/glassUI.png",
     readingTimeMinutes: 8,
     published: true,
+    // blurBehindText: true,
   },
   {
     slug: "llm-evals-building-a-chess-benchmark",
