@@ -16,6 +16,7 @@ import {
   type BlogPost,
 } from "@/lib/blog-data";
 import { getPostContent } from "@/lib/blog-content";
+import { cn } from "@/lib/utils";
 
 // Pre-generate static params for all published posts
 export function generateStaticParams() {
@@ -179,7 +180,8 @@ export default async function BlogPostPage({
   return (
     <main className="min-h-screen bg-white dark:bg-black text-black dark:text-white">
       <Navbar />
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+      <div className="pointer-events-none fixed inset-0 z-0 dark:hidden bg-black/20"></div>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 relative z-10">
         <div className="max-w-3xl mx-auto">
           <Link
             href="/blog"
@@ -208,7 +210,13 @@ export default async function BlogPostPage({
             </div>
           ) : null}
 
-          <article className="prose prose-gray dark:prose-invert max-w-none">
+          <article
+            className={cn(
+              "prose prose-gray dark:prose-invert max-w-none",
+              (post as any)?.blurBehindText &&
+                "relative -mx-4 sm:mx-0 rounded-xl px-4 sm:px-6 py-5 bg-white/10 dark:bg-black/20 backdrop-blur-sm ring-1 ring-black/5 dark:ring-white/10",
+            )}
+          >
             <ReactMarkdown
               components={MarkdownComponents}
               remarkPlugins={[remarkGfm]}

@@ -41,7 +41,7 @@ export function BlogCard({
   return (
     <Card
       className={cn(
-        "group overflow-hidden border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black transition duration-200 hover:shadow-xl dark:shadow-none rounded-xl",
+        "group overflow-hidden glass-card text-card-foreground transition duration-200 rounded-xl pt-3 px-3",
         className,
       )}
     >
@@ -60,7 +60,7 @@ export function BlogCard({
       </Link>
 
       {/* Content */}
-      <CardHeader className="space-y-2 p-4">
+      <CardHeader className="space-y-2 p-0 pt-3">
         <Link
           href={`/blog/${slug}`}
           className="block focus:outline-none focus:ring-2 focus:ring-neutral-500 dark:focus:ring-neutral-400 rounded-sm"
@@ -78,7 +78,7 @@ export function BlogCard({
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="pt-0 px-4">
+      <CardContent className="pt-0 px-0">
         <p className="text-xs text-neutral-600 dark:text-neutral-300 line-clamp-3">
           {excerpt}
         </p>
@@ -102,7 +102,7 @@ export function BlogCard({
         ) : null}
       </CardContent>
 
-      <CardFooter className="pt-0 px-4 pb-4">
+      <CardFooter className="pt-0 px-0 pb-4">
         <Link
           href={`/blog/${slug}`}
           className="text-xs text-neutral-600 dark:text-neutral-200 underline underline-offset-4 hover:no-underline transition duration-200"
@@ -119,7 +119,7 @@ export function BlogCardSkeleton({ className }: { className?: string }) {
   return (
     <Card
       className={cn(
-        "overflow-hidden border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black rounded-xl",
+        "overflow-hidden glass-card text-card-foreground rounded-xl pt-3 px-3",
         className,
       )}
     >
@@ -127,12 +127,12 @@ export function BlogCardSkeleton({ className }: { className?: string }) {
         <div className="h-full w-full animate-pulse bg-neutral-200 dark:bg-neutral-800" />
       </div>
 
-      <CardHeader className="space-y-3 p-4">
+      <CardHeader className="space-y-3 p-0 pt-3">
         <div className="h-5 w-3/4 animate-pulse rounded bg-neutral-200 dark:bg-neutral-800" />
         <div className="h-3 w-1/3 animate-pulse rounded bg-neutral-200 dark:bg-neutral-800" />
       </CardHeader>
 
-      <CardContent className="space-y-2 pt-0 px-4">
+      <CardContent className="space-y-2 pt-0 px-0">
         <div className="h-4 w-full animate-pulse rounded bg-neutral-200 dark:bg-neutral-800" />
         <div className="h-4 w-11/12 animate-pulse rounded bg-neutral-200 dark:bg-neutral-800" />
         <div className="h-4 w-5/6 animate-pulse rounded bg-neutral-200 dark:bg-neutral-800" />
@@ -143,7 +143,7 @@ export function BlogCardSkeleton({ className }: { className?: string }) {
         </div>
       </CardContent>
 
-      <CardFooter className="pt-0 px-4 pb-4">
+      <CardFooter className="pt-0 px-0 pb-4">
         <div className="h-4 w-20 animate-pulse rounded bg-neutral-200 dark:bg-neutral-800" />
       </CardFooter>
     </Card>

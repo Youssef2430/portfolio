@@ -226,7 +226,7 @@ export function Experience() {
               >
                 {/* Always filled circle */}
                 <motion.div
-                  className="absolute top-0 left-0 w-3 h-3 -ml-1.5 bg-black dark:bg-white rounded-full border border-black dark:border-white"
+                  className="absolute top-0 left-0 w-3 h-3 -ml-1.5 bg-white dark:bg-white rounded-full border border-white dark:border-white"
                   initial={{ scale: 1 }}
                   animate={{
                     scale: hoveredIndex === index ? 1.2 : 1,
@@ -238,7 +238,7 @@ export function Experience() {
                 <AnimatePresence>
                   {hoveredIndex === index && (
                     <motion.div
-                      className="absolute -left-0.5 top-0 h-full w-0.5 bg-black dark:bg-white origin-top"
+                      className="absolute -left-0.5 top-0 h-full w-0.5 bg-white dark:bg-white origin-top"
                       initial={{ scaleY: 0 }}
                       animate={{ scaleY: 1 }}
                       exit={{ scaleY: 0 }}

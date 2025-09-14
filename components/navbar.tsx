@@ -84,7 +84,7 @@ function NavLink({
 
 export function Navbar() {
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isResumeHovered, setIsResumeHovered] = useState(false);
@@ -101,12 +101,12 @@ export function Navbar() {
   }, []);
 
   const navLinks = [
-    { href: "#education", japanese: "教育", english: "Education" },
-    { href: "#experience", japanese: "経験", english: "Experience" },
-    { href: "#projects", japanese: "プロジェクト", english: "Projects" },
-    { href: "/blog", japanese: "ブログ", english: "Blog" },
-    { href: "#skills", japanese: "スキル", english: "Skills" },
-    { href: "#about", japanese: "私について", english: "About Me" },
+    { href: "/#education", japanese: "教育", english: "Education" },
+    { href: "/#experience", japanese: "経験", english: "Experience" },
+    { href: "/#projects", japanese: "プロジェクト", english: "Projects" },
+    { href: "/#blog", japanese: "ブログ", english: "Blog" },
+    { href: "/#skills", japanese: "スキル", english: "Skills" },
+    { href: "/#about", japanese: "私について", english: "About Me" },
   ];
 
   const closeMobileMenu = () => {
@@ -139,8 +139,8 @@ export function Navbar() {
     <motion.header
       className={`fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300 ${
         scrolled
-          ? "border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-black/90 backdrop-blur-md"
-          : "border-transparent bg-white/50 dark:bg-black/50 backdrop-blur-sm"
+          ? "border-gray-200 dark:border-gray-800 bg-black/20 backdrop-blur-md dark:bg-black/90 dark:backdrop-blur-md"
+          : "border-transparent bg-black/10 backdrop-blur-sm dark:bg-black/50 dark:backdrop-blur-sm"
       }`}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
@@ -221,20 +221,22 @@ export function Navbar() {
 
             {/* Theme Toggle */}
             <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              onClick={() =>
+                setTheme(resolvedTheme === "dark" ? "light" : "dark")
+              }
               className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               aria-label="Toggle theme"
             >
               <AnimatePresence mode="wait" initial={false}>
                 {mounted && (
                   <motion.div
-                    key={theme === "dark" ? "dark" : "light"}
+                    key={resolvedTheme === "dark" ? "dark" : "light"}
                     initial={{ y: -20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: 20, opacity: 0 }}
                     transition={{ duration: 0.2 }}
                   >
-                    {theme === "dark" ? (
+                    {resolvedTheme === "dark" ? (
                       <SunIcon className="h-5 w-5" />
                     ) : (
                       <MoonIcon className="h-5 w-5" />
@@ -260,20 +262,22 @@ export function Navbar() {
 
             {/* Theme Toggle for Mobile */}
             <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              onClick={() =>
+                setTheme(resolvedTheme === "dark" ? "light" : "dark")
+              }
               className="p-2 mr-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               aria-label="Toggle theme"
             >
               <AnimatePresence mode="wait" initial={false}>
                 {mounted && (
                   <motion.div
-                    key={theme === "dark" ? "dark" : "light"}
+                    key={resolvedTheme === "dark" ? "dark" : "light"}
                     initial={{ y: -20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: 20, opacity: 0 }}
                     transition={{ duration: 0.2 }}
                   >
-                    {theme === "dark" ? (
+                    {resolvedTheme === "dark" ? (
                       <SunIcon className="h-4 w-4" />
                     ) : (
                       <MoonIcon className="h-4 w-4" />
@@ -303,7 +307,7 @@ export function Navbar() {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            className="md:hidden bg-white dark:bg-black border-t border-gray-200 dark:border-gray-800"
+            className="md:hidden bg-transparent dark:bg-black border-t border-gray-200 dark:border-gray-800"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}

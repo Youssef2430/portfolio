@@ -52,7 +52,7 @@ export const PinContainer = ({
           style={{
             transform: transform,
           }}
-          className="absolute left-1/2 p-4 top-1/2 flex justify-start items-start rounded-2xl shadow-[0_8px_16px_rgb(0_0_0/0.4)] bg-white dark:bg-black border border-gray-200/[0.1] dark:border-white/[0.1] group-hover/pin:border-gray-300/[0.2] dark:group-hover/pin:border-white/[0.2] transition duration-700 overflow-hidden"
+          className="absolute left-1/2 top-1/2 p-4 flex justify-start items-start rounded-2xl glass-card transition duration-700 overflow-hidden"
         >
           <div className={cn("relative z-50", className)}>{children}</div>
         </div>
@@ -70,8 +70,8 @@ export const PinPerspective = ({ title }: { title?: string }) => {
       <div className="w-full h-full -mt-7 flex-none inset-0">
         <div className="absolute top-0 inset-x-0 flex justify-center">
           {/* Changed this from <a> to <div> and removed link attributes */}
-          <div className="relative flex space-x-2 items-center z-10 rounded-full bg-white dark:bg-black py-0.5 px-4 ring-1 ring-gray-200/10 dark:ring-white/10">
-            <span className="relative z-20 text-black dark:text-white text-xs font-bold inline-block py-0.5">
+          <div className="relative flex space-x-2 items-center z-10 rounded-full glass-card py-0.5 px-4">
+            <span className="relative z-20 text-card-foreground text-xs font-bold inline-block py-0.5">
               {title}
             </span>
             <span className="absolute -bottom-0 left-[1.125rem] h-px w-[calc(100%-2.25rem)] bg-gradient-to-r from-black/0 dark:from-white/0 via-black/90 dark:via-white/90 to-black/0 dark:to-white/0 transition-opacity duration-500 group-hover/btn:opacity-40"></span>

@@ -39,7 +39,7 @@ export function SectionHeading({ japanese, english, id }: SectionHeadingProps) {
         /> */}
       </motion.h2>
       <motion.div
-        className="h-px w-16 bg-black dark:bg-white"
+        className="h-px w-16 bg-white dark:bg-white"
         initial={{ width: 0 }}
         animate={inView ? { width: 64 } : { width: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
