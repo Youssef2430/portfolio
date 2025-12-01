@@ -6,7 +6,8 @@ import { ArrowLeft } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
-
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import {
@@ -176,6 +177,9 @@ export default async function BlogPostPage({
 
   // Read markdown content from file
   const content = await getPostContent(post);
+  const normalizedContent = content
+    .replace(/\\\(([\s\S]*?)\\\)/g, (_match, m) => `$${m}$`)
+    .replace(/\\\[([\s\S]*?)\\\]/g, (_match, m) => `$$${m}$$`);
 
   return (
     <main className="min-h-screen bg-white dark:bg-black text-black dark:text-white">
@@ -219,10 +223,13 @@ export default async function BlogPostPage({
           >
             <ReactMarkdown
               components={MarkdownComponents}
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeHighlight]}
+              remarkPlugins={[remarkGfm, remarkMath]}
+              rehypePlugins={[
+                [rehypeKatex, { strict: false, throwOnError: false }],
+                rehypeHighlight,
+              ]}
             >
-              {content}
+              {normalizedContent}
             </ReactMarkdown>
           </article>
         </div>

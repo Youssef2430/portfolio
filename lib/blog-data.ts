@@ -20,6 +20,29 @@ export type BlogPost = {
 
 const blogPostsData: BlogPost[] = [
   {
+    slug: "stock-volatility",
+    title:
+      "Modeling Stock Market Volatility with Independent Economic Shocks: A Multivariate Stochastic Approach",
+    date: "2025-11-30",
+    excerpt:
+      "When Markets Misbehave: A Student's Guide to Taming Volatility with Stochastic Processes",
+    contentFile: "blogs/stock_volatility_blog.md",
+    tags: [
+      "stochastic-processes",
+      "GBM",
+      "volatility",
+      "Monte Carlo",
+      "S&P500",
+      "SDE",
+      "Wiener-process",
+      "conditional-distributions",
+    ],
+    coverImage: "/blog/figures/anim1_gbm_paths.gif",
+    readingTimeMinutes: 8,
+    published: true,
+    blurBehindText: true,
+  },
+  {
     slug: "building-ledgerglass-privacy-first-macos-finance-app",
     title:
       "Building LedgerGlass: Why I Built a Privacy-First Finance App for macOS, How It Works, and What’s Next",
