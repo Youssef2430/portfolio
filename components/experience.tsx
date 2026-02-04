@@ -1,26 +1,16 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { useInView } from "react-intersection-observer";
-import { SectionHeading } from "./section-heading";
-import { useState, useEffect, useRef } from "react";
-import { ParallaxSection } from "./parallax-section";
-import { LinkPreview } from "./ui/link-preview";
-import type React from "react";
+import { useRef, useState } from "react";
+import { motion, AnimatePresence, useInView } from "framer-motion";
+import { Briefcase, Calendar, MapPin, ArrowUpRight } from "lucide-react";
 
 type ExperienceItem = {
   role: string;
   company: string;
   companyUrl: string;
-  companyPreviewImage: string;
   location: string;
   period: string;
   details: string[];
-  highlights?: Array<{
-    name: string;
-    url: string;
-    previewImage: string;
-  }>;
 };
 
 const experiences: ExperienceItem[] = [
@@ -28,249 +18,178 @@ const experiences: ExperienceItem[] = [
     role: "Artificial Intelligence Researcher",
     company: "National Research Council",
     companyUrl: "https://nrc.canada.ca/en",
-    companyPreviewImage:
-      "/placeholder.svg?height=400&width=640&text=National+Research+Council",
     location: "Ottawa, ON",
     period: "May 2024 – Present",
     details: [
       "Designed and deployed systems in Python using LangChain, enabling seamless communication between Building Automation Systems (BAS) and reducing data processing times and workload by 49%.",
       "Used a SQLite to efficiently process, integrate, and manage real-time data streams from BAS.",
-      "Partnered with Delta Controls and Carleton University to deliver AI-powered building agents, achieving a 56% reduction in maintenance costs by automating issue detection, predictive maintenance, and real-time alerts.",
-    ],
-    highlights: [
-      {
-        name: "Delta Controls",
-        url: "https://www.deltacontrols.com/",
-        previewImage:
-          "/placeholder.svg?height=400&width=640&text=Delta+Controls",
-      },
-      {
-        name: "Carleton University",
-        url: "https://carleton.ca/",
-        previewImage:
-          "/placeholder.svg?height=400&width=640&text=Carleton+University",
-      },
+      "Partnered with Delta Controls and Carleton University to deliver AI-powered building agents, achieving a 56% reduction in maintenance costs.",
     ],
   },
   {
     role: "Junior Software Engineer",
     company: "Wind River Systems",
     companyUrl: "https://www.windriver.com/",
-    companyPreviewImage:
-      "/placeholder.svg?height=400&width=640&text=Wind+River+Systems",
     location: "Ottawa, ON",
     period: "Sept 2022 – Aug 2023",
     details: [
-      "Designed and implemented an Automation Dashboard using Angular, TypeScript, and Django, with a PostgreSQL database, to streamline the management and analysis of services used by industry leaders such as NASA, Airbus, and Ford.",
-      "Achieved over 90% faster query execution and UI responsiveness by optimizing API endpoints, implementing efficient database queries, and reducing frontend rendering times.",
-    ],
-    highlights: [
-      {
-        name: "NASA",
-        url: "https://www.nasa.gov/",
-        previewImage: "/placeholder.svg?height=400&width=640&text=NASA",
-      },
-      {
-        name: "Airbus",
-        url: "https://www.airbus.com/",
-        previewImage: "/placeholder.svg?height=400&width=640&text=Airbus",
-      },
-      {
-        name: "Ford",
-        url: "https://www.ford.com/",
-        previewImage: "/placeholder.svg?height=400&width=640&text=Ford",
-      },
+      "Designed and implemented an Automation Dashboard using Angular, TypeScript, and Django, with a PostgreSQL database.",
+      "Achieved over 90% faster query execution and UI responsiveness by optimizing API endpoints and reducing frontend rendering times.",
     ],
   },
   {
     role: "Software Developer",
     company: "University of Ottawa",
     companyUrl: "https://www.uottawa.ca/en",
-    companyPreviewImage:
-      "/placeholder.svg?height=400&width=640&text=University+of+Ottawa",
     location: "Ottawa, ON",
     period: "May 2022 – Apr 2024",
     details: [
-      "Redesigned and optimized the university's search engine using PHP, MySQL, and Apache, improving query response times by 80%, benefiting over 5,000+ students and saving the university over $30,000 annually.",
-      "Developed and deployed automation scripts using PHP, Bash, and Cron jobs to enhance search speed by 54% and streamline data migration workflows.",
+      "Redesigned and optimized the university's search engine using PHP, MySQL, and Apache, improving query response times by 80%.",
+      "Developed automation scripts using PHP, Bash, and Cron jobs to enhance search speed by 54%.",
     ],
   },
   {
     role: "Teaching Assistant",
     company: "University of Ottawa",
     companyUrl: "https://www.uottawa.ca/en",
-    companyPreviewImage:
-      "/placeholder.svg?height=400&width=640&text=University+of+Ottawa",
     location: "Ottawa, ON",
     period: "Sept 2023 – Present",
     details: [
-      "Assisted in teaching Graduate classes such as Machine Learning for Bio-informatics and Undergraduate ones like Data Structures & Algorithms, Design & Analysis of Algorithms, Programming Paradigms and Discrete Structures.",
+      "Assisted in teaching Graduate classes (Machine Learning for Bio-informatics) and Undergraduate courses (Data Structures & Algorithms, Design & Analysis of Algorithms, Programming Paradigms).",
     ],
   },
 ];
 
 export function Experience() {
-  const [ref, inView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  });
-
+  const sectionRef = useRef<HTMLElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(titleRef, { once: true, margin: "-100px" });
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [beamAnimating, setBeamAnimating] = useState<boolean>(false);
-  const isMobileRef = useRef(false);
-
-  // Check if device is mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      isMobileRef.current = window.innerWidth < 768;
-    };
-
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-
-    return () => {
-      window.removeEventListener("resize", checkMobile);
-    };
-  }, []);
-
-  const handleMouseEnter = (index: number) => {
-    setHoveredIndex(index);
-    setBeamAnimating(true);
-  };
-
-  const handleMouseLeave = () => {
-    setBeamAnimating(true);
-    setTimeout(() => {
-      setHoveredIndex(null);
-      setBeamAnimating(false);
-    }, 300);
-  };
-
-  // Toggle for touch devices
-  const handleTouch = (index: number) => {
-    if (isMobileRef.current) {
-      if (hoveredIndex === index) {
-        setBeamAnimating(true);
-        setTimeout(() => {
-          setHoveredIndex(null);
-          setBeamAnimating(false);
-        }, 300);
-      } else {
-        setHoveredIndex(index);
-        setBeamAnimating(true);
-      }
-    }
-  };
-
-  // Function to highlight company names with link previews
-  const highlightCompanyNames = (
-    text: string,
-    highlights?: Array<{ name: string; url: string; previewImage: string }>,
-  ) => {
-    if (!highlights || highlights.length === 0) return <span>{text}</span>;
-
-    const result = text;
-    const elements: React.JSX.Element[] = [];
-    let lastIndex = 0;
-
-    highlights.forEach((highlight, index) => {
-      const startIndex = result.indexOf(highlight.name, lastIndex);
-      if (startIndex !== -1) {
-        // Add text before the highlight
-        if (startIndex > lastIndex) {
-          elements.push(
-            <span key={`text-${index}-1`}>
-              {result.substring(lastIndex, startIndex)}
-            </span>,
-          );
-        }
-
-        // Add the highlighted company name with link preview
-        elements.push(
-          <LinkPreview key={`highlight-${index}`} url={highlight.url}>
-            <span className="font-medium text-black dark:text-white">
-              {highlight.name}
-            </span>
-          </LinkPreview>,
-        );
-
-        lastIndex = startIndex + highlight.name.length;
-      }
-    });
-
-    // Add any remaining text
-    if (lastIndex < result.length) {
-      elements.push(<span key="text-last">{result.substring(lastIndex)}</span>);
-    }
-
-    return <>{elements}</>;
-  };
 
   return (
-    <section id="experience" className="py-24 sm:py-32">
-      <ParallaxSection offset={15}>
-        <div className="max-w-3xl mx-auto">
-          <SectionHeading japanese="経験" english="Experience" />
+    <section
+      ref={sectionRef}
+      id="experience"
+      className="relative py-32 overflow-hidden"
+    >
+      {/* Subtle background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[hsl(220,30%,5%)] to-transparent opacity-50" />
 
-          <div ref={ref} className="space-y-16">
+      <div className="relative container mx-auto px-6 md:px-12">
+        {/* Section Title */}
+        <div ref={titleRef} className="relative mb-20">
+          <div className="flex items-center">
+            <motion.span
+              initial={{ opacity: 0, x: -50 }}
+              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
+              transition={{ duration: 1, ease: [0.55, 0.45, 0.16, 1] }}
+              className="text-section text-white font-light"
+            >
+              EX
+            </motion.span>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: [0.55, 0.45, 0.16, 1] }}
+              className="flex flex-col items-center mx-2 md:mx-4"
+            >
+              <span className="arabic-bracket text-lg md:text-xl">「</span>
+              <span className="font-arabic text-xl md:text-3xl text-[hsl(42,45%,75%)]">
+                خبرة
+              </span>
+              <span className="arabic-bracket text-lg md:text-xl">」</span>
+            </motion.div>
+
+            <motion.span
+              initial={{ opacity: 0, x: 50 }}
+              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 50 }}
+              transition={{ duration: 1, ease: [0.55, 0.45, 0.16, 1] }}
+              className="text-section text-white font-light"
+            >
+              P
+            </motion.span>
+          </div>
+        </div>
+
+        {/* Experience Timeline */}
+        <div className="max-w-4xl mx-auto">
+          <div className="relative">
+            {/* Vertical line */}
+            <div className="absolute left-0 md:left-8 top-0 bottom-0 w-px bg-[hsl(0,0%,15%)]" />
+
             {experiences.map((item, index) => (
               <motion.div
                 key={index}
-                className="relative pl-8 border-l border-gray-200 dark:border-gray-800"
-                initial={{ opacity: 0, x: -10 }}
-                animate={inView ? { opacity: 1, x: 0 } : { opacity: 0, x: -10 }}
-                transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-                onMouseEnter={() => handleMouseEnter(index)}
-                onMouseLeave={handleMouseLeave}
-                onTouchStart={() => handleTouch(index)}
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="relative pl-8 md:pl-20 pb-16 last:pb-0"
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
               >
-                {/* Always filled circle */}
+                {/* Timeline dot */}
                 <motion.div
-                  className="absolute top-0 left-0 w-3 h-3 -ml-1.5 bg-white dark:bg-white rounded-full border border-white dark:border-white"
-                  initial={{ scale: 1 }}
+                  className="absolute left-0 md:left-8 top-1 w-2 h-2 -ml-[3px] md:-ml-1 rounded-full bg-[hsl(0,0%,25%)] border-2 border-black"
                   animate={{
-                    scale: hoveredIndex === index ? 1.2 : 1,
+                    backgroundColor: hoveredIndex === index ? "hsl(42,45%,75%)" : "hsl(0,0%,25%)",
+                    scale: hoveredIndex === index ? 1.5 : 1,
                   }}
                   transition={{ duration: 0.3 }}
                 />
 
-                {/* Beam animation */}
+                {/* Beam on hover */}
                 <AnimatePresence>
                   {hoveredIndex === index && (
                     <motion.div
-                      className="absolute -left-0.5 top-0 h-full w-0.5 bg-white dark:bg-white origin-top"
-                      initial={{ scaleY: 0 }}
-                      animate={{ scaleY: 1 }}
-                      exit={{ scaleY: 0 }}
-                      transition={{
-                        duration: 0.5,
-                        ease: [0.22, 1, 0.36, 1],
-                      }}
+                      className="absolute left-0 md:left-8 top-1 w-px bg-[hsl(42,45%,75%)] -ml-[1px] md:ml-0 origin-top"
+                      initial={{ height: 0 }}
+                      animate={{ height: "100%" }}
+                      exit={{ height: 0 }}
+                      transition={{ duration: 0.4, ease: [0.55, 0.45, 0.16, 1] }}
                     />
                   )}
                 </AnimatePresence>
 
-                <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                  {item.period}
+                {/* Period */}
+                <div className="flex items-center gap-2 mb-3">
+                  <Calendar className="w-3 h-3 text-[hsl(42,45%,75%)]" />
+                  <span className="font-mono text-xs tracking-wider text-[hsl(0,0%,50%)]">
+                    {item.period}
+                  </span>
                 </div>
-                <h3 className="text-xl font-medium mb-1">{item.role}</h3>
-                <div className="text-gray-600 dark:text-gray-300 mb-2">
-                  <LinkPreview url={item.companyUrl}>
-                    <span className="font-medium text-black dark:text-white">
-                      {item.company}
-                    </span>
-                  </LinkPreview>
-                  , {item.location}
+
+                {/* Role */}
+                <h3 className="text-xl md:text-2xl font-light text-white mb-2">
+                  {item.role}
+                </h3>
+
+                {/* Company */}
+                <div className="flex items-center gap-2 mb-4 flex-wrap">
+                  <Briefcase className="w-4 h-4 text-[hsl(0,0%,50%)]" />
+                  <a
+                    href={item.companyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[hsl(42,45%,75%)] hover:text-white transition-colors inline-flex items-center gap-1 group"
+                  >
+                    {item.company}
+                    <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </a>
+                  <span className="text-[hsl(0,0%,30%)]">•</span>
+                  <MapPin className="w-3 h-3 text-[hsl(0,0%,50%)]" />
+                  <span className="text-[hsl(0,0%,50%)]">{item.location}</span>
                 </div>
-                <ul className="space-y-1">
+
+                {/* Details */}
+                <ul className="space-y-3">
                   {item.details.map((detail, detailIndex) => (
                     <li
                       key={detailIndex}
-                      className="text-gray-600 dark:text-gray-400"
+                      className="text-sm text-[hsl(0,0%,55%)] leading-relaxed pl-4 border-l border-[hsl(0,0%,20%)]"
                     >
-                      {item.highlights
-                        ? highlightCompanyNames(detail, item.highlights)
-                        : detail}
+                      {detail}
                     </li>
                   ))}
                 </ul>
@@ -278,7 +197,7 @@ export function Experience() {
             ))}
           </div>
         </div>
-      </ParallaxSection>
+      </div>
     </section>
   );
 }

@@ -6,61 +6,42 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Trash2 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import ReactMarkdown from "react-markdown";
 
 // Utility function for combining class names
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// --- BubbleParticle Component ---
-const BubbleParticle = ({ delay = 0 }: { delay?: number }) => {
-  const randomX = Math.random() * 100 - 50;
-  const randomSize = Math.random() * 8 + 4;
-  const randomDuration = Math.random() * 3 + 2;
-  const randomDistance = -150 - Math.random() * 100;
+// --- Loading Cube Component (Conductor style) ---
+const LoadingCube = () => {
+  // 3x3 grid of dots
+  const dots = Array.from({ length: 9 });
 
   return (
-    <motion.div
-      className="absolute rounded-full bg-gradient-to-b from-white/60 to-white/10 dark:from-blue-400/20 dark:to-purple-400/5"
-      style={{
-        width: randomSize,
-        height: randomSize,
-        bottom: -10,
-        left: `calc(50% + ${randomX}px)`,
-        boxShadow: "0 0 5px rgba(255, 255, 255, 0.2)",
-      }}
-      initial={{ y: 0, opacity: 0, scale: 0.5 }}
-      animate={{
-        y: [0, randomDistance],
-        opacity: [0, 0.7, 0.9, 0],
-        scale: [0.5, 1, 1.2, 0],
-        x: [0, randomX / 2, randomX],
-      }}
-      transition={{
-        duration: randomDuration,
-        times: [0, 0.7, 0.9, 1],
-        ease: "easeOut",
-        delay: delay,
-        repeat: Number.POSITIVE_INFINITY,
-        repeatDelay: Math.random() * 2,
-      }}
-    />
-  );
-};
-
-// --- TypingCursor Component ---
-const TypingCursor = () => {
-  return (
-    <motion.span
-      className="inline-block w-[2px] h-[14px] ml-[1px] bg-black dark:bg-white align-middle"
-      animate={{ opacity: [1, 0, 1] }}
-      transition={{
-        duration: 0.8,
-        repeat: Number.POSITIVE_INFINITY,
-        times: [0, 0.5, 1],
-        ease: "linear",
-      }}
-    />
+    <div className="flex items-center gap-3 py-1">
+      <div className="grid grid-cols-3 gap-[3px] w-[18px] h-[18px]">
+        {dots.map((_, i) => (
+          <motion.div
+            key={i}
+            className="w-[4px] h-[4px] rounded-[1px] bg-[hsl(var(--gold))]"
+            animate={{
+              opacity: [0.2, 1, 0.2],
+              scale: [0.8, 1, 0.8],
+            }}
+            transition={{
+              duration: 1.2,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+              delay: i * 0.1,
+            }}
+          />
+        ))}
+      </div>
+      <span className="text-xs font-mono text-[hsl(var(--muted-foreground))]">
+        thinking...
+      </span>
+    </div>
   );
 };
 
@@ -86,7 +67,6 @@ export function AskInput() {
   const [nextId, setNextId] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [showBubbles, setShowBubbles] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [animating, setAnimating] = useState(false);
 
@@ -153,30 +133,24 @@ export function AskInput() {
   }, []);
 
   useEffect(() => {
-    // Scroll to bottom of messages
+    // Scroll to bottom when new messages are added (user query or after AI finishes)
     if (messagesEndRef.current && messages.length > 0) {
       const parent = messagesEndRef.current.parentElement;
       if (parent) {
-        // Use scrollTop instead of scrollIntoView to avoid page scroll issues
         parent.scrollTop = parent.scrollHeight;
       }
     }
-  }, [messages]);
+  }, [messages.length]);
 
   // Clean implementation to prevent scroll-to-top on mobile input focus
   useEffect(() => {
-    // Simple function to prevent iOS from scrolling to focused input
     const preventScrollOnFocus = () => {
-      // Store the current scroll position
       const scrollPosition = window.pageYOffset;
-
-      // Use a short timeout to reset scroll after browser's default behavior
       setTimeout(() => {
         window.scrollTo(0, scrollPosition);
       }, 0);
     };
 
-    // Only apply to the input element
     if (inputRef.current) {
       inputRef.current.addEventListener("focus", preventScrollOnFocus);
     }
@@ -206,14 +180,6 @@ export function AskInput() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isExpanded, inputRef, submitButtonRef, chatContainerRef]);
-
-  useEffect(() => {
-    if (isExpanded) setShowBubbles(true);
-    else {
-      const timer = setTimeout(() => setShowBubbles(false), 500);
-      return () => clearTimeout(timer);
-    }
-  }, [isExpanded]);
 
   // Cleanup intervals and animation frame on unmount
   useEffect(() => {
@@ -259,7 +225,6 @@ export function AskInput() {
       for (let x = 0; x < canvas.width; x += 2) {
         const index = (y * canvas.width + x) * 4;
         if (pixelData[index + 3]! > 128) {
-          // Check alpha channel
           newData.push({
             x: x / dpr,
             y: y / dpr,
@@ -307,9 +272,9 @@ export function AskInput() {
       particlesRemaining = true;
       p.x += p.vx;
       p.y += p.vy;
-      p.opacity -= 0.008; // Slower fade
-      p.r = Math.max(0, p.r - 0.01); // Slower shrink
-      p.vx *= 0.99; // Slightly less resistance
+      p.opacity -= 0.008;
+      p.r = Math.max(0, p.r - 0.01);
+      p.vx *= 0.99;
       p.vy *= 0.99;
 
       const rgb = p.color.match(/(\d+),\s*(\d+),\s*(\d+)/);
@@ -328,15 +293,12 @@ export function AskInput() {
     if (particlesRemaining) {
       animationFrameRef.current = requestAnimationFrame(animate);
     } else {
-      // Animation Finished
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       animationFrameRef.current = null;
-      // Set animating false first, then focus in a microtask
       setAnimating(false);
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus();
-          // console.log("Input focused after animation");
         }
       }, 0);
     }
@@ -359,19 +321,16 @@ export function AskInput() {
       const currentInput = inputValue;
 
       setAnimating(true);
-      draw(); // Draw the text that will vanish
+      draw();
 
-      // Clear input visually *before* starting animation
       setInputValue("");
 
       if (newDataRef.current.length === 0) {
-        // If no particles, skip animation loop but still manage state and focus
         setTimeout(() => {
           setAnimating(false);
-          if (inputRef.current) inputRef.current.focus(); // Focus if animation skipped
+          if (inputRef.current) inputRef.current.focus();
         }, 100);
       } else {
-        // Start the animation loop
         if (animationFrameRef.current)
           cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = requestAnimationFrame(animate);
@@ -414,7 +373,6 @@ export function AskInput() {
       // --- API Call ---
       try {
         const response = await fetch("/api/ask", {
-          // MAKE SURE THIS API ROUTE EXISTS
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: currentInput, history }),
@@ -449,8 +407,6 @@ export function AskInput() {
               clearInterval(typingIntervalRef.current);
             setIsTyping(false);
             isStreamingRef.current = false;
-            // Optional: refocus after typing if needed
-            // setTimeout(() => { if (inputRef.current && document.activeElement !== inputRef.current) inputRef.current.focus(); }, 0);
           }
         }, typingSpeed);
       } catch (error) {
@@ -468,7 +424,6 @@ export function AskInput() {
         if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
         setIsTyping(false);
         isStreamingRef.current = false;
-        // Focus on error if animation didn't already handle it
         setTimeout(() => {
           if (inputRef.current && document.activeElement !== inputRef.current)
             inputRef.current.focus();
@@ -476,7 +431,6 @@ export function AskInput() {
       }
     },
     [
-      // Keep dependencies updated
       inputValue,
       messages,
       nextId,
@@ -501,7 +455,6 @@ export function AskInput() {
     setApiError(null);
     setIsTyping(false);
     isStreamingRef.current = false;
-    // Ensure focus returns after clearing
     setTimeout(() => {
       if (inputRef.current) inputRef.current.focus();
     }, 0);
@@ -512,65 +465,60 @@ export function AskInput() {
   // --- JSX Rendering ---
   return (
     <motion.div
-      className="fixed bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 w-[98%] sm:w-full max-w-xl px-3 sm:px-6 z-40"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      className="fixed bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 w-[95%] sm:w-full max-w-lg px-4 sm:px-6 z-40"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
     >
-      {/* Bubble particles */}
-      {showBubbles && (
-        <div className="absolute inset-x-0 bottom-0 h-20 overflow-hidden pointer-events-none">
-          {Array.from({ length: 15 }).map((_, i) => (
-            <BubbleParticle key={i} delay={i * 0.2} />
-          ))}
-        </div>
-      )}
-
       {/* Messages container */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
             ref={chatContainerRef}
-            className="relative mb-3 sm:mb-4 max-h-[70vh] sm:max-h-[400px] overflow-hidden rounded-2xl sm:rounded-3xl glass-card p-2.5 sm:p-4 pointer-events-auto"
-            initial={{ opacity: 0, y: 60, scale: 0.8, height: 0 }}
-            animate={{ opacity: 1, y: 0, scale: 1, height: "auto" }}
-            exit={{ opacity: 0, y: 60, scale: 0.8, height: 0 }}
+            className="relative mb-3 sm:mb-4 max-h-[65vh] sm:max-h-[400px] overflow-hidden bg-black border border-[hsl(var(--border))] rounded-lg pointer-events-auto"
+            initial={{ opacity: 0, y: 40, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, y: 40, height: 0 }}
             transition={{
               type: "spring",
-              damping: 15,
-              stiffness: 180,
-              mass: 0.8,
+              damping: 20,
+              stiffness: 200,
             }}
           >
             {/* Header */}
-            <div className="absolute top-0 left-1/4 w-1/2 h-1 bg-gradient-to-r from-transparent via-white/60 dark:via-blue-400/30 to-transparent rounded-full hidden sm:block"></div>
-            <div className="flex justify-between items-center mb-2.5 sm:mb-4 pb-2 border-b border-gray-100/50 dark:border-gray-700/20">
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Conversation with Youssef
-              </h3>
-              <div className="flex space-x-2">
+            <div className="flex justify-between items-center p-4 border-b border-[hsl(var(--border))]">
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-xs text-[hsl(var(--muted-foreground))] uppercase tracking-wider">
+                  Conversation
+                </span>
+                <span className="text-[hsl(var(--gold))] opacity-50">「</span>
+                <span className="text-[hsl(var(--gold))] font-arabic text-base">محادثة</span>
+                <span className="text-[hsl(var(--gold))] opacity-50">」</span>
+              </div>
+              <div className="flex gap-2">
                 <button
                   onClick={clearMessages}
-                  className="p-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-blue-500/10 transition-colors active:scale-95 touch-manipulation"
+                  className="p-2 text-[hsl(var(--muted-foreground))] hover:text-white hover:bg-[hsl(var(--muted))] transition-all duration-300 active:scale-95"
                   aria-label="Clear conversation"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setIsExpanded(false)}
-                  className="p-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-blue-500/10 transition-colors active:scale-95 touch-manipulation"
+                  className="p-2 text-[hsl(var(--muted-foreground))] hover:text-white hover:bg-[hsl(var(--muted))] transition-all duration-300 active:scale-95"
                   aria-label="Close conversation"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
             </div>
+
             {/* Messages Area */}
-            <div className="overflow-y-auto max-h-[55vh] sm:max-h-[280px] pr-2 space-y-3 sm:space-y-4 scrollbar-thin overscroll-contain -mr-2 pr-4 pb-1">
+            <div className="overflow-y-auto max-h-[50vh] sm:max-h-[300px] p-4 space-y-4 scrollbar-thin">
               {apiError && (
                 <motion.div
-                  className="text-center text-red-600 dark:text-red-400 text-xs sm:text-sm p-2 bg-red-100/50 dark:bg-red-900/30 rounded-lg"
+                  className="text-center text-red-400 text-xs font-mono p-3 bg-red-900/20 border border-red-900/50"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
@@ -582,44 +530,41 @@ export function AskInput() {
                   <motion.div
                     key={message.id}
                     layout
-                    className={`flex ${message.type === "question" ? "justify-end" : "justify-start"} mb-1 sm:mb-0`}
-                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    className={`flex ${message.type === "question" ? "justify-end" : "justify-start"}`}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
                     transition={{
                       type: "spring",
-                      damping: 20,
-                      stiffness: 200,
-                      mass: 0.5,
+                      damping: 25,
+                      stiffness: 300,
                     }}
                   >
                     <div
                       className={cn(
-                        "relative max-w-[90%] sm:max-w-[80%] rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-2.5 text-[15px] sm:text-sm whitespace-pre-wrap break-words leading-relaxed",
+                        "relative max-w-[85%] sm:max-w-[80%] px-4 py-3 text-sm whitespace-pre-wrap break-words leading-relaxed",
                         message.type === "question"
-                          ? "glass-card-strong text-card-foreground rounded-tr-none"
-                          : "glass-card text-card-foreground rounded-tl-none",
+                          ? "bg-[hsl(var(--gold))] text-black rounded-[20px] rounded-br-[4px]"
+                          : "bg-[hsl(var(--card))] text-white border border-[hsl(var(--border))] rounded-[20px] rounded-bl-[4px]",
                       )}
                     >
-                      <div
-                        className={cn(
-                          "absolute top-0 left-1/4 w-1/2 h-0.5 bg-gradient-to-r from-transparent to-transparent rounded-full",
-                          message.type === "question"
-                            ? "via-white/30"
-                            : "via-white/50 dark:via-blue-400/20",
-                          "hidden sm:block", // Hide decorative element on mobile for cleaner look
-                        )}
-                      ></div>
-                      <p>
-                        {message.text}
-                        {message.type === "answer" &&
-                          index === messages.length - 1 &&
-                          isTyping && <TypingCursor />}
-                        {message.type === "answer" &&
-                          index === messages.length - 1 &&
-                          isTyping &&
-                          !message.text && <span>&nbsp;</span>}
-                      </p>
+                      {message.type === "answer" && (
+                        <span className="block text-[10px] text-[hsl(var(--gold))] uppercase tracking-widest mb-1.5 font-mono">
+                          Youssef&apos;s AI
+                        </span>
+                      )}
+                      {message.type === "answer" &&
+                        index === messages.length - 1 &&
+                        isTyping &&
+                        !message.text ? (
+                        <LoadingCube />
+                      ) : message.type === "answer" ? (
+                        <div className="text-sm leading-relaxed [&_strong]:font-semibold [&_code]:bg-white/10 [&_code]:px-1 [&_code]:rounded [&_code]:text-[hsl(var(--gold))] [&_a]:text-[hsl(var(--gold))] [&_a]:underline [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:ml-0 [&_p+p]:mt-2">
+                          <ReactMarkdown>{message.text}</ReactMarkdown>
+                        </div>
+                      ) : (
+                        <p>{message.text}</p>
+                      )}
                     </div>
                   </motion.div>
                 ))}
@@ -633,7 +578,7 @@ export function AskInput() {
       {/* Input form */}
       <form
         onSubmit={handleSubmit}
-        className="relative h-[52px] sm:h-14 overflow-hidden rounded-full bg-white/70 dark:bg-zinc-900/50 backdrop-blur-lg pl-4 pr-2 sm:pl-6 sm:pr-3 flex items-center border border-white/50 dark:border-blue-500/20 shadow-[0_8px_30px_rgba(0,0,0,0.12),_0_0_10px_rgba(120,120,255,0.1)] pointer-events-auto"
+        className="relative h-14 overflow-hidden bg-black border border-[hsl(var(--border))] rounded-lg flex items-center pointer-events-auto transition-all duration-300 hover:border-[hsl(var(--gold))/0.3]"
       >
         {/* Canvas for vanishing effect */}
         <canvas
@@ -641,10 +586,16 @@ export function AskInput() {
           className={cn(
             "absolute inset-0 w-full h-full pointer-events-none z-[5]",
             animating ? "opacity-100" : "opacity-0",
-            "transition-opacity duration-100 ease-out", // Faster transition for canvas visibility
+            "transition-opacity duration-100 ease-out",
           )}
           aria-hidden="true"
         />
+
+        {/* Arabic decoration */}
+        <div className="absolute left-4 text-[hsl(var(--gold))] opacity-40 font-arabic text-sm pointer-events-none">
+          「
+        </div>
+
         {/* Input Field */}
         <input
           ref={inputRef}
@@ -655,53 +606,58 @@ export function AskInput() {
           }}
           onFocus={(e) => {
             if (!isExpanded) setIsExpanded(true);
-            // Prevent default scrolling behavior
             e.preventDefault();
-            // Store current scroll position
-            const scrollY = window.scrollY;
-            // Set timeout to restore scroll position after browserUse the input's focus method with preventScroll option to avoid scrolling
             e.currentTarget.focus({ preventScroll: true });
           }}
           placeholder="Ask me anything..."
           className={cn(
-            "relative z-10 w-full h-full px-4 sm:px-6 pr-12",
+            "relative z-10 w-full h-full pl-8 pr-14",
             "bg-transparent border-none focus:outline-none focus:ring-0",
-            "text-base sm:text-sm leading-normal placeholder-gray-500 dark:placeholder-gray-400",
-            "min-h-[44px] py-2.5 sm:py-2", // Taller input for better touch targets on mobile
-            // Make text transparent when animating and particles exist
+            "text-sm font-mono placeholder:text-[hsl(var(--muted-foreground))] placeholder:font-mono placeholder:text-xs placeholder:uppercase placeholder:tracking-wider",
             animating && newDataRef.current.length > 0
-              ? "text-transparent dark:text-transparent caret-transparent"
-              : "text-black dark:text-white",
-            "transition-colors duration-100", // Transition text color change
-            "touch-manipulation", // Improve touch behavior
+              ? "text-transparent caret-transparent"
+              : "text-white",
+            "transition-colors duration-100",
           )}
-          disabled={isStreamingRef.current} // Only disable during API call stream
+          disabled={isStreamingRef.current}
           autoComplete="off"
           enterKeyHint="send"
           spellCheck="true"
-          // onFocus handled above - removing duplicate handler
         />
+
+        {/* Arabic decoration */}
+        <div className="absolute right-14 text-[hsl(var(--gold))] opacity-40 font-arabic text-sm pointer-events-none">
+          」
+        </div>
+
         {/* Submit Button */}
         <button
           ref={submitButtonRef}
           type="submit"
-          disabled={!inputValue.trim() || isStreamingRef.current || animating} // Disable during stream OR animation
+          disabled={!inputValue.trim() || isStreamingRef.current || animating}
           className={cn(
-            "absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 z-20",
-            "h-10 w-10 sm:h-8 sm:w-8 rounded-full",
-            "bg-black dark:bg-gray-700",
-            "transition duration-200 flex items-center justify-center",
-            "active:scale-95 touch-manipulation", // Better touch feedback
-            "hover:bg-gray-800 dark:hover:bg-gray-600",
-            "tap-highlight-transparent", // Remove tap highlight on mobile
-            "disabled:bg-gray-300 dark:disabled:bg-zinc-700/50",
-            "disabled:opacity-60 disabled:cursor-not-allowed",
+            "absolute right-0 top-0 bottom-0 z-20",
+            "w-14 border-l border-[hsl(var(--border))]",
+            "bg-transparent hover:bg-[hsl(var(--gold))]",
+            "transition-all duration-300 flex items-center justify-center group",
+            "active:scale-95",
+            "disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent",
           )}
           aria-label="Send message"
         >
-          <Send className="h-[18px] w-[18px] sm:h-4 sm:w-4 text-gray-300 dark:text-white/90" />
+          <Send className="h-4 w-4 text-[hsl(var(--muted-foreground))] group-hover:text-black transition-colors duration-300" />
         </button>
       </form>
+
+      {/* Hint text */}
+      <motion.p
+        className="text-center mt-3 text-[10px] font-mono text-[hsl(var(--muted-foreground))] uppercase tracking-widest"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+      >
+        Ask Youssef&apos;s AI anything
+      </motion.p>
 
       {/* CSS for scrollbar styling */}
       <style jsx>{`
@@ -710,52 +666,36 @@ export function AskInput() {
         }
         .scrollbar-thin::-webkit-scrollbar-track {
           background: transparent;
-          margin: 5px 0;
         }
         .scrollbar-thin::-webkit-scrollbar-thumb {
-          background-color: rgba(155, 155, 155, 0.4);
-          border-radius: 20px;
-          border: 1px solid transparent;
+          background-color: hsl(var(--muted));
+          border-radius: 0;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+          background-color: hsl(var(--gold));
         }
         .scrollbar-thin {
           scrollbar-width: thin;
-          scrollbar-color: rgba(155, 155, 155, 0.4) transparent;
+          scrollbar-color: hsl(var(--muted)) transparent;
         }
         .break-words {
           word-break: break-word;
           overflow-wrap: break-word;
         }
 
-        /* iOS-specific fixes to prevent auto-scrolling */
+        /* iOS-specific fixes */
         @supports (-webkit-touch-callout: none) {
           input[type="text"],
           input,
           textarea,
           select {
-            font-size: 16px; /* Prevents zoom */
-            -webkit-user-select: text; /* Better touch handling */
+            font-size: 16px;
+            -webkit-user-select: text;
             user-select: text;
           }
-          /* Prevent scroll anchoring behavior */
           * {
             overflow-anchor: none;
           }
-          /* Additional fixes for iOS focus behavior */
-          body {
-            position: relative;
-            width: 100%;
-            height: 100%;
-          }
-          .fixed {
-            position: fixed !important;
-          }
-          /* Additional iOS fixes */
-          .scrollbar-thin {
-            -webkit-overflow-scrolling: auto; /* Prevent momentum scrolling */
-          }
-        }
-        .tap-highlight-transparent {
-          -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         }
       `}</style>
     </motion.div>

@@ -1,226 +1,191 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useInView } from "react-intersection-observer";
+import { useRef } from "react";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import Image from "next/image";
-import { X, Code, Server, Database, Crown } from "lucide-react";
-import { SectionHeading } from "./section-heading";
-import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
-import { ParallaxSection } from "./parallax-section";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { projects } from "@/lib/project-data";
 
-// Project header component for bento grid
-function ProjectHeader({ image, title }: { image: string; title: string }) {
+function ProjectCard({
+  project,
+  index,
+}: {
+  project: (typeof projects)[0];
+  index: number;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(cardRef, { once: true, margin: "-100px" });
+
   return (
-    <div className="relative w-full h-40 overflow-hidden rounded-lg">
-      <Image
-        src={image || "/placeholder.svg"}
-        alt={title}
-        fill
-        className="object-cover transition-transform duration-500 group-hover/bento:scale-105"
-      />
-      <div className="absolute inset-0 bg-black/30 opacity-0 group-hover/bento:opacity-100 transition-opacity duration-300" />
-    </div>
+    <motion.div
+      ref={cardRef}
+      initial={{ opacity: 0, y: 60 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
+      transition={{
+        duration: 0.8,
+        delay: index * 0.15,
+        ease: [0.55, 0.45, 0.16, 1],
+      }}
+      className="group"
+    >
+      <Link href={`/projects/${project.id}`} className="block">
+        <div className="project-card">
+          {/* Image container */}
+          <div className="relative aspect-[16/10] overflow-hidden">
+            <Image
+              src={project.image}
+              alt={project.title}
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500" />
+
+            {/* Hover arrow */}
+            <div className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+              <ArrowUpRight className="w-5 h-5 text-white" />
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="p-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-xl font-light text-white mb-2 group-hover:text-[hsl(42,45%,75%)] transition-colors">
+                  {project.title}
+                </h3>
+                <p className="text-sm text-[hsl(0,0%,50%)] uppercase tracking-wider">
+                  {project.category}
+                </p>
+              </div>
+              <span className="font-mono text-xs text-[hsl(0,0%,35%)]">
+                {project.timeline?.split(" - ")[0] || "Recent"}
+              </span>
+            </div>
+
+            {/* Technologies */}
+            <div className="mt-4 flex flex-wrap gap-2">
+              {project.technologies.slice(0, 4).map((tech, i) => (
+                <span
+                  key={i}
+                  className="px-2 py-1 text-[10px] font-mono uppercase tracking-wider bg-white/5 text-[hsl(0,0%,60%)] border border-white/10"
+                >
+                  {tech}
+                </span>
+              ))}
+              {project.technologies.length > 4 && (
+                <span className="px-2 py-1 text-[10px] font-mono uppercase tracking-wider bg-white/5 text-[hsl(0,0%,60%)] border border-white/10">
+                  +{project.technologies.length - 4}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </Link>
+    </motion.div>
   );
 }
 
 export function Projects() {
-  const [activeProject, setActiveProject] = useState<
-    (typeof projects)[0] | null
-  >(null);
-  const [ref, inView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
+  const sectionRef = useRef<HTMLElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(titleRef, { once: true, margin: "-100px" });
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
   });
 
-  return (
-    <section id="projects" className="py-24 sm:py-32">
-      <ParallaxSection offset={15}>
-        <div className="max-w-3xl mx-auto">
-          <SectionHeading japanese="プロジェクト" english="Projects" />
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
 
-          <div ref={ref}>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={inView ? { opacity: 1 } : { opacity: 0 }}
-              transition={{ duration: 0.5 }}
+  return (
+    <section
+      ref={sectionRef}
+      id="work"
+      className="relative min-h-screen py-32 overflow-hidden"
+    >
+      {/* Background gradient on scroll */}
+      <motion.div
+        className="absolute inset-0 z-0"
+        style={{ y: backgroundY }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[hsl(150,30%,8%)] to-transparent opacity-50" />
+      </motion.div>
+
+      <div className="relative z-10 container mx-auto px-6 md:px-12">
+        {/* Section Title - Split Typography */}
+        <div ref={titleRef} className="relative mb-24">
+          <div className="flex items-center justify-center">
+            {/* WO */}
+            <motion.span
+              initial={{ opacity: 0, x: -100 }}
+              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -100 }}
+              transition={{ duration: 1, ease: [0.55, 0.45, 0.16, 1] }}
+              className="text-section text-white font-light"
             >
-              <BentoGrid className="max-w-5xl mx-auto">
-                {projects.map((project, index) => (
-                  <BentoGridItem
-                    key={index}
-                    title={project.title}
-                    description={
-                      <span className="text-sm">
-                        {project.description[0].substring(0, 100)}
-                        {project.description[0].length > 100 ? "..." : ""}
-                      </span>
-                    }
-                    header={
-                      <ProjectHeader
-                        image={project.image}
-                        title={project.title}
-                      />
-                    }
-                    icon={
-                      <div className="flex items-center space-x-1">
-                        {project.id === "chess-llm-benchmark" ? (
-                          <Crown className="h-4 w-4 text-neutral-500" />
-                        ) : project.id === "nlp-phishing-detection" ? (
-                          <Code className="h-4 w-4 text-neutral-500" />
-                        ) : project.id === "geegees-intramural" ? (
-                          <Server className="h-4 w-4 text-neutral-500" />
-                        ) : (
-                          <Database className="h-4 w-4 text-neutral-500" />
-                        )}
-                        <span className="text-xs text-neutral-500">
-                          {project.category}
-                        </span>
-                      </div>
-                    }
-                    className={`${project.size === "large" ? "md:col-span-2" : "md:col-span-1"}`}
-                    onClick={() => {
-                      // Instead of showing modal, we'll navigate to the project page
-                      window.location.href = `/projects/${project.id}`;
-                    }}
-                  />
-                ))}
-              </BentoGrid>
+              WO
+            </motion.span>
+
+            {/* Arabic in center */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.8, delay: 0.3, ease: [0.55, 0.45, 0.16, 1] }}
+              className="flex flex-col items-center mx-4 md:mx-8"
+            >
+              <span className="arabic-bracket text-xl md:text-2xl">「</span>
+              <span className="font-arabic text-2xl md:text-4xl text-[hsl(42,45%,75%)]">
+                أعمال
+              </span>
+              <span className="arabic-bracket text-xl md:text-2xl">」</span>
             </motion.div>
+
+            {/* RK */}
+            <motion.span
+              initial={{ opacity: 0, x: 100 }}
+              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 100 }}
+              transition={{ duration: 1, ease: [0.55, 0.45, 0.16, 1] }}
+              className="text-section text-white font-light"
+            >
+              RK
+            </motion.span>
           </div>
 
-          <AnimatePresence>
-            {activeProject && (
-              <motion.div
-                className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setActiveProject(null)}
-              >
-                <motion.div
-                  className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-black border border-gray-200 dark:border-gray-800"
-                  initial={{ scale: 0.9, y: 20 }}
-                  animate={{ scale: 1, y: 0 }}
-                  exit={{ scale: 0.9, y: 20 }}
-                  transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button
-                    className="absolute top-4 right-4 p-2 rounded-full bg-gray-100 dark:bg-gray-800 z-10"
-                    onClick={() => setActiveProject(null)}
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2">
-                    <div className="relative h-64 md:h-full">
-                      <Image
-                        src={activeProject.image || "/placeholder.svg"}
-                        alt={activeProject.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="p-6 md:p-8">
-                      <div className="border-b border-gray-200 dark:border-gray-800 pb-4 mb-4">
-                        <h2 className="text-2xl font-medium mb-1">
-                          {activeProject.title}
-                        </h2>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {activeProject.category}
-                        </p>
-                      </div>
-
-                      <div className="space-y-6">
-                        <div>
-                          <h3 className="text-sm font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
-                            Project Brief
-                          </h3>
-                          <div className="space-y-2">
-                            {activeProject.description.map((paragraph, idx) => (
-                              <p
-                                key={idx}
-                                className="text-sm text-gray-600 dark:text-gray-300"
-                              >
-                                {paragraph}
-                              </p>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div>
-                          <h3 className="text-sm font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
-                            Technologies
-                          </h3>
-                          <div className="flex flex-wrap gap-2">
-                            {activeProject.technologies.map((tech, idx) => (
-                              <span
-                                key={idx}
-                                className="inline-block px-2 py-1 text-xs bg-gray-100 dark:bg-gray-800 rounded"
-                              >
-                                {tech}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-
-                        {activeProject.timeline && (
-                          <div>
-                            <h3 className="text-sm font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
-                              Timeline
-                            </h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              {activeProject.timeline}
-                            </p>
-                          </div>
-                        )}
-
-                        {activeProject.contributors && (
-                          <div>
-                            <h3 className="text-sm font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
-                              Contributors
-                            </h3>
-                            <div className="space-y-1">
-                              {activeProject.contributors.map(
-                                (contributor, idx) => (
-                                  <p
-                                    key={idx}
-                                    className="text-sm text-gray-600 dark:text-gray-300"
-                                  >
-                                    {contributor}
-                                  </p>
-                                ),
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {activeProject.link && (
-                          <div>
-                            <h3 className="text-sm font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
-                              Links
-                            </h3>
-                            <a
-                              href={activeProject.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm text-black dark:text-white underline hover:no-underline"
-                            >
-                              View Project
-                            </a>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="text-center mt-8 font-mono text-xs tracking-[0.2em] text-[hsl(0,0%,45%)] uppercase"
+          >
+            Selected Projects
+          </motion.p>
         </div>
-      </ParallaxSection>
+
+        {/* Projects Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          {projects.map((project, index) => (
+            <ProjectCard key={project.id} project={project} index={index} />
+          ))}
+        </div>
+
+        {/* View all projects link */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          viewport={{ once: true }}
+          className="mt-16 text-center"
+        >
+          <Link
+            href="/blog"
+            className="inline-flex items-center gap-2 font-mono text-sm tracking-wider text-[hsl(0,0%,50%)] hover:text-white transition-colors group"
+          >
+            <span>VIEW ALL WRITINGS</span>
+            <ArrowUpRight className="w-4 h-4 transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+          </Link>
+        </motion.div>
+      </div>
     </section>
   );
 }
