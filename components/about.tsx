@@ -22,10 +22,7 @@ export function About() {
       className="relative min-h-screen py-32 overflow-hidden"
     >
       {/* Background */}
-      <motion.div
-        className="absolute inset-0 z-0"
-        style={{ y: backgroundY }}
-      >
+      <motion.div className="absolute inset-0 z-0" style={{ y: backgroundY }}>
         <div className="absolute inset-0 bg-gradient-to-b from-black via-[hsl(220,20%,6%)] to-black" />
       </motion.div>
 
@@ -56,7 +53,11 @@ export function About() {
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-            transition={{ duration: 1, delay: 0.1, ease: [0.55, 0.45, 0.16, 1] }}
+            transition={{
+              duration: 1,
+              delay: 0.1,
+              ease: [0.55, 0.45, 0.16, 1],
+            }}
             className="mb-16"
           >
             <div className="flex flex-wrap items-baseline gap-x-4">
@@ -81,7 +82,9 @@ export function About() {
           {/* Divider dot */}
           <motion.div
             initial={{ opacity: 0, scale: 0 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0 }}
+            animate={
+              isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0 }
+            }
             transition={{ duration: 0.5, delay: 0.3 }}
             className="flex justify-center mb-20"
           >
@@ -92,7 +95,11 @@ export function About() {
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-            transition={{ duration: 1, delay: 0.4, ease: [0.55, 0.45, 0.16, 1] }}
+            transition={{
+              duration: 1,
+              delay: 0.4,
+              ease: [0.55, 0.45, 0.16, 1],
+            }}
             className="max-w-5xl mx-auto mb-20"
           >
             <div className="text-center">
@@ -114,14 +121,20 @@ export function About() {
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-            transition={{ duration: 1, delay: 0.5, ease: [0.55, 0.45, 0.16, 1] }}
+            transition={{
+              duration: 1,
+              delay: 0.5,
+              ease: [0.55, 0.45, 0.16, 1],
+            }}
             className="grid grid-cols-1 lg:grid-cols-2 gap-16 max-w-5xl mx-auto"
           >
             {/* Left column - Current role */}
             <div>
               <div className="mb-8">
                 <p className="font-mono text-xs tracking-[0.15em] text-[hsl(0,0%,50%)] uppercase">
-                  AI RESEARCHER <span className="text-[hsl(42,45%,75%)]">@</span> NATIONAL RESEARCH COUNCIL
+                  AI RESEARCHER{" "}
+                  <span className="text-[hsl(42,45%,75%)]">@</span> NATIONAL
+                  RESEARCH COUNCIL
                 </p>
                 <p className="font-mono text-xs tracking-[0.15em] text-[hsl(0,0%,40%)] uppercase mt-1">
                   BASED IN OTTAWA, CANADA
@@ -129,9 +142,10 @@ export function About() {
               </div>
 
               <p className="text-[hsl(0,0%,70%)] leading-relaxed">
-                I'm a software engineer and researcher with a cross-cultural perspective
-                shaped by Moroccan roots and a Canadian education. This unique background
-                informs my approach to building technology that bridges different worlds.
+                I'm a software engineer and researcher with a passion for
+                creating elegant, efficient solutions to complex problems.
+                Growing up curious about the world and my surroundings, I've
+                always wanted to understand how they worked.
               </p>
             </div>
 
@@ -139,7 +153,8 @@ export function About() {
             <div>
               <div className="mb-8">
                 <p className="font-mono text-xs tracking-[0.15em] text-[hsl(0,0%,50%)] uppercase">
-                  M.SC COMPUTER SCIENCE <span className="text-[hsl(42,45%,75%)]">@</span> UOTTAWA
+                  M.SC COMPUTER SCIENCE{" "}
+                  <span className="text-[hsl(42,45%,75%)]">@</span> UOTTAWA
                 </p>
                 <p className="font-mono text-xs tracking-[0.15em] text-[hsl(0,0%,40%)] uppercase mt-1">
                   FOCUS: GRAPH THEORY
@@ -147,13 +162,16 @@ export function About() {
               </div>
 
               <p className="text-[hsl(0,0%,70%)] leading-relaxed">
-                Growing up curious about the world, I've always wanted to understand how
-                things work. That curiosity drives me to explore the intersection of
-                theoretical computer science and practical applications.
+                I've kept that approach and mindset throughout my whole life and
+                I'm slowly chipping the iceberg of knowledge hoping to make a
+                big enough dent to make my younger self proud. Currently
+                pursuing a Master's in Computer Science with a focus on Graph
+                Theory, and working as an AI researcher for the Canadian
+                National Research Council. I'm constantly exploring new
+                technologies and ways to contribute.
               </p>
             </div>
           </motion.div>
-
         </div>
       </div>
     </section>

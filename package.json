@@ -11,6 +11,10 @@
     "populate-db": "node scripts/populateSupabase.js"
   },
   "dependencies": {
+    "@opentelemetry/api-logs": "^0.211.0",
+    "@opentelemetry/exporter-logs-otlp-http": "^0.211.0",
+    "@opentelemetry/resources": "^2.5.0",
+    "@opentelemetry/sdk-logs": "^0.211.0",
     "@radix-ui/react-hover-card": "^1.1.11",
     "@supabase/supabase-js": "^2.49.4",
     "@tailwindcss/cli": "^4.1.4",

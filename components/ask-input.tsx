@@ -559,11 +559,11 @@ export function AskInput() {
                         !message.text ? (
                         <LoadingCube />
                       ) : message.type === "answer" ? (
-                        <div className="text-sm leading-relaxed [&_strong]:font-semibold [&_code]:bg-white/10 [&_code]:px-1 [&_code]:rounded [&_code]:text-[hsl(var(--gold))] [&_a]:text-[hsl(var(--gold))] [&_a]:underline [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:ml-0 [&_p+p]:mt-2">
+                        <div className="chat-message-text text-sm leading-relaxed [&_strong]:font-semibold [&_code]:bg-white/10 [&_code]:px-1 [&_code]:rounded [&_code]:text-[hsl(var(--gold))] [&_a]:text-[hsl(var(--gold))] [&_a]:underline [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:ml-0 [&_p+p]:mt-2">
                           <ReactMarkdown>{message.text}</ReactMarkdown>
                         </div>
                       ) : (
-                        <p>{message.text}</p>
+                        <p className="chat-message-text">{message.text}</p>
                       )}
                     </div>
                   </motion.div>

@@ -521,6 +521,17 @@
   border: 1px solid hsl(var(--border));
 }
 
+/* Chat message text - force Inter font */
+.chat-message-text,
+.chat-message-text * {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+.chat-message-text code,
+.chat-message-text pre {
+  font-family: 'Roboto Mono', ui-monospace, monospace !important;
+}
+
 /* Light mode overrides - keep dark aesthetic */
 html:not(.dark) {
   --background: 0 0% 0%;

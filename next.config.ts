@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
       "api.microlink.io", // Microlink Image Preview
     ],
   },
+  experimental: {
+    instrumentationHook: true,
+  },
 };
 
 export default nextConfig;

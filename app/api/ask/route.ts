@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
-import { PostHog } from "posthog-node";
+import { SeverityNumber } from "@opentelemetry/api-logs";
+import { loggerProvider } from "@/instrumentation";
 
-// --- PostHog Server-Side Client ---
-const posthog = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY || "", {
-  host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
-  flushAt: 1, // Flush immediately for API routes
-  flushInterval: 0,
-});
+// --- PostHog Logger ---
+const logger = loggerProvider.getLogger("ai-chat-api");
 
 // --- Configuration ---
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
@@ -122,6 +119,7 @@ Market value: $120k+.
 // --- API Route Handler ---
 export async function POST(req: Request) {
   const requestStartTime = Date.now();
+  const requestId = `req-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
   try {
     if (!OPENROUTER_API_KEY) {
@@ -214,36 +212,27 @@ export async function POST(req: Request) {
       generationId,
     };
 
-    // Track successful query in PostHog
-    posthog.capture({
-      distinctId: "api-user", // Anonymous tracking for API calls
-      event: "ai_chat_query",
-      properties: {
-        // Query details
-        question: message.substring(0, 500), // Truncate for privacy
-        answer_length: responseContent.length,
-        conversation_length: conversationHistory.length,
-
-        // Model & Performance
+    // Log LLM conversation with full question and answer
+    logger.emit({
+      body: "LLM conversation",
+      severityNumber: SeverityNumber.INFO,
+      attributes: {
+        request_id: requestId,
+        question: message,
+        answer: responseContent,
         model: metrics.model,
-        response_time_ms: metrics.queryResponseTimeMs,
-
-        // Token usage
         prompt_tokens: metrics.promptTokens,
         completion_tokens: metrics.completionTokens,
         total_tokens: metrics.totalTokens,
-
-        // Cost tracking
+        response_time_ms: metrics.queryResponseTimeMs,
         estimated_cost_usd: metrics.estimatedCost,
-
-        // Metadata
         generation_id: metrics.generationId,
-        timestamp: metrics.timestamp,
+        conversation_length: conversationHistory.length,
       },
     });
 
-    // Ensure PostHog flushes before response
-    await posthog.flush();
+    // Ensure logs flush before response
+    await loggerProvider.forceFlush();
 
     return NextResponse.json({
       response: responseContent,
@@ -257,21 +246,21 @@ export async function POST(req: Request) {
       },
     });
   } catch (error: unknown) {
-    // Track errors in PostHog
     const errorMessage =
       error instanceof Error ? error.message : "An unknown error occurred";
 
-    posthog.capture({
-      distinctId: "api-user",
-      event: "ai_chat_error",
-      properties: {
-        error_message: errorMessage,
+    // Log error
+    logger.emit({
+      body: "AI chat error",
+      severityNumber: SeverityNumber.ERROR,
+      attributes: {
+        request_id: requestId,
         error_type: error instanceof Error ? error.name : "Unknown",
-        model: DEFAULT_MODEL,
-        timestamp: new Date().toISOString(),
+        error_message: errorMessage,
       },
     });
-    await posthog.flush();
+
+    await loggerProvider.forceFlush();
 
     console.error("API Route Error:", error);
     return NextResponse.json(
@@ -290,6 +279,7 @@ export async function GET(req: Request) {
 
   const requestStartTime = Date.now();
   let timeToFirstToken: number | null = null;
+  const requestId = `stream-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
   if (!OPENROUTER_API_KEY) {
     return new Response("OpenRouter API key not configured", { status: 500 });
