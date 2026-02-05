@@ -92,14 +92,6 @@ I aggregate with **weighted voting** + **confidence gates**. Disagreement is a f
 
 ---
 
-## Roadmap ? (near → far)
-
-* **Near:** Gmail/Outlook extension with inline warnings; HTML/attachments parsing; sender-auth signals (SPF/DKIM/DMARC); model-drift alerts.
-* **Next:** **Federated learning** so orgs can improve models without sharing raw mail; smarter ensemble weights based on scenario.
-* **Later:** **Graph-level analysis** (campaign clustering across senders/domains), **behavioral signals** for account compromise.
-
----
-
 ## A personal note
 
 I built this partly because I’m the friend people forward suspicious emails to (“Youssef, is this real?”). Now I have a tool that reflects how I think—privacy-first, explainable, and fast—and that I’m comfortable recommending to my lab mates and colleagues. It’s not “set and forget”; it’s a living system that learns with me.

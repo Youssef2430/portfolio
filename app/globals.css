@@ -1,9 +1,9 @@
+/* Import Arabic display font - Aref Ruqaa for elegant Arabic calligraphy */
+@import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Amiri:wght@400;700&family=Roboto+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import Arabic display font - Aref Ruqaa for elegant Arabic calligraphy */
-@import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Amiri:wght@400;700&family=Roboto+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap');
 
 @layer base {
   :root {

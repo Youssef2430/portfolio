@@ -89,30 +89,6 @@ Features students love:
 
 ---
 
-## Roadmap (the fun part)
-
-**Near‑term**
-
-* WebSockets for live scores
-* Redis caching + rate limiting
-* Team captain tools (rosters, comms)
-* Better filters/search across sports & times
-
-**Mid‑term**
-
-* GraphQL endpoint + mobile SDK
-* Analytics dashboard for players/leagues
-* Referee portal & incident tracking
-* Fantasy mode (because why not?)
-
-**Long‑term**
-
-* Multi‑university support
-* Video highlights & alumni layer
-* Smarter notifications and voice interfaces
-
----
-
 ## Why I’m still excited
 
 This project blends everything I care about: performance, accessibility, beautiful UIs, and making student life easier. It’s also *mine*—born from late games, long bus rides, and too many coffees. Every release makes campus sports feel a little more professional and a lot more human.

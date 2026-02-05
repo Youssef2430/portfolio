@@ -133,26 +133,3 @@ Side-by-side runs made it obvious:
 - Confidence scores + traces make debugging feel like analysis, not guesswork
 
 I ship tools for people who care about control and observability; this was the first time I felt that same “observability” applied to a model’s *thinking* in a game loop.
-
----
-
-## Roadmap
-
-**Short-term (next month)**
-- Opening book support
-- Elimination brackets with seeds
-- Custom evaluation hooks
-- Batch runs for large experiments
-
-**Quarter-scale**
-- Stronger evaluation via Leela-style nets
-- MCTS-like lookahead for the agent path
-- Multi-agent collaboration (committee of styles)
-- Deeper stats: opening repertoires, tactical motifs, endgames
-
-**Exploratory**
-- Learn-from-own-games mode
-- “Play like X” style transfer
-- Puzzle-only benchmarks
-- Real-time commentary streams
-- Cross-domain strategy experiments (Go, poker, etc.)

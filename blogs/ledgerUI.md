@@ -1,6 +1,6 @@
 # Building LedgerGlass: Why I Built a Privacy-First Finance App for macOS, How It Works, and What’s Next
 
-If you’ve ever tried to keep a clean pulse on your personal finances without handing everything to a cloud service, you know the trade-offs: great charts usually come with account scraping, background syncing, or “trust us with your data.” I wanted the opposite — a beautiful, modern, Mac-native experience that keeps every byte on my machine.
+If you’ve ever tried to keep a clean pulse on your personal finances without handing everything to a cloud service, you know the trade-offs: great charts usually come with account scraping, background syncing, or “trust us with your data.” I wanted the opposite, a beautiful, modern, Mac-native experience that keeps every byte on my machine.
 
 LedgerGlass is that itch scratched: a SwiftUI app that turns bank CSVs into an insight-rich, privacy-first personal ledger. It uses SwiftData for storage and Apple’s NaturalLanguage embeddings for on-device categorization. No servers, no keys, no tracking.
 
@@ -40,7 +40,7 @@ What felt confusing at first:
 
 Why it was fresh:
 - **Tighter feedback loop.** SwiftUI previews + small view models = build–run–fix cycles that feel like a REPL for UI.
-- **Ownership.** No glue services, no brittle web layers — just the app, the data, the user.
+- **Ownership.** No glue services, no brittle web layers, just the app, the data, the user.
 - **Craft.** Tiny hover states, elastic grids, and consistent spacing make software feel calm. You can *feel* the quality when it’s right.
 
 This stretch from “API brain” to “app brain” is exactly why I wanted to do LedgerGlass native. It forced better boundaries (models/services/views), more empathy for interaction, and a deeper respect for platform patterns.
@@ -136,28 +136,7 @@ This stretch from “API brain” to “app brain” is exactly why I wanted to 
 - Budget every millisecond the user can feel.
 - Design hot paths first (import, search, recategorize) and make them keyboard-native.
 
-
-## What’s next (roadmap)
-
-Short-term
-- **Bank statements & reconciliation.** Import OFX/QFX/MT940 and common bank PDFs (on-device parsing/OCR), auto-map to accounts, then reconcile against running balances and catch duplicates/missing rows. Lock a month to a statement total with “explain the difference” tooling.
-- Budgets & alerts — set monthly targets per category; highlight overruns.
-- Better rules — keyword and merchant rules that apply pre-ML.
-- Richer calendar — quick inline editing of a subscription and skip/adjust once.
-- Multi-currency polish — per-account currency with lightweight FX for roll-ups.
-
-Medium-term
-- Forecasting — simple cashflow projections using recurring charges + historical spend.
-- iCloud Drive sync (opt-in, E2E) — keep privacy while syncing between Macs.
-- Custom reports — export monthly summaries for taxes and audits.
-- Accessibility & localization — VoiceOver, high-contrast palettes, and a few languages.
-
-Exploratory
-- Rule “recipes” you can import/export.
-- Plugin hooks for power users (import transformers, custom exports).
-
-
 ## Closing thoughts
 LedgerGlass is my answer to a simple question: can personal finance software be beautiful, fast, and private by default? Building it with the latest Apple stack has been both a joy and a learning lab — and yes, jumping from APIs/web to macOS was confusing at first, in the same way switching sports feels clumsy for a week and then suddenly clicks. If you have ideas, requests, or tough CSVs (or statements), I’d love to hear from you — open an issue, share a screenshot, or suggest a rule set.
 
-Most of all, I hope LedgerGlass helps you see your money more clearly — without giving it away.
+Most of all, I hope LedgerGlass helps you see your money more clearly, without giving it away.

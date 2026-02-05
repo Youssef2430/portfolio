@@ -69,7 +69,7 @@ export const projects: ProjectDetail[] = [
   },
   {
     id: "ledgerglass",
-    title: "LedgerGlass — Privacy-First macOS Finance App",
+    title: "LedgerGlass, Privacy-First macOS Finance App",
     category: "Personal Project",
     description: [
       "Built a Mac-native, privacy-first personal finance app with SwiftUI and SwiftData; imports bank CSVs and keeps all data fully on-device.",
