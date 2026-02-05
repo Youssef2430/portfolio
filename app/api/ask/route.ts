@@ -1,199 +1,440 @@
-// src/app/api/ask/route.ts
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
-import { createClient } from "@supabase/supabase-js";
+import { SeverityNumber } from "@opentelemetry/api-logs";
+import { loggerProvider } from "@/instrumentation";
+
+// --- PostHog Logger ---
+const logger = loggerProvider.getLogger("ai-chat-api");
 
 // --- Configuration ---
-const USE_RAG = false;
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; // Use Service Role Key for server-side RPC
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 
-const EMBEDDING_MODEL = "text-embedding-3-small"; // Needed for query embedding
-const EMBEDDING_DIMENSIONS = 1536; // Needed for query embedding
-const COMPLETION_MODEL = "gpt-4.1-nano";
-const TOP_K_CONTEXT = 3;
-const SIMILARITY_THRESHOLD = 0.5; // Minimum similarity score for matches
-const SUPABASE_MATCH_FUNCTION = "match_documents"; // Must match your SQL function name
+// Default model - can be easily switched for cost/speed tradeoffs
+// Options: google/gemini-2.0-flash-001, anthropic/claude-3.5-haiku, meta-llama/llama-3.3-70b-instruct, etc.
+const DEFAULT_MODEL = "google/gemini-3-flash-preview";
 
 // --- Validate Environment Variables ---
-if (!OPENAI_API_KEY) {
-  throw new Error("Missing environment variable OPENAI_API_KEY");
-}
-if (!SUPABASE_URL) {
-  throw new Error("Missing environment variable NEXT_PUBLIC_SUPABASE_URL");
-}
-if (!SUPABASE_SERVICE_KEY) {
-  throw new Error("Missing environment variable SUPABASE_SERVICE_ROLE_KEY");
+if (!OPENROUTER_API_KEY) {
+  console.warn("Missing OPENROUTER_API_KEY - API will fail");
 }
 
-// --- Initialize Clients ---
-const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
-// Create a single Supabase client instance for server-side operations
-const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-
-// --- Define Chat Message Structure ---
+// --- Define Types ---
 interface ChatMessage {
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system";
   content: string;
 }
 
-// --- Helper Functions ---
-
-// Function to get embedding for the *user query*
-async function getQueryEmbedding(text: string): Promise<number[]> {
-  try {
-    const response = await openai.embeddings.create({
-      model: EMBEDDING_MODEL,
-      input: text.replace(/\n/g, " "),
-      dimensions: EMBEDDING_DIMENSIONS,
-    });
-    return response.data[0].embedding;
-  } catch (error) {
-    console.error("Error getting query embedding:", error);
-    throw new Error("Failed to get query embedding from OpenAI.");
-  }
+interface OpenRouterUsage {
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_tokens: number;
 }
 
-// --- Function to find relevant context using Supabase RPC ---
-async function findRelevantContext(
-  query: string,
-  topK: number,
-  similarityThreshold: number,
-): Promise<string[]> {
-  try {
-    console.log("Finding context for query:", query);
-    const queryEmbedding = await getQueryEmbedding(query);
-    // console.log("Query Embedding (first 5 dims):", queryEmbedding.slice(0, 5)); // Optional: Log embedding snippet
-
-    // console.log(
-    //   "Query Embedding Vector (for SQL testing):",
-    //   JSON.stringify(queryEmbedding), // Stringify makes it easy to copy
-    // );
-
-    console.log("Calling Supabase RPC match_documents...");
-    const { data, error } = await supabaseAdmin.rpc(SUPABASE_MATCH_FUNCTION, {
-      query_embedding: queryEmbedding,
-      match_threshold: similarityThreshold,
-      match_count: topK,
-    });
-
-    if (error) {
-      console.error("Supabase RPC Error:", error); // Log the specific error
-      throw new Error("Failed to retrieve relevant context from Supabase.");
-    }
-
-    // Log the raw data received from Supabase
-    console.log("Supabase RPC Data:", data);
-
-    if (!data || data.length === 0) {
-      console.log("No relevant documents found in Supabase.");
-      return [];
-    }
-
-    const contexts = data.map((item: any) => item.content);
-    // console.log("Extracted Contexts:", contexts); // Log the final text contexts
-    return contexts;
-  } catch (error) {
-    console.error("Error in findRelevantContext:", error);
-    return [];
-  }
+interface OpenRouterResponse {
+  id: string;
+  model: string;
+  choices: {
+    message: {
+      role: string;
+      content: string;
+    };
+    finish_reason: string;
+  }[];
+  usage?: OpenRouterUsage;
 }
+
+// Metrics tracking interface
+export interface QueryMetrics {
+  id: string;
+  timestamp: string;
+  model: string;
+  question: string;
+  answer: string;
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+  queryResponseTimeMs: number;
+  timeToFirstTokenMs: number | null;
+  estimatedCost: number | null;
+  generationId: string | null;
+}
+
+// Model pricing (per 1M tokens) - update as needed
+const MODEL_PRICING: Record<string, { input: number; output: number }> = {
+  "google/gemini-3-flash-preview": { input: 0.15, output: 0.6 },
+  "google/gemini-2.0-flash-lite-preview-02-05:free": { input: 0, output: 0 },
+  "google/gemini-2.0-flash-001": { input: 0.1, output: 0.4 },
+  "anthropic/claude-3.5-haiku": { input: 0.8, output: 4 },
+  "anthropic/claude-3.5-sonnet": { input: 3, output: 15 },
+  "meta-llama/llama-3.3-70b-instruct": { input: 0.3, output: 0.3 },
+  "openai/gpt-4o-mini": { input: 0.15, output: 0.6 },
+  "openai/gpt-4o": { input: 2.5, output: 10 },
+};
+
+function calculateCost(
+  model: string,
+  promptTokens: number,
+  completionTokens: number
+): number | null {
+  const pricing = MODEL_PRICING[model];
+  if (!pricing) return null;
+
+  const inputCost = (promptTokens / 1_000_000) * pricing.input;
+  const outputCost = (completionTokens / 1_000_000) * pricing.output;
+  return inputCost + outputCost;
+}
+
+// System prompt with Youssef's context
+const SYSTEM_PROMPT = `You are an AI assistant answering questions about Youssef based *primarily* on the provided context and the ongoing conversation. If the context doesn't contain the answer, state that you don't have that information based on the provided details. Refer to previous messages if relevant.
+
+IMPORTANT: Keep responses SHORT and COMPACT. Use 2-3 sentences max for simple questions. Avoid bullet points and long lists unless specifically asked. Be direct and to the point.
+Context about Youssef:
+--- START CONTEXT ---
+Youssef Chouay is a software engineer and AI researcher pursuing a Master's in Computer Science at the University of Ottawa (Jan 2025–Dec 2026) under Prof. Vida Dujmović; he has received over $52,000 in research scholarships.
+He completed a BASc in Software Engineering (Sept 2020–Dec 2024) with coursework in DS&A, Embedded Systems, Databases, Discrete Math, Real-Time Systems Design, and Enterprise Architecture.
+Since May 2024, he's an AI Researcher at Canada's National Research Council. He was first author on a peer-reviewed IEEE EPEC 2025 paper presenting live-building results for an AI agent layer for BAS; he built Python/LangChain agents that cut data-processing time and operator workload by 49%, a SQLite-backed ingestion pipeline for real-time BAS streams, and—through partnerships with Delta Controls and Carleton University—achieved a 56% maintenance-cost reduction via automated fault detection, predictive maintenance, and real-time alerts. He also built an enhanced, multi-agent utilities chatbot that explains bills, simulates alternative rate plans, and diagnoses anomalies by linking AMI data with weather/holidays/tariffs. The system includes a retrieval-augmented policy/tariff QA layer with deterministic function calling and inline citations, plus a time-series engine (seasonal decomposition + change-point detection) that flags spikes, persistent baseload, and overnight leaks and generates plain-English "why it happened" narratives and savings playbooks.
+Previously at Wind River Systems (Sept 2022–Aug 2023), he delivered an Angular/TypeScript/Django Automation Dashboard with PostgreSQL used by programs at NASA, Airbus, and Ford, and improved query/UI performance by over 90% through API and DB optimizations.
+As a University of Ottawa Software Developer (May 2022–Apr 2024), he redesigned the university search engine (PHP/MySQL/Apache), improving response times by 80% and saving $30,000+ annually; he also shipped PHP/Bash/Cron automations that further boosted search speed by 54% and streamlined data migration.
+Teaching Assistant (Sept 2023–present): supports graduate ML for Bio-informatics and undergraduate courses including Data Structures & Algorithms, Design & Analysis of Algorithms, Programming Paradigms, and Discrete Structures.
+Selected projects:
+• NLP Phishing Detection (Bell Canada Research): CNN-based website classifier (98.4% accuracy), Chrome extension integration, and an AWS S3-driven retraining pipeline.
+• GeeGees Intramural Sports Hub: Next.js/TypeScript/Tailwind app with a Rust + Actix-web API (SQLx/PostgreSQL) streaming real-time standings, Elo ratings, and predictive analytics with sub-20 ms latency; built with async/await and strict type safety for scalable concurrency.
+• Distributed File Storage System (Go): Engineered a fault-tolerant, gRPC/Protocol Buffers-backed storage network using consistent hashing and replication, reducing transfer latency by 35 %.
+
+Skills: Python, Java, Go, Rust, C/C++, JavaScript/TypeScript, HTML/CSS, SQL, LaTeX; plus AWS CDK, React, Node.js, TensorFlow, Docker, Kubernetes, Firebase, Jira, Git, Mockito, Flask.
+--- END CONTEXT ---
+--- START META ADDENDUM ---
+Funding: $52,000+ in research scholarships. Publications: First-author, peer-reviewed IEEE EPEC 2025 paper (live-building BAS results).
+Impact (by the numbers):
+    49% cut in data-processing time & operator workload (BAS agents).
+    56% reduction in maintenance costs (predictive maintenance + alerts).
+    90% faster queries/UI (Automation Dashboard).
+    80% faster university search + $30k/yr savings.
+    98.4% phishing-classifier accuracy.
+    Sub-20 ms real-time API latency (Rust + Actix).
+Experience snapshot: Research & industry roles since 2022 (NRC, Wind River, uOttawa; TA since 2023).
+Market value: $120k+.
+--- END META ADDENDUM ---`;
 
 // --- API Route Handler ---
 export async function POST(req: Request) {
+  const requestStartTime = Date.now();
+  const requestId = `req-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+
   try {
-    // --- Get message and optional history ---
-    const { message, history } = (await req.json()) as {
+    if (!OPENROUTER_API_KEY) {
+      return NextResponse.json(
+        { error: "OpenRouter API key not configured" },
+        { status: 500 }
+      );
+    }
+
+    // --- Get message, history, and optional model override ---
+    const { message, history, model: requestedModel } = (await req.json()) as {
       message: string;
       history?: ChatMessage[];
+      model?: string;
     };
 
     if (!message || typeof message !== "string") {
       return NextResponse.json(
         { error: "Invalid message format" },
-        { status: 400 },
+        { status: 400 }
       );
     }
+
     const conversationHistory: ChatMessage[] = Array.isArray(history)
       ? history
       : [];
 
-    // --- RAG Step 1: Retrieve relevant context from Supabase ---
-    // Database is assumed to be populated by the separate script
-    const relevantContexts = await findRelevantContext(
-      message,
-      TOP_K_CONTEXT,
-      SIMILARITY_THRESHOLD,
-    );
-    const contextString =
-      relevantContexts.length > 0
-        ? relevantContexts.join("\n\n")
-        : "No specific context found matching the query.";
-
-    let systemPrompt = "";
-    if (USE_RAG) {
-      systemPrompt = `You are an AI assistant answering questions about Youssef based *primarily* on the provided context and the ongoing conversation. If the context doesn't contain the answer, state that you don't have that information based on the provided details. Refer to previous messages if relevant. Keep responses concise and professional.
-              Context about Youssef:
-              --- START CONTEXT ---
-              ${contextString}
-              --- END CONTEXT ---`;
-    } else {
-      systemPrompt = `You are an AI assistant answering questions about Youssef based *primarily* on the provided context and the ongoing conversation. If the context doesn't contain the answer, state that you don't have that information based on the provided details. Refer to previous messages if relevant. Keep responses concise and professional.
-              Context about Youssef:
-              --- START CONTEXT ---
-              Youssef Chouay is a software engineer and AI researcher pursuing a Master’s in Computer Science at the University of Ottawa (Jan 2025–Dec 2026) under Prof. Vida Dujmović; he has received over $52,000 in research scholarships.
-              He completed a BASc in Software Engineering (Sept 2020–Dec 2024) with coursework in DS&A, Embedded Systems, Databases, Discrete Math, Real-Time Systems Design, and Enterprise Architecture.
-              Since May 2024, he’s an AI Researcher at Canada’s National Research Council. He was first author on a peer-reviewed IEEE EPEC 2025 paper presenting live-building results for an AI agent layer for BAS; he built Python/LangChain agents that cut data-processing time and operator workload by 49%, a SQLite-backed ingestion pipeline for real-time BAS streams, and—through partnerships with Delta Controls and Carleton University—achieved a 56% maintenance-cost reduction via automated fault detection, predictive maintenance, and real-time alerts. He also built an enhanced, multi-agent utilities chatbot that explains bills, simulates alternative rate plans, and diagnoses anomalies by linking AMI data with weather/holidays/tariffs. The system includes a retrieval-augmented policy/tariff QA layer with deterministic function calling and inline citations, plus a time-series engine (seasonal decomposition + change-point detection) that flags spikes, persistent baseload, and overnight leaks and generates plain-English “why it happened” narratives and savings playbooks.
-              Previously at Wind River Systems (Sept 2022–Aug 2023), he delivered an Angular/TypeScript/Django Automation Dashboard with PostgreSQL used by programs at NASA, Airbus, and Ford, and improved query/UI performance by over 90% through API and DB optimizations.
-              As a University of Ottawa Software Developer (May 2022–Apr 2024), he redesigned the university search engine (PHP/MySQL/Apache), improving response times by 80% and saving $30,000+ annually; he also shipped PHP/Bash/Cron automations that further boosted search speed by 54% and streamlined data migration.
-              Teaching Assistant (Sept 2023–present): supports graduate ML for Bio-informatics and undergraduate courses including Data Structures & Algorithms, Design & Analysis of Algorithms, Programming Paradigms, and Discrete Structures.
-              Selected projects:
-              • NLP Phishing Detection (Bell Canada Research): CNN-based website classifier (98.4% accuracy), Chrome extension integration, and an AWS S3-driven retraining pipeline.
-              • GeeGees Intramural Sports Hub: Next.js/TypeScript/Tailwind app with a Rust + Actix-web API (SQLx/PostgreSQL) streaming real-time standings, Elo ratings, and predictive analytics with sub-20 ms latency; built with async/await and strict type safety for scalable concurrency.
-              • Distributed File Storage System (Go): Engineered a fault-tolerant, gRPC/Protocol Buffers-backed storage network using consistent hashing and replication, reducing transfer latency by 35 %.
-
-              Skills: Python, Java, Go, Rust, C/C++, JavaScript/TypeScript, HTML/CSS, SQL, LaTeX; plus AWS CDK, React, Node.js, TensorFlow, Docker, Kubernetes, Firebase, Jira, Git, Mockito, Flask.
-              --- END CONTEXT ---
-              --- START META ADDENDUM ---
-              Funding: $52,000+ in research scholarships. Publications: First-author, peer-reviewed IEEE EPEC 2025 paper (live-building BAS results).
-              Impact (by the numbers):
-                  49% cut in data-processing time & operator workload (BAS agents).
-                  56% reduction in maintenance costs (predictive maintenance + alerts).
-                  90% faster queries/UI (Automation Dashboard).
-                  80% faster university search + $30k/yr savings.
-                  98.4% phishing-classifier accuracy.
-                  Sub-20 ms real-time API latency (Rust + Actix).
-              Experience snapshot: Research & industry roles since 2022 (NRC, Wind River, uOttawa; TA since 2023).
-              Market value: $120k+.
-              `;
-    }
+    const model = requestedModel || DEFAULT_MODEL;
 
     // --- Construct the full message list for the LLM ---
-    const messagesForAPI: OpenAI.Chat.ChatCompletionMessageParam[] = [
-      { role: "system", content: systemPrompt },
+    const messagesForAPI: ChatMessage[] = [
+      { role: "system", content: SYSTEM_PROMPT },
       ...conversationHistory,
       { role: "user", content: message },
     ];
 
-    // --- RAG Step 3: Call the LLM ---
-    const completion = await openai.chat.completions.create({
-      model: COMPLETION_MODEL,
-      messages: messagesForAPI,
-      max_tokens: 150,
-      temperature: 0.3,
+    // --- Call OpenRouter API ---
+    const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://youssefchouay.com",
+        "X-Title": "Youssef Chouay Portfolio",
+      },
+      body: JSON.stringify({
+        model,
+        messages: messagesForAPI,
+        max_tokens: 200,
+        temperature: 0.3,
+      }),
     });
 
+    const queryResponseTimeMs = Date.now() - requestStartTime;
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("OpenRouter API Error:", errorText);
+      return NextResponse.json(
+        { error: "Failed to get response from AI", details: errorText },
+        { status: response.status }
+      );
+    }
+
+    const data: OpenRouterResponse = await response.json();
+
+    // Extract generation ID from response headers for detailed metrics lookup
+    const generationId = response.headers.get("x-openrouter-generation-id");
+
+    // Extract response content
+    const responseContent = data.choices[0]?.message?.content || "Sorry, I couldn't generate a response.";
+
+    // Build metrics object
+    const metrics: QueryMetrics = {
+      id: data.id || `gen-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      model: data.model || model,
+      question: message,
+      answer: responseContent,
+      promptTokens: data.usage?.prompt_tokens || 0,
+      completionTokens: data.usage?.completion_tokens || 0,
+      totalTokens: data.usage?.total_tokens || 0,
+      queryResponseTimeMs,
+      timeToFirstTokenMs: null, // Only available with streaming
+      estimatedCost: calculateCost(
+        model,
+        data.usage?.prompt_tokens || 0,
+        data.usage?.completion_tokens || 0
+      ),
+      generationId,
+    };
+
+    // Log LLM conversation with full question and answer
+    logger.emit({
+      body: "LLM conversation",
+      severityNumber: SeverityNumber.INFO,
+      attributes: {
+        request_id: requestId,
+        question: message,
+        answer: responseContent,
+        model: metrics.model,
+        prompt_tokens: metrics.promptTokens,
+        completion_tokens: metrics.completionTokens,
+        total_tokens: metrics.totalTokens,
+        response_time_ms: metrics.queryResponseTimeMs,
+        estimated_cost_usd: metrics.estimatedCost,
+        generation_id: metrics.generationId,
+        conversation_length: conversationHistory.length,
+      },
+    });
+
+    // Ensure logs flush before response
+    await loggerProvider.forceFlush();
+
     return NextResponse.json({
-      response: completion.choices[0].message.content,
+      response: responseContent,
+      metrics: {
+        model: metrics.model,
+        promptTokens: metrics.promptTokens,
+        completionTokens: metrics.completionTokens,
+        totalTokens: metrics.totalTokens,
+        responseTimeMs: metrics.queryResponseTimeMs,
+        estimatedCost: metrics.estimatedCost,
+      },
     });
   } catch (error: unknown) {
-    console.error("API Route Error:", error);
     const errorMessage =
       error instanceof Error ? error.message : "An unknown error occurred";
+
+    // Log error
+    logger.emit({
+      body: "AI chat error",
+      severityNumber: SeverityNumber.ERROR,
+      attributes: {
+        request_id: requestId,
+        error_type: error instanceof Error ? error.name : "Unknown",
+        error_message: errorMessage,
+      },
+    });
+
+    await loggerProvider.forceFlush();
+
+    console.error("API Route Error:", error);
     return NextResponse.json(
       { error: "Internal server error", details: errorMessage },
-      { status: 500 },
+      { status: 500 }
     );
+  }
+}
+
+// --- Streaming endpoint for real-time responses ---
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const message = url.searchParams.get("message");
+  const historyParam = url.searchParams.get("history");
+  const requestedModel = url.searchParams.get("model");
+
+  const requestStartTime = Date.now();
+  let timeToFirstToken: number | null = null;
+  const requestId = `stream-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+
+  if (!OPENROUTER_API_KEY) {
+    return new Response("OpenRouter API key not configured", { status: 500 });
+  }
+
+  if (!message) {
+    return new Response("Message is required", { status: 400 });
+  }
+
+  let conversationHistory: ChatMessage[] = [];
+  if (historyParam) {
+    try {
+      conversationHistory = JSON.parse(historyParam);
+    } catch {
+      // Ignore parse errors, use empty history
+    }
+  }
+
+  const model = requestedModel || DEFAULT_MODEL;
+
+  const messagesForAPI: ChatMessage[] = [
+    { role: "system", content: SYSTEM_PROMPT },
+    ...conversationHistory,
+    { role: "user", content: message },
+  ];
+
+  try {
+    const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://youssefchouay.com",
+        "X-Title": "Youssef Chouay Portfolio",
+      },
+      body: JSON.stringify({
+        model,
+        messages: messagesForAPI,
+        max_tokens: 200,
+        temperature: 0.3,
+        stream: true,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      return new Response(errorText, { status: response.status });
+    }
+
+    const generationId = response.headers.get("x-openrouter-generation-id");
+
+    // Create a TransformStream to process SSE and track metrics
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+
+    let fullResponse = "";
+    let promptTokens = 0;
+    let completionTokens = 0;
+
+    const transformStream = new TransformStream({
+      async transform(chunk, controller) {
+        const text = decoder.decode(chunk);
+        const lines = text.split("\n");
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const data = line.slice(6);
+
+            if (data === "[DONE]") {
+              // Send final metrics
+              const queryResponseTimeMs = Date.now() - requestStartTime;
+              const metrics = {
+                type: "metrics",
+                model,
+                promptTokens,
+                completionTokens,
+                totalTokens: promptTokens + completionTokens,
+                responseTimeMs: queryResponseTimeMs,
+                timeToFirstTokenMs: timeToFirstToken,
+                estimatedCost: calculateCost(model, promptTokens, completionTokens),
+                generationId,
+              };
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(metrics)}\n\n`));
+              controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+              continue;
+            }
+
+            try {
+              const parsed = JSON.parse(data);
+
+              // Track time to first token
+              if (timeToFirstToken === null && parsed.choices?.[0]?.delta?.content) {
+                timeToFirstToken = Date.now() - requestStartTime;
+              }
+
+              // Accumulate response
+              if (parsed.choices?.[0]?.delta?.content) {
+                fullResponse += parsed.choices[0].delta.content;
+              }
+
+              // Extract usage if available (usually in final chunk)
+              if (parsed.usage) {
+                promptTokens = parsed.usage.prompt_tokens || promptTokens;
+                completionTokens = parsed.usage.completion_tokens || completionTokens;
+              }
+
+              // Forward the chunk
+              controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+            } catch {
+              // Forward unparseable lines as-is
+              controller.enqueue(encoder.encode(`${line}\n`));
+            }
+          }
+        }
+      },
+    });
+
+    const reader = response.body?.getReader();
+    if (!reader) {
+      return new Response("No response body", { status: 500 });
+    }
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        const writer = transformStream.writable.getWriter();
+
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+              await writer.close();
+              break;
+            }
+            await writer.write(value);
+          }
+        } catch (error) {
+          console.error("Stream error:", error);
+          controller.error(error);
+        }
+      },
+    });
+
+    // Pipe through transform and return
+    const transformedStream = stream.pipeThrough(transformStream);
+
+    return new Response(transformedStream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "X-Generation-Id": generationId || "",
+      },
+    });
+  } catch (error) {
+    console.error("Streaming error:", error);
+    return new Response("Internal server error", { status: 500 });
   }
 }

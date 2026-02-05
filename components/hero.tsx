@@ -1,102 +1,185 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { ArrowDownIcon } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { GlitchText } from "./glitch-text";
 
 export function Hero() {
-  const [scrolled, setScrolled] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
 
-  // Parallax effect using Framer Motion
   const { scrollY } = useScroll();
-  const backgroundY = useTransform(scrollY, [0, 500], [0, 150]);
-  const textY = useTransform(scrollY, [0, 500], [0, -50]);
-  const opacityText = useTransform(scrollY, [0, 300], [1, 0.3]);
+  const backgroundScale = useTransform(scrollY, [0, 500], [1.1, 1]);
+  const textY = useTransform(scrollY, [0, 500], [0, 100]);
+  const opacity = useTransform(scrollY, [0, 400], [1, 0]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    setMounted(true);
   }, []);
+
+  // Staggered letter animation
+  const letterVariants = {
+    hidden: { opacity: 0, y: 150 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: 0.5 + i * 0.1,
+        duration: 1.2,
+        ease: [0.55, 0.45, 0.16, 1],
+      },
+    }),
+  };
+
+  const arabicVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        delay: 1.2,
+        duration: 1,
+        ease: [0.55, 0.45, 0.16, 1],
+      },
+    },
+  };
+
+  const subtitleVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: 1.8,
+        duration: 0.8,
+        ease: [0.55, 0.45, 0.16, 1],
+      },
+    },
+  };
+
+  const scrollIndicatorVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        delay: 2.5,
+        duration: 1,
+      },
+    },
+  };
+
+  const initials = ["Y", "C", "A", "Y"];
 
   return (
     <section
       ref={containerRef}
-      className="relative h-screen flex flex-col justify-center items-center pt-16 overflow-hidden"
+      className="relative h-screen flex items-center justify-center overflow-hidden"
     >
+      {/* Background with parallax */}
       <motion.div
-        className="absolute inset-0 overflow-hidden"
-        style={{ y: backgroundY }}
+        className="absolute inset-0 z-0"
+        style={{ scale: backgroundScale }}
       >
-        <div className="absolute inset-0"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black" />
+        {/* Subtle vignette */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,black_70%)]" />
       </motion.div>
 
+      {/* Main content */}
       <motion.div
-        className="relative z-10 text-center space-y-6 max-w-3xl mx-auto px-4"
-        style={{ y: textY, opacity: opacityText }}
+        className="relative z-10 w-full px-8 md:px-16"
+        style={{ y: textY, opacity }}
       >
-        <motion.h1
-          className="text-5xl sm:text-6xl md:text-7xl font-light tracking-tighter"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <GlitchText
-            japanese="好奇心"
-            english="Curiosity"
-            className="mt-2"
-            index={0}
-          />
-          <GlitchText
-            japanese="創造性"
-            english="Creativity"
-            className="mt-2"
-            index={1}
-          />
-          <GlitchText
-            japanese="調和"
-            english="Harmony"
-            className="mt-2"
-            index={2}
-          />
-        </motion.h1>
+        {/* Giant initials with Arabic in center */}
+        <div className="flex items-center justify-center">
+          {/* Left letters - Y C */}
+          <div className="flex items-baseline">
+            {initials.slice(0, 2).map((letter, i) => (
+              <motion.span
+                key={i}
+                custom={i}
+                variants={letterVariants}
+                initial="hidden"
+                animate={mounted ? "visible" : "hidden"}
+                className="text-massive text-white font-light select-none"
+              >
+                {letter}
+              </motion.span>
+            ))}
+          </div>
 
-        <motion.p
-          className="text-lg md:text-xl text-gray-600 dark:text-gray-300 font-light max-w-xl mx-auto"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
+          {/* Arabic name in center */}
+          <motion.div
+            variants={arabicVariants}
+            initial="hidden"
+            animate={mounted ? "visible" : "hidden"}
+            className="flex flex-col items-center mx-4 md:mx-8"
+          >
+            <span className="arabic-bracket text-2xl md:text-4xl mb-2">「</span>
+            <span className="font-arabic text-3xl md:text-5xl lg:text-6xl text-[hsl(42,45%,75%)] leading-tight">
+              يوسف
+            </span>
+            <span className="font-arabic text-3xl md:text-5xl lg:text-6xl text-[hsl(42,45%,75%)] leading-tight">
+              شواي
+            </span>
+            <span className="arabic-bracket text-2xl md:text-4xl mt-2">」</span>
+          </motion.div>
+
+          {/* Right letters - A Y */}
+          <div className="flex items-baseline">
+            {initials.slice(2).map((letter, i) => (
+              <motion.span
+                key={i + 2}
+                custom={i + 2}
+                variants={letterVariants}
+                initial="hidden"
+                animate={mounted ? "visible" : "hidden"}
+                className="text-massive text-white font-light select-none"
+              >
+                {letter}
+              </motion.span>
+            ))}
+          </div>
+        </div>
+
+        {/* Subtitle */}
+        <motion.div
+          variants={subtitleVariants}
+          initial="hidden"
+          animate={mounted ? "visible" : "hidden"}
+          className="text-center mt-12 md:mt-16"
         >
-          Crafting elegant solutions through code, where engineering meets
-          artistry.
-        </motion.p>
+          <p className="font-mono text-xs md:text-sm tracking-[0.3em] text-[hsl(0,0%,65%)] uppercase">
+            YOUSSEF [CHOUAY] ↓
+          </p>
+          <p className="mt-4 text-sm md:text-base text-[hsl(0,0%,65%)] font-light max-w-md mx-auto">
+            software engineer, AI researcher and graph theory enthusiast
+          </p>
+        </motion.div>
       </motion.div>
 
+      {/* Scroll indicator */}
       <motion.div
-        className={`absolute bottom-8 left-1/2 transform -translate-x-1/2 transition-opacity duration-500 ${
-          scrolled ? "opacity-0" : "opacity-100"
-        }`}
+        variants={scrollIndicatorVariants}
+        initial="hidden"
+        animate={mounted ? "visible" : "hidden"}
+        className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center"
+      >
+        <span className="font-mono text-[10px] tracking-[0.2em] text-[hsl(0,0%,45%)] uppercase mb-4">
+          Scroll
+        </span>
+        <div className="w-px h-12 bg-gradient-to-b from-[hsl(0,0%,45%)] to-transparent scroll-indicator" />
+      </motion.div>
+
+      {/* Year indicator - right side */}
+      <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: scrolled ? 0 : 1 }}
-        transition={{ duration: 0.5, delay: 1 }}
+        animate={{ opacity: mounted ? 1 : 0 }}
+        transition={{ delay: 2, duration: 1 }}
+        className="absolute right-8 top-1/2 -translate-y-1/2 hidden lg:block"
       >
-        <a
-          href="#education"
-          className="flex flex-col items-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
-          onClick={(e) => {
-            e.preventDefault();
-            document
-              .getElementById("education")
-              ?.scrollIntoView({ behavior: "smooth" });
-          }}
-        >
-          <span className="mb-2">Explore</span>
-          <ArrowDownIcon className="h-4 w-4 animate-bounce" />
-        </a>
+        <span className="font-mono text-[10px] tracking-[0.2em] text-[hsl(0,0%,35%)] writing-mode-vertical">
+          2025
+        </span>
       </motion.div>
     </section>
   );
