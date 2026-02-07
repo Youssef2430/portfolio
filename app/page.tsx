@@ -9,6 +9,7 @@ import { Education } from "@/components/education";
 import { Experience } from "@/components/experience";
 import { Projects } from "@/components/projects";
 import { BlogSection } from "@/components/blog-section";
+import { CurrentListen } from "@/components/current-listen";
 import { Footer } from "@/components/footer";
 import { AskInput } from "@/components/ask-input";
 
@@ -97,6 +98,8 @@ export default function Home() {
         <Projects />
 
         <BlogSection />
+
+        <CurrentListen />
 
         <Footer />
 
