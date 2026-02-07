@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { Play, Pause } from "lucide-react";
@@ -14,6 +14,8 @@ export function CurrentListen() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
 
   // Deezer track ID for "SURVIVAL" by Riles (from The 25th Hour)
   const deezerTrackId = "3579494031";
@@ -39,16 +41,14 @@ export function CurrentListen() {
 
     if (isPlaying) {
       audioRef.current.pause();
-      setIsPlaying(false);
     } else {
       setIsLoading(true);
       try {
         await audioRef.current.play();
-        setIsPlaying(true);
       } catch (error) {
         console.error("Playback failed:", error);
+        setIsLoading(false);
       }
-      setIsLoading(false);
     }
   };
 
@@ -59,6 +59,22 @@ export function CurrentListen() {
 
     const handleEnded = () => {
       setIsPlaying(false);
+      setProgress(0);
+    };
+
+    const handleLoadedMetadata = () => {
+      setDuration(audio.duration);
+    };
+
+    const handleTimeUpdate = () => {
+      if (audio.duration) {
+        setProgress((audio.currentTime / audio.duration) * 100);
+      }
+    };
+
+    const handlePlay = () => {
+      setIsPlaying(true);
+      setIsLoading(false);
     };
 
     const handlePause = () => {
@@ -66,13 +82,19 @@ export function CurrentListen() {
     };
 
     audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("play", handlePlay);
     audio.addEventListener("pause", handlePause);
 
     return () => {
       audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("play", handlePlay);
       audio.removeEventListener("pause", handlePause);
     };
-  }, []);
+  }, [previewUrl]);
 
   // Reset expanded state when clicking outside (only if not playing)
   useEffect(() => {
@@ -94,17 +116,56 @@ export function CurrentListen() {
     return "10%";
   };
 
+  // Calculate SVG circle properties for progress ring
+  const size = 56; // matches w-14 h-14
+  const strokeWidth = 3;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (progress / 100) * circumference;
+
   return (
     <section
       ref={sectionRef}
-      className="relative py-24 md:py-32 overflow-hidden bg-black"
+      className="relative py-24 md:py-32 overflow-hidden"
     >
+      {/* Static noise background with vertical fade */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          maskImage: `linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)`,
+          WebkitMaskImage: `linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)`,
+          opacity: 0.08,
+        }}
+      />
+
       {/* Audio element */}
       {previewUrl && (
         <audio ref={audioRef} src={previewUrl} preload="metadata" />
       )}
 
       <div className="container mx-auto px-6 md:px-12">
+        {/* Section divider with Arabic text */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+          transition={{ duration: 0.8 }}
+          className="flex items-center justify-center gap-4 mb-16 md:mb-24"
+        >
+          {/* Left line */}
+          <div className="flex-1 h-px bg-white/20" />
+
+          {/* Arabic text in brackets */}
+          <div className="flex flex-col items-center px-4">
+            <span className="text-white/40 text-sm mb-1">「</span>
+            <span className="font-arabic text-white/60 text-xl md:text-2xl leading-relaxed">موسيقى</span>
+            <span className="text-white/40 text-sm mt-1">」</span>
+          </div>
+
+          {/* Right line */}
+          <div className="flex-1 h-px bg-white/20" />
+        </motion.div>
+
         <div className="flex flex-col items-center justify-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -174,29 +235,63 @@ export function CurrentListen() {
                   <div className="absolute inset-[30%] rounded-full bg-[hsl(0,0%,25%)]">
                     {/* Center label */}
                     <div className="absolute inset-[25%] rounded-full bg-[hsl(0,0%,35%)] flex items-center justify-center">
-                      {/* Play/Pause button */}
+                      {/* Play/Pause button with progress ring */}
                       <AnimatePresence>
                         {isExpanded && (
-                          <motion.button
+                          <motion.div
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.8 }}
                             transition={{ duration: 0.2 }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handlePlayClick();
-                            }}
-                            disabled={!previewUrl || isLoading}
-                            className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="relative"
                           >
-                            {isLoading ? (
-                              <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                            ) : isPlaying ? (
-                              <Pause className="w-5 h-5 md:w-6 md:h-6 text-black" />
-                            ) : (
-                              <Play className="w-5 h-5 md:w-6 md:h-6 text-black ml-1" />
-                            )}
-                          </motion.button>
+                            {/* Progress ring */}
+                            <svg
+                              className="absolute -inset-1 w-[calc(100%+8px)] h-[calc(100%+8px)] -rotate-90"
+                              viewBox={`0 0 ${size} ${size}`}
+                            >
+                              {/* Background circle */}
+                              <circle
+                                cx={size / 2}
+                                cy={size / 2}
+                                r={radius}
+                                fill="none"
+                                stroke="rgba(255,255,255,0.2)"
+                                strokeWidth={strokeWidth}
+                              />
+                              {/* Progress circle */}
+                              <circle
+                                cx={size / 2}
+                                cy={size / 2}
+                                r={radius}
+                                fill="none"
+                                stroke="white"
+                                strokeWidth={strokeWidth}
+                                strokeLinecap="round"
+                                strokeDasharray={circumference}
+                                strokeDashoffset={strokeDashoffset}
+                                className="transition-[stroke-dashoffset] duration-200 ease-linear"
+                              />
+                            </svg>
+
+                            {/* Button */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handlePlayClick();
+                              }}
+                              disabled={!previewUrl || isLoading}
+                              className="relative w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {isLoading ? (
+                                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                              ) : isPlaying ? (
+                                <Pause className="w-5 h-5 md:w-6 md:h-6 text-black" />
+                              ) : (
+                                <Play className="w-5 h-5 md:w-6 md:h-6 text-black ml-1" />
+                              )}
+                            </button>
+                          </motion.div>
                         )}
                       </AnimatePresence>
                     </div>
