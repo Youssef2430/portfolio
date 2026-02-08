@@ -238,6 +238,14 @@ export function Projects() {
       id="work"
       className="relative py-16 md:py-24 bg-black noise-bg overflow-hidden"
     >
+      {/* Top fade overlay */}
+      <div
+        className="absolute top-0 left-0 right-0 h-32 pointer-events-none z-[2]"
+        style={{
+          background: `linear-gradient(to top, transparent 0%, black 100%)`,
+        }}
+      />
+
       {/* Static noise with fade */}
       <div
         className="absolute inset-0 pointer-events-none z-[1]"
@@ -246,6 +254,14 @@ export function Projects() {
           maskImage: `linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)`,
           WebkitMaskImage: `linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)`,
           opacity: 0.06,
+        }}
+      />
+
+      {/* Bottom fade overlay */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none z-[2]"
+        style={{
+          background: `linear-gradient(to bottom, transparent 0%, black 100%)`,
         }}
       />
 

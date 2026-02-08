@@ -37,6 +37,14 @@ export function About() {
         }}
       />
 
+      {/* Bottom fade overlay */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none z-[2]"
+        style={{
+          background: `linear-gradient(to bottom, transparent 0%, black 100%)`,
+        }}
+      />
+
       <div className="relative z-10 container mx-auto px-6 md:px-12">
         {/* Main intro - Mason Wong style */}
         <div ref={titleRef} className="max-w-6xl mx-auto">
