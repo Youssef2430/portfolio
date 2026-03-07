@@ -43,20 +43,6 @@ const blogPostsData: BlogPost[] = [
     blurBehindText: true,
   },
   {
-    slug: "building-ledgerglass-privacy-first-macos-finance-app",
-    title:
-      "Building LedgerGlass: Why I Built a Privacy-First Finance App for macOS, How It Works, and What’s Next",
-    date: "2025-09-01",
-    excerpt:
-      "From APIs to a Mac-native, privacy-first finance app: importing bank CSVs, on-device ML categorization, a color-coded Subscriptions Calendar, and a roadmap toward bank-statement reconciliation — all offline.",
-    contentFile: "blogs/ledgerUI.md",
-    tags: ["macos", "swiftui", "swiftdata", "privacy", "personal-finance"],
-    coverImage: "/blog/glassUI.png",
-    readingTimeMinutes: 8,
-    published: true,
-    // blurBehindText: true,
-  },
-  {
     slug: "llm-evals-building-a-chess-benchmark",
     title: "LLM Evals: Building a Chess Benchmark",
     date: "2025-07-10",
@@ -66,30 +52,6 @@ const blogPostsData: BlogPost[] = [
     tags: ["ai", "evals", "chess"],
     coverImage: "/blog/chessLLM.gif",
     readingTimeMinutes: 7,
-    published: true,
-  },
-  {
-    slug: "designing-resilient-apis-with-rust-and-actix",
-    title: "GeeGees Sports Platform — One Project, Three Engines",
-    date: "2025-05-04",
-    excerpt:
-      "How I turned intramural chaos into a privacy-first stack—scraper → Rust API → Next.js hub—that makes uOttawa sports feel pro.",
-    contentFile: "blogs/geegeereg.md",
-    tags: ["rust", "react", "sports", "web"],
-    coverImage: "/blog/dropins.png",
-    readingTimeMinutes: 8,
-    published: true,
-  },
-  {
-    slug: "nlp-and-vision-for-phishing-detection",
-    title: "NLP and Vision for Phishing Detection",
-    date: "2024-10-01",
-    excerpt:
-      "Combining text and visual signals to robustly detect phishing attempts in the wild.",
-    contentFile: "blogs/nlp-and-vision-for-phishing-detection.md",
-    tags: ["ml", "nlp", "security"],
-    coverImage: "/blog/wandb.png",
-    readingTimeMinutes: 9,
     published: true,
   },
 ];
