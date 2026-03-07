@@ -1,135 +1,123 @@
-# Building chessLLM: Why I Built an AI Chess Arena for Modern LLMs, How It Works, and What’s Next
+# chessLLM: Pitting LLMs Against Each Other in Chess
 
-Could Claude beat GPT-4 at chess? Does Gemini actually climb an ELO ladder—or just vibe its way through openings? I wanted a real answer, not Reddit lore. So I built **chessLLM**: a clean, terminal-first benchmark that lets modern language models battle each other (and real engines) in a controlled arena with budgets, telemetry, and receipts.
+Can Claude beat GPT-4 at chess? Does Gemini actually play principled openings, or is it just winging it? I got tired of guessing based on scattered Reddit threads, so I built **chessLLM**: a terminal-first arena where language models play real chess against each other and against engines, with move validation, cost tracking, and full game logs.
 
-If you’ve seen my LedgerGlass app, you know how I work: minimal surface area, no mysterious black boxes, and ruthless attention to cost and UX. chessLLM follows the same philosophy—except the “UI” is a beautiful terminal board and a live dashboard that makes evaluation feel like a sport.
-
----
-
-## TL;DR
-
-- **What**: A Python CLI that benchmarks LLMs via head-to-head chess games, with smart opponent selection and strict move validation.
-- **How**: Two modes—**pure prompts** vs **agent reasoning** with a lightweight analysis toolkit and structured workflows.
-- **Why**: I wanted a scientific, repeatable way to compare models; anecdotes weren’t cutting it.
-- **Nice bits**: Real-time board + stats, PGN logging, historical leaderboards, and **built-in cost tracking** (because I hate surprises).
-- **Who**: Runs providers I use daily—OpenAI, Anthropic, Google—plus Stockfish for grounding and sanity checks.
-- **Next**: Opening books, tournament brackets, MCTS-style planning, and multi-agent collaboration.
+If you've seen my LedgerGlass app, the ethos is the same. Keep the surface area small, make everything observable, and never let costs surprise you. The difference here is that the "UI" is a terminal board and a live stats dashboard, and watching games play out feels more like a sport than a benchmark.
 
 ---
 
-## Why I built it (and why this is my kind of project)
+## The short version
 
-I’m a grad student at uOttawa and a part-time software engineer at Canada’s NRC. My weeks are a weird blend of academic rigor, production constraints, and building small tools that actually ship. That lens shaped this project:
-
-- **I needed real evaluation, not vibes.** If I’m going to say “Model A > Model B for structured reasoning,” I want a dataset, not a hunch.
-- **I care about costs.** I track expenses obsessively (LedgerGlass changed how I think about spend), so chessLLM tells me exactly what each game costs—per model, per move, per run.
-- **I love terminal UIs.** A tight CLI with great ergonomics beats a heavy web stack when iteration speed matters.
-- **I’m curious about agents—practically.** Not “agents that can do everything.” Just… do they help on a bounded task like chess selection? Answer: yes, dramatically.
-
----
-
-## What I set out to build (constraints that kept me honest)
-
-- **Terminal-first.** Unicode pieces, smooth live updates, useful keyboard shortcuts. No browser. No CSS tantrums.
-- **Provider-agnostic.** One clean interface for multiple vendors. Swap models without rewriting logic.
-- **Cost-aware.** Live budget limits, spending breakdowns, and “stop before my wallet cries” safeguards.
-- **Engine-grade validation.** All moves are verified; Stockfish can be your sparring partner at calibrated ELOs.
-- **Reproducible.** Everything’s logged as PGN with full config so you can rerun, compare, and publish.
+- **What it is**: A Python CLI for head-to-head LLM chess, with strict move validation and smart opponent matching.
+- **Two modes**: Plain prompting vs. agent-assisted reasoning, where the model gets a lightweight analysis toolkit and a structured decision process.
+- **Why bother**: Anecdotes about which model is "smarter" weren't cutting it. I wanted repeatable data.
+- **The details**: Real-time board rendering, PGN logging, historical leaderboards, and built-in cost tracking. Running models isn't free and I like knowing exactly what I'm spending.
+- **Supported providers**: OpenAI, Anthropic, Google, plus Stockfish as a ground-truth sparring partner.
+- **What's next**: Opening books, tournament brackets, MCTS-style planning, and multi-agent collaboration.
 
 ---
 
-## From web apps to terminal chess (and why it was addictive)
+## Why this project
 
-Most of my recent stuff is web + APIs. Flipping to a terminal app felt like a dopamine cheat code:
+I'm a grad student at uOttawa and a part-time software engineer at Canada's NRC. My day-to-day swings between academic rigor and production constraints, and I tend to gravitate toward small tools that actually ship. A few things made this project feel right:
 
-- **Immediate feedback.** Run → see a board animate → watch two AIs argue over the center.
-- **Focus.** No React state or CSS breakpoints—just logic, data, and performance.
-- **Async that actually sings.** Concurrent calls, UI refreshes, and game state all play nicely with modern Python.
-- **Performance as craft.** Shaving milliseconds off rendering and batching calls feels like tuning a game engine.
+**I wanted real evaluation.** If I'm going to claim "Model A reasons better than Model B," I'd rather have a dataset than a gut feeling. Chess is bounded, well-defined, and hard enough to be interesting.
+
+**I'm cost-conscious by nature.** LedgerGlass changed how I think about spending, and that carried over here. chessLLM tracks what each game costs per model, per move, per run.
+
+**Terminal UIs are underrated.** A tight CLI with good ergonomics beats a heavy web stack when you care about iteration speed.
+
+**I'm practically curious about agents.** Not "agents that can do everything," just whether a thin reasoning layer helps on a bounded task like move selection. Spoiler: it does, and by a lot.
 
 ---
 
-## How chessLLM works
+## Design constraints
 
-### Architecture at a glance
-- **Core models**: `BotSpec`, `GameRecord`, `LadderStats`, `LiveState` keep data types explicit and debuggable.
-- **Engine layer**: Stockfish handles legality + optional opponent play at specific ELOs.
-- **LLM layer**: Unified clients for OpenAI/Anthropic/Google plus a random baseline.
-- **Game manager**: Orchestrates turns, logs PGNs, tracks timing/costs, and updates the live dashboard.
-- **Agent system**: Optional reasoning pass with lightweight evaluation and scored move selection.
+These kept the project from sprawling:
+
+- **Terminal-first.** Unicode pieces, live updates, keyboard shortcuts. No browser required.
+- **Provider-agnostic.** One interface, multiple vendors. Swapping models doesn't mean rewriting anything.
+- **Cost-aware.** Budget limits, spending breakdowns, and automatic stops before things get expensive.
+- **Engine-grade validation.** Every move is verified. Stockfish serves as both opponent and referee.
+- **Reproducible.** Full PGN logs with config metadata, so any game can be rerun or shared.
+
+---
+
+## Why a terminal app was so satisfying
+
+Most of my recent work has been web and APIs. Going back to the terminal felt different in a good way:
+
+- **Immediate feedback.** Run a command, watch a board animate, see two AIs fight over the center.
+- **No distractions.** No React state, no CSS breakpoints. Just logic, data, and performance.
+- **Async done well.** Concurrent API calls, UI refreshes, and game state all cooperate nicely in modern Python.
+- **Performance as craft.** Shaving time off rendering and batching calls scratches the same itch as tuning a game engine.
+
+---
+
+## How it works
+
+### Architecture
+
+- **Core models**: `BotSpec`, `GameRecord`, `LadderStats`, `LiveState`. Explicit types that stay easy to debug.
+- **Engine layer**: Stockfish handles legality checks and optional opponent play at calibrated ELOs.
+- **LLM layer**: Unified clients for OpenAI, Anthropic, and Google, plus a random baseline.
+- **Game manager**: Orchestrates turns, logs PGNs, tracks timing and costs, and drives the live dashboard.
+- **Agent system**: An optional reasoning pass with lightweight evaluation and scored move selection.
 - **Storage**: SQLite-backed history, leaderboards, and spend analytics.
 
-### Two ways to play
+### Two modes of play
 
-**Traditional prompting (default)**
-1. Send FEN → ask for a UCI move in strict format
-2. Parse → validate → apply → repeat
+**Standard prompting (default)**
+Send the position as FEN, ask for a UCI move in a strict format, parse it, validate it, apply it, repeat.
 
-**Agent mode (`--use-agent`)**
-1. Observe the position with quick heuristics (material, structure, king safety, center, activity)
-2. Generate all legal moves and score them
-3. Adjust strategy by phase (opening/middlegame/endgame)
-4. Pick the move with a confidence score and emit a compact reasoning trace
+**Agent mode** (`--use-agent`)
+Before choosing a move, the model runs a quick evaluation: material balance, pawn structure, king safety, center control, piece activity. It scores every legal move, adjusts for game phase, and picks the best one with a confidence score and a reasoning trace.
 
-### The analysis toolkit (simple, on purpose)
+### What the analysis toolkit covers
+
+It's deliberately simple:
+
 - **Position**: center control, piece activity, king safety, pawn structure, development
-- **Material**: standard piece values + imbalance tracking
-- **Move classes**: captures, checks, castling, development, tactical, defensive
-- **Endgames**: king activity, pawn race progress, coordination
-- **Threats**: detect/defend simple tactics without overfitting
+- **Material**: standard piece values and imbalance tracking
+- **Move classification**: captures, checks, castling, development, tactical, defensive
+- **Endgames**: king activity, pawn races, piece coordination
+- **Threats**: detect and defend basic tactics without overcomplicating things
 
-### Real-time terminal UI
+### The terminal UI
+
 - Unicode board with last-move highlights and coordinates
-- Live ELO, win-rate, timers, token/cost meters
-- Opponent picker: random, 600-ELO Stockfish, or full ladder climbing
+- Live ELO, win rate, move timers, and token/cost counters
+- Opponent selection: random, Stockfish at a given ELO, or full ladder climbing
 
-### Performance analytics
-- Historical leaderboards + ELO deltas
-- PGN logs with metadata
-- Timing per move and per provider
-- Cost reports that make budgeting easy to reason about
+### Analytics
 
----
-
-## Patterns that held up
-
-### AsyncIO that stays readable
-- Concurrent provider calls without starving the UI
-- Graceful recovery if a model suggests an illegal move or times out
-
-### Terminal UIs can be beautiful
-- `rich` makes dashboards feel like a real app, not a log dump
-- Frame rates that feel smooth but not noisy
-
-### LLM chess behavior emerges fast
-- Tiny format tweaks can make/break parsing stability
-- Context management matters with long games
-- **Agent > raw prompts** once positions get even slightly tactical
-
-### Engines keep us honest
-- Stockfish is a rock—fast, fair, and great for grounding difficulty
-- ELO calibration gives “levels” that are meaningful, not arbitrary
-
-### Python patterns I reach for
-- Dataclasses for clarity and serialization
-- Type hints across async boundaries
-- Factory methods for model clients and agents
-- Env-driven config + CLI flags for everything that matters
+- Historical leaderboards with ELO deltas
+- PGN logs with full metadata
+- Per-move and per-provider timing
+- Cost reports broken down however you want
 
 ---
 
-## The agent “oh wow” moment
+## What held up well
 
-Side-by-side runs made it obvious:
+**AsyncIO that stays readable.** Concurrent provider calls don't starve the UI, and recovery from illegal moves or timeouts is graceful.
 
-**Prompts only (struggles)**
-- Illegal moves happen more than you’d expect
-- Decisions feel unprincipled in messy middlegames
-- Notation/formatting errors are a tax you keep paying
+**Terminal UIs can look great.** `rich` makes dashboards feel like a real application, not a wall of log lines.
 
-**Agent mode (wins)**
-- Structured scoring leads to saner, repeatable choices
-- Quick threat checks catch blunders before they happen
-- Confidence scores + traces make debugging feel like analysis, not guesswork
+**LLM chess behavior shows up fast.** Small format changes make or break parsing stability. Context management matters in long games. And agent mode consistently outperforms raw prompts once positions get even slightly tactical.
 
-I ship tools for people who care about control and observability; this was the first time I felt that same “observability” applied to a model’s *thinking* in a game loop.
+**Engines keep things honest.** Stockfish is fast, fair, and gives you meaningful difficulty levels instead of arbitrary ones.
+
+**Python patterns I lean on.** Dataclasses for clarity, type hints across async boundaries, factory methods for model clients, and env-driven config with CLI overrides.
+
+---
+
+## The agent difference
+
+Running the two modes side by side made this obvious:
+
+**Prompts only.** Illegal moves happen more than you'd expect, decisions feel unprincipled in messy middlegames, and notation errors are a constant tax.
+
+**Agent mode.** Structured scoring leads to more consistent choices, quick threat checks catch blunders before they happen, and confidence scores with reasoning traces turn debugging into actual analysis instead of guesswork.
+
+I build tools for people who care about control and observability. This was the first time I felt that same idea apply to a model's thinking inside a game loop.

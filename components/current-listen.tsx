@@ -3,12 +3,13 @@
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, useInView, AnimatePresence } from "framer-motion";
-import { Play, Pause } from "lucide-react";
+import { Play, Pause, MapPin } from "lucide-react";
 
 const travelPhotos = [
   {
     src: "/travel/amsterdam.jpg",
     alt: "Amsterdam",
+    location: "Amsterdam, NL",
     rotate: -6,
     x: "2%",
     y: "0%",
@@ -19,6 +20,7 @@ const travelPhotos = [
   {
     src: "/travel/barcelona.jpg",
     alt: "Barcelona",
+    location: "Barcelona, ES",
     rotate: 4,
     x: "42%",
     y: "-3%",
@@ -29,6 +31,7 @@ const travelPhotos = [
   {
     src: "/travel/chelsea-cottage.jpg",
     alt: "Chelsea Cottage",
+    location: "Chelsea, QC",
     rotate: -2,
     x: "22%",
     y: "15%",
@@ -39,6 +42,7 @@ const travelPhotos = [
   {
     src: "/travel/french-rivera.jpg",
     alt: "French Riviera",
+    location: "Côte d'Azur, FR",
     rotate: 5,
     x: "55%",
     y: "18%",
@@ -49,6 +53,7 @@ const travelPhotos = [
   {
     src: "/travel/laarache.jpg",
     alt: "Laarache",
+    location: "Larache, MA",
     rotate: -4,
     x: "0%",
     y: "35%",
@@ -59,6 +64,7 @@ const travelPhotos = [
   {
     src: "/travel/nerja.jpg",
     alt: "Nerja",
+    location: "Nerja, ES",
     rotate: 7,
     x: "38%",
     y: "38%",
@@ -69,6 +75,7 @@ const travelPhotos = [
   {
     src: "/travel/nice.jpg",
     alt: "Nice",
+    location: "Nice, FR",
     rotate: -3,
     x: "12%",
     y: "55%",
@@ -79,6 +86,7 @@ const travelPhotos = [
   {
     src: "/travel/ottawa-sunset.jpg",
     alt: "Ottawa Sunset",
+    location: "Ottawa, CA",
     rotate: 3,
     x: "50%",
     y: "52%",
@@ -89,6 +97,7 @@ const travelPhotos = [
   {
     src: "/travel/victoria-islands.jpg",
     alt: "Victoria Islands",
+    location: "Victoria, CA",
     rotate: -5,
     x: "28%",
     y: "72%",
@@ -379,6 +388,24 @@ export function CurrentListen() {
                         }}
                       />
                     )}
+
+                    {/* Location indicator on hover */}
+                    <AnimatePresence>
+                      {hoveredPhoto === i && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 4 }}
+                          transition={{ duration: 0.2 }}
+                          className="absolute bottom-[3px] md:bottom-[4px] left-0 right-0 flex items-center justify-center gap-[3px] pointer-events-none"
+                        >
+                          <MapPin className="w-[9px] h-[9px] md:w-[10px] md:h-[10px] text-[#8a7a6a]" strokeWidth={2.5} />
+                          <span className="text-[8px] md:text-[9px] font-mono tracking-[0.08em] uppercase text-[#8a7a6a]">
+                            {photo.location}
+                          </span>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </motion.div>
               ))}
