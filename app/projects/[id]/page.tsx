@@ -137,7 +137,8 @@ export default function ProjectPage() {
                   </span>
                   <span className="flex items-center gap-2 text-sm text-white">
                     <Users className="w-4 h-4 text-[hsl(42,45%,75%)]" />
-                    {project.contributors.length} contributor{project.contributors.length > 1 ? "s" : ""}
+                    {project.contributors.length} contributor
+                    {project.contributors.length > 1 ? "s" : ""}
                   </span>
                 </div>
               )}
@@ -220,10 +221,7 @@ export default function ProjectPage() {
                     </h2>
                     <ul className="space-y-3">
                       {project.contributors.map((contributor, idx) => (
-                        <li
-                          key={idx}
-                          className="text-sm text-[hsl(0,0%,70%)]"
-                        >
+                        <li key={idx} className="text-sm text-[hsl(0,0%,70%)]">
                           {contributor}
                         </li>
                       ))}
@@ -245,7 +243,7 @@ export default function ProjectPage() {
                           External Link
                         </span>
                         <span className="text-white group-hover:text-[hsl(42,45%,75%)] transition-colors">
-                          View on GitHub
+                          More details
                         </span>
                       </div>
                       <ArrowUpRight className="w-5 h-5 text-[hsl(0,0%,40%)] group-hover:text-[hsl(42,45%,75%)] transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />

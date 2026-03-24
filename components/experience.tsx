@@ -1,8 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { Briefcase, Calendar, MapPin, ArrowUpRight } from "lucide-react";
+
+type ExperienceProject = {
+  name: string;
+  details: ReactNode[];
+};
 
 type ExperienceItem = {
   role: string;
@@ -10,20 +15,45 @@ type ExperienceItem = {
   companyUrl: string;
   location: string;
   period: string;
-  details: string[];
+  details?: ReactNode[];
+  projects?: ExperienceProject[];
 };
 
 const experiences: ExperienceItem[] = [
+  {
+    role: "Software Engineer Intern",
+    company: "TrendMicro / TrendAI",
+    companyUrl: "https://www.trendmicro.com/",
+    location: "Ottawa, ON",
+    period: "Jan 2026 – Present",
+    details: [
+      "Owned end-to-end delivery of a backend service for the CRQ service to fetch company profiles and stock data via MCP-based integrations, including research, orchestration design, implementation, testing, and production deployment on AWS.",
+      "Led migration of an MLOps codebase to a Lakehouse architecture by rewriting data pipelines in PySpark, helping enable scalable processing and improved maintainability of analytics workflows.",
+    ],
+  },
   {
     role: "Artificial Intelligence Researcher",
     company: "National Research Council",
     companyUrl: "https://nrc.canada.ca/en",
     location: "Ottawa, ON",
     period: "May 2024 – Present",
-    details: [
-      "Designed and deployed systems in Python using LangChain, enabling seamless communication between Building Automation Systems (BAS) and reducing data processing times and workload by 49%.",
-      "Used a SQLite to efficiently process, integrate, and manage real-time data streams from BAS.",
-      "Partnered with Delta Controls and Carleton University to deliver AI-powered building agents, achieving a 56% reduction in maintenance costs.",
+    projects: [
+      {
+        name: "AI-Enhanced Building Automation (BAS) for Modern Facilities",
+        details: [
+          <>Published, as <strong>First-author</strong>, a peer-reviewed paper called &ldquo;<strong>Implementing AI in Smart Buildings: A Modular, Proof-of-Concept approach</strong>&rdquo; and presented to field experts at <a href="https://epec2025.ieee.ca/" target="_blank" rel="noopener noreferrer" className="text-[hsl(42,45%,75%)] hover:text-white transition-colors underline decoration-[hsl(42,45%,75%)]/30 hover:decoration-white">IEEE EPEC 2025</a>.</>,
+          "Designed and deployed using Python/LangChain agents bridging BAS and LLM tools, cutting data-processing time and operator workload by 49%.",
+          "Built a SQLite-backed ingestion pipeline to process and integrate real-time BAS streams reliably.",
+          "Partnered with Delta Controls and Carleton University to deliver AI building agents, achieving a 56% reduction in maintenance costs via automated fault detection, predictive maintenance, and real-time alerts.",
+        ],
+      },
+      {
+        name: "Enhanced Utilities Chatbot",
+        details: [
+          "Built a multi-agent, tool-using utilities chatbot that explains bills, simulates alternate rate plans, and diagnoses anomalies by linking AMI data with weather/holidays/tariffs for a $3M+ annual revenue company.",
+          "Implemented a time-series engine (seasonal decomposition + change-point detection) to flag spikes, persistent baseload, and overnight leaks, then auto-generate plain-English \"why it happened\" narratives and savings playbooks.",
+        ],
+      },
     ],
   },
   {
@@ -194,16 +224,41 @@ export function Experience() {
                 </div>
 
                 {/* Details */}
-                <ul className="space-y-3">
-                  {item.details.map((detail, detailIndex) => (
-                    <li
-                      key={detailIndex}
-                      className="text-sm text-[hsl(0,0%,55%)] leading-relaxed pl-4 border-l border-[hsl(0,0%,20%)]"
-                    >
-                      {detail}
-                    </li>
-                  ))}
-                </ul>
+                {item.details && (
+                  <ul className="space-y-3">
+                    {item.details.map((detail, detailIndex) => (
+                      <li
+                        key={detailIndex}
+                        className="text-sm text-[hsl(0,0%,55%)] leading-relaxed pl-4 border-l border-[hsl(0,0%,20%)]"
+                      >
+                        {detail}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {/* Projects */}
+                {item.projects && (
+                  <div className="space-y-6">
+                    {item.projects.map((project, projectIndex) => (
+                      <div key={projectIndex}>
+                        <h4 className="text-sm font-medium text-[hsl(42,45%,75%)] mb-3 tracking-wide">
+                          {project.name}
+                        </h4>
+                        <ul className="space-y-3">
+                          {project.details.map((detail, detailIndex) => (
+                            <li
+                              key={detailIndex}
+                              className="text-sm text-[hsl(0,0%,55%)] leading-relaxed pl-4 border-l border-[hsl(0,0%,20%)]"
+                            >
+                              {detail}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </motion.div>
             ))}
           </div>
