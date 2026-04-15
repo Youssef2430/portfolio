@@ -1,0 +1,97 @@
+// ═══════════════════════════════════════════════
+// MAIN — Entry point: imports config, renders
+// everything, wires up interactions
+// ═══════════════════════════════════════════════
+
+import config from '../data/config.js';
+
+// Render modules
+import { renderTopBar }      from './render/topbar.js';
+import { renderLeftPanel }   from './render/leftpanel.js';
+import { renderQuestLog }    from './render/quests.js';
+import { initMap }           from './render/map.js';
+import { renderAchievements } from './render/achievements.js';
+import { renderRightPanel }  from './render/rightpanel.js';
+import { renderBottomBar }   from './render/bottombar.js';
+
+// UI modules
+import { initTabs }          from './ui/tabs.js';
+import { initTooltips }      from './ui/tooltip.js';
+import { showToast }         from './ui/toast.js';
+import { initPanelToggles }  from './ui/panels.js';
+import { initClock }         from './ui/clock.js';
+import { initTheme, initThemeToggle } from './ui/theme.js';
+
+// Hero scene
+import { renderHeroScene }   from './hero/scene.js';
+
+// ═══════════════════════════════════════════════
+// 1. Apply theme FIRST (prevents flash of wrong colors)
+// ═══════════════════════════════════════════════
+initTheme(config.site.defaultTheme);
+
+// Set page title
+document.title = config.site.title;
+
+// ═══════════════════════════════════════════════
+// 2. Render all sections from config data
+// ═══════════════════════════════════════════════
+renderTopBar(config.character, 'top-bar');
+renderLeftPanel(config, 'left-panel');
+renderRightPanel(config, 'right-panel');
+renderBottomBar(config.site, 'bottom-bar');
+
+// Main panel: create the tab structure, then render content into each tab
+const mainPanel = document.getElementById('main-panel');
+mainPanel.innerHTML = `
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="quests">QUEST LOG</button>
+    <button class="tab-btn" data-tab="map">WORLD MAP</button>
+    <button class="tab-btn" data-tab="achievements">ACHIEVEMENTS</button>
+  </div>
+  <div id="tab-quests" class="tab-content active"></div>
+  <div id="tab-map" class="tab-content">
+    <div class="map-container">
+      <canvas id="map-canvas"></canvas>
+      <canvas id="flight-canvas"></canvas>
+      <div class="map-overlay-pins" id="map-pins"></div>
+      <div class="map-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green);"></div> Visited</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--gold);"></div> Current</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--cyan);"></div> Planned</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#fff;"></div> Home</div>
+        <div class="legend-item"><div style="width:12px;border-top:1px dashed var(--gold);"></div> Flight</div>
+      </div>
+      <div class="map-stats">
+        <span>${config.travelStats.find(s => s.label === 'Flights Taken')?.value || config.flights.length}</span> flights &middot;
+        <span>${config.travelStats.find(s => s.label === 'Countries')?.value || '?'}</span> countries &middot;
+        <span>${config.travelStats.find(s => s.label === 'Continents')?.value || '?'}</span> continents
+      </div>
+    </div>
+  </div>
+  <div id="tab-achievements" class="tab-content"></div>
+`;
+
+// Render tab contents
+renderQuestLog(config.quests, 'tab-quests');
+initMap(config.cities, config.flights, config.continents);
+renderAchievements(config.achievements, 'tab-achievements');
+
+// ═══════════════════════════════════════════════
+// 3. Wire up interactions (DOM exists now)
+// ═══════════════════════════════════════════════
+initTabs();
+initTooltips();
+initPanelToggles();
+initClock(config.site.currentDay);
+initThemeToggle();
+
+// ═══════════════════════════════════════════════
+// 4. Render hero scene
+// ═══════════════════════════════════════════════
+renderHeroScene();
+
+// ═══════════════════════════════════════════════
+// 5. Welcome toast
+// ═══════════════════════════════════════════════
+setTimeout(() => showToast('📍', config.site.welcomeMessage), 1200);

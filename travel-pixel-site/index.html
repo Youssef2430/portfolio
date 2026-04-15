@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="night">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel「رحلات」Journal</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- CSS (load order matters) -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/effects.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/ui.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/map.css">
+  <link rel="stylesheet" href="css/hero.css">
+</head>
+<body>
+
+<!-- ── Atmospheric overlays ── -->
+<svg id="grain" aria-hidden="true" width="100%" height="100%">
+  <filter id="noiseFilter">
+    <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+  </filter>
+  <rect width="100%" height="100%" filter="url(#noiseFilter)"/>
+</svg>
+<div id="scanlines" aria-hidden="true"></div>
+
+<!-- ── Pixel art hero scene (canvas backdrop) ── -->
+<canvas id="hero-canvas" aria-hidden="true"></canvas>
+
+<!-- ── Game UI — JS renders all content into these shells ── -->
+<div id="game-ui">
+  <div id="top-bar"></div>
+  <div id="left-panel"></div>
+  <div id="main-panel"></div>
+  <div id="right-panel"></div>
+  <div id="bottom-bar"></div>
+</div>
+
+<!-- ── Tooltip ── -->
+<div class="tooltip" id="tooltip" role="tooltip" aria-hidden="true">
+  <div class="tt-name" id="tt-name"></div>
+  <div class="tt-type" id="tt-type"></div>
+  <div class="tt-desc" id="tt-desc"></div>
+</div>
+
+<!-- ── Toast notification ── -->
+<div id="toast" role="status" aria-live="polite">
+  <span class="toast-icon" id="toast-icon"></span>
+  <span class="toast-text" id="toast-text"></span>
+</div>
+
+<!-- Single entry point -->
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

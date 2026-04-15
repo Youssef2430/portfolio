@@ -1,0 +1,94 @@
+/* ═══════════════════════════════════════════════
+   TOKENS — Design tokens & theme system
+   Toggle between day/night via data-theme on <html>
+   ═══════════════════════════════════════════════ */
+
+/* ─── NIGHT THEME (default) ─── */
+:root,
+[data-theme="night"] {
+  --bg:            #000000;
+  --panel:         #0a0a0a;
+  --panel-border:  #262626;
+  --gold:          #c8aa76;
+  --gold-dim:      #8a7550;
+  --cream:         #e8e0d2;
+  --green:         #5a9a6a;
+  --cyan:          #6aacb8;
+  --accent:        #c8aa76;
+  --text:          #ffffff;
+  --dim:           #a6a6a6;
+  --muted:         #666666;
+  --hp-red:        #c06050;
+  --xp-gold:       #c8aa76;
+  --stamina-green: #5a9a6a;
+
+  /* Map */
+  --map-ocean:       #08090f;
+  --map-land:        #18201a;
+  --map-land-stroke: #2a3a2a;
+  --map-grid:        rgba(200,170,118,0.04);
+
+  /* Hero scene */
+  --sky-top:       #0a0e1a;
+  --sky-bottom:    #121a24;
+  --forest-far:    #0a120a;
+  --forest-mid:    #0d1a0d;
+  --forest-near:   #102010;
+  --cliff-base:    #1a1a14;
+  --cliff-light:   #2a2a1e;
+  --tower-wall:    #22221a;
+  --tower-top:     #2a2a20;
+  --window-glow:   #4dffd4;
+  --star-opacity:  1;
+
+  /* Effects */
+  --scanline-opacity: 0.06;
+  --grain-opacity:    0.035;
+}
+
+/* ─── DAY THEME ─── */
+[data-theme="day"] {
+  --bg:            #f0ebe0;
+  --panel:         #e8e2d4;
+  --panel-border:  #c8b89a;
+  --gold:          #7a5a1a;
+  --gold-dim:      #a8884a;
+  --cream:         #3a2a1a;
+  --green:         #3a7a4a;
+  --cyan:          #2a7080;
+  --accent:        #7a5a1a;
+  --text:          #1a1208;
+  --dim:           #5a4a3a;
+  --muted:         #8a7a6a;
+  --hp-red:        #a03828;
+  --xp-gold:       #7a5a1a;
+  --stamina-green: #3a7a4a;
+
+  /* Map */
+  --map-ocean:       #c8d8e8;
+  --map-land:        #a8c898;
+  --map-land-stroke: #7a9a6a;
+  --map-grid:        rgba(60,40,10,0.06);
+
+  /* Hero scene */
+  --sky-top:       #88b8e0;
+  --sky-bottom:    #d8dcc0;
+  --forest-far:    #5a8a48;
+  --forest-mid:    #4a8038;
+  --forest-near:   #3a7028;
+  --cliff-base:    #8a8068;
+  --cliff-light:   #a8a088;
+  --tower-wall:    #908870;
+  --tower-top:     #a09880;
+  --window-glow:   transparent;
+  --star-opacity:  0;
+
+  /* Effects */
+  --scanline-opacity: 0.02;
+  --grain-opacity:    0.015;
+}
+
+/* ─── THEME TRANSITION ─── */
+html {
+  transition: background-color 0.6s ease;
+}
