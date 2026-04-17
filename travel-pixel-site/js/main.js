@@ -9,9 +9,9 @@ import config from '../data/config.js';
 import { renderTopBar }      from './render/topbar.js';
 import { renderLeftPanel }   from './render/leftpanel.js';
 import { renderQuestLog }    from './render/quests.js';
-import { initMap }           from './render/map.js';
+import { initMap, initMapZoom } from './render/map.js';
 import { renderAchievements } from './render/achievements.js';
-import { renderRightPanel }  from './render/rightpanel.js';
+import { renderRightPanel, initLiveWeather }  from './render/rightpanel.js';
 import { renderBottomBar }   from './render/bottombar.js';
 
 // UI modules
@@ -52,9 +52,16 @@ mainPanel.innerHTML = `
   <div id="tab-quests" class="tab-content active"></div>
   <div id="tab-map" class="tab-content">
     <div class="map-container">
-      <canvas id="map-canvas"></canvas>
-      <canvas id="flight-canvas"></canvas>
-      <div class="map-overlay-pins" id="map-pins"></div>
+      <div class="map-zoom-layer">
+        <canvas id="map-canvas"></canvas>
+        <canvas id="flight-canvas"></canvas>
+        <div class="map-overlay-pins" id="map-pins"></div>
+      </div>
+      <div class="map-controls">
+        <button class="map-zoom-btn" id="map-zoom-in" title="Zoom in">+</button>
+        <button class="map-zoom-btn" id="map-zoom-out" title="Zoom out">−</button>
+        <button class="map-zoom-btn" id="map-zoom-reset" title="Reset">⟲</button>
+      </div>
       <div class="map-legend">
         <div class="legend-item"><div class="legend-dot" style="background:var(--green);"></div> Visited</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--gold);"></div> Current</div>
@@ -81,6 +88,7 @@ renderAchievements(config.achievements, 'tab-achievements');
 // 3. Wire up interactions (DOM exists now)
 // ═══════════════════════════════════════════════
 initTabs();
+initMapZoom();
 initTooltips();
 initPanelToggles();
 initClock(config.site.currentDay);
@@ -95,3 +103,8 @@ renderHeroScene();
 // 5. Welcome toast
 // ═══════════════════════════════════════════════
 setTimeout(() => showToast('📍', config.site.welcomeMessage), 1200);
+
+// ═══════════════════════════════════════════════
+// 6. Live weather (non-blocking async)
+// ═══════════════════════════════════════════════
+initLiveWeather();

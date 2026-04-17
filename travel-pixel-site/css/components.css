@@ -51,6 +51,93 @@
 .quest-location {
   font-size: 11px; color: var(--muted);
   font-family: 'Roboto Mono', monospace;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+  margin-top: 4px;
+}
+
+/* ── Souvenir fridge magnet badges ── */
+.city-magnet {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px 3px 5px;
+  border-radius: 4px;
+  color: #fff;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  /* 3D fridge magnet depth */
+  border: 1.5px solid rgba(255,255,255,0.2);
+  border-bottom-color: rgba(0,0,0,0.15);
+  border-right-color: rgba(0,0,0,0.1);
+  box-shadow:
+    0 2px 3px rgba(0,0,0,0.45),
+    0 4px 8px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    inset 0 -1px 0 rgba(0,0,0,0.15);
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s;
+}
+/* Glossy shine overlay — like a shiny fridge magnet */
+.city-magnet::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0) 100%);
+  border-radius: 4px 4px 0 0;
+  pointer-events: none;
+}
+.city-magnet:hover {
+  transform: translateY(-3px) rotate(-2deg) scale(1.06) !important;
+  box-shadow:
+    0 6px 14px rgba(0,0,0,0.35),
+    0 10px 24px rgba(0,0,0,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.35);
+}
+/* "Stuck on fridge" varied rotations */
+.city-magnet:nth-child(6n+1) { transform: rotate(-1deg); }
+.city-magnet:nth-child(6n+2) { transform: rotate(0.6deg); }
+.city-magnet:nth-child(6n+3) { transform: rotate(-0.4deg); }
+.city-magnet:nth-child(6n+5) { transform: rotate(0.9deg); }
+.city-magnet:nth-child(6n+6) { transform: rotate(-0.7deg); }
+
+[data-theme="day"] .city-magnet {
+  border-color: rgba(255,255,255,0.25);
+  border-bottom-color: rgba(0,0,0,0.12);
+  border-right-color: rgba(0,0,0,0.08);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.25),
+    0 4px 8px rgba(0,0,0,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.35);
+}
+
+.magnet-pixel {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25));
+}
+.magnet-pixel svg {
+  height: 16px;
+  width: auto;
+  image-rendering: pixelated;
+}
+.magnet-label {
+  font-size: 8px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  position: relative;
+  z-index: 1;
+}
+.location-arrow {
+  font-size: 11px; color: var(--muted);
+  margin: 0 -1px;
+  opacity: 0.35;
 }
 .quest-status { text-align: right; font-size: 11px; font-family: 'Roboto Mono', monospace; }
 .quest-date   { color: var(--muted); margin-bottom: 5px; }
@@ -137,33 +224,41 @@
 .ach-desc { color: var(--muted); line-height: 1.8; }
 .ach-date { color: var(--green); margin-top: 5px; font-size: 10px; font-family: 'Roboto Mono', monospace; }
 
-/* ── PARTY MEMBERS ── */
-.party-member {
+/* ── SKILL TREE ── */
+.skill-item {
   display: flex; align-items: center; gap: 12px;
-  padding: 12px 18px;
+  padding: 10px 18px;
   border-bottom: 1px solid rgba(255,255,255,0.03);
-  cursor: pointer;
   transition: background 0.2s;
 }
-[data-theme="day"] .party-member { border-color: rgba(0,0,0,0.05); }
-.party-member:hover { background: rgba(255,255,255,0.02); }
-[data-theme="day"] .party-member:hover { background: rgba(0,0,0,0.02); }
-.pm-avatar {
-  width: 40px; height: 40px;
+[data-theme="day"] .skill-item { border-color: rgba(0,0,0,0.05); }
+.skill-item:hover { background: rgba(255,255,255,0.02); }
+[data-theme="day"] .skill-item:hover { background: rgba(0,0,0,0.02); }
+.skill-icon {
+  width: 36px; height: 36px;
   background: rgba(255,255,255,0.02);
   border: 1px solid var(--panel-border);
   display: flex; align-items: center; justify-content: center;
-  font-size: 20px; flex-shrink: 0;
+  font-size: 18px; flex-shrink: 0;
 }
-[data-theme="day"] .pm-avatar { background: rgba(0,0,0,0.03); }
-.pm-info   { font-size: 12px; flex: 1; font-family: 'Inter', sans-serif; }
-.pm-name   { color: var(--text); margin-bottom: 4px; }
-.pm-role   { color: var(--muted); font-size: 10px; font-family: 'Roboto Mono', monospace; }
-.pm-status { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.pm-status.online  { background: var(--green); box-shadow: 0 0 6px var(--green); }
-.pm-status.offline { background: #333; }
-[data-theme="day"] .pm-status.offline { background: #bbb; }
-.pm-status.away    { background: var(--gold); }
+[data-theme="day"] .skill-icon { background: rgba(0,0,0,0.03); }
+.skill-info { flex: 1; font-family: 'Inter', sans-serif; }
+.skill-name {
+  font-size: 12px; color: var(--text); margin-bottom: 3px;
+}
+.skill-level {
+  font-size: 9px; color: var(--gold);
+  font-family: 'Roboto Mono', monospace;
+  margin-left: 6px;
+}
+.skill-bar {
+  font-size: 11px; color: var(--gold); letter-spacing: 2px;
+  margin-bottom: 2px;
+}
+.skill-desc {
+  font-size: 10px; color: var(--muted);
+  font-family: 'Roboto Mono', monospace;
+}
 
 /* ── WEATHER ── */
 .weather-widget {
@@ -181,21 +276,26 @@
   font-family: 'Roboto Mono', monospace; letter-spacing: 0.1em;
 }
 
-/* ── ACTIVITY FEED ── */
-.activity-feed { padding: 0; }
-.activity-item {
+/* ── LOOT LOG ── */
+.loot-feed { padding: 0; }
+.loot-item {
   padding: 12px 18px;
   border-bottom: 1px solid rgba(255,255,255,0.03);
   font-size: 11px; color: var(--muted);
-  line-height: 1.8; display: flex; gap: 10px;
+  line-height: 1.8; display: flex; gap: 10px; align-items: center;
   font-family: 'Inter', sans-serif;
 }
-[data-theme="day"] .activity-item { border-color: rgba(0,0,0,0.05); }
-.activity-icon { font-size: 14px; flex-shrink: 0; margin-top: 2px; }
-.activity-text { flex: 1; }
-.activity-text strong { color: var(--cream); }
-.activity-time {
-  color: #444; font-size: 10px; white-space: nowrap;
+[data-theme="day"] .loot-item { border-color: rgba(0,0,0,0.05); }
+.loot-icon { font-size: 14px; flex-shrink: 0; }
+.loot-text { flex: 1; }
+.loot-text strong { color: var(--cream); }
+[data-theme="day"] .loot-text strong { color: var(--text); }
+.loot-trip {
+  font-size: 8px; color: var(--cyan);
   font-family: 'Roboto Mono', monospace;
+  white-space: nowrap; letter-spacing: 0.05em;
+  padding: 2px 6px;
+  border: 1px solid rgba(106,172,184,0.2);
+  background: rgba(106,172,184,0.05);
 }
-[data-theme="day"] .activity-time { color: #999; }
+[data-theme="day"] .loot-trip { color: #1a7a8a; border-color: rgba(26,122,138,0.2); background: rgba(26,122,138,0.05); }

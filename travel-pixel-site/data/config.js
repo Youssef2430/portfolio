@@ -13,7 +13,7 @@ export default {
   // ─── SITE SETTINGS ───────────────────────────────────────
   site: {
     title: 'Travel「رحلات」Journal',
-    welcomeMessage: 'Welcome back to Marrakech!',  // Toast shown on load
+    welcomeMessage: 'Welcome back!',  // Toast shown on load
     currentDay: 10,                                 // Shown in bottom-bar clock
     defaultTheme: 'night',                          // 'night' or 'day'
   },
@@ -32,11 +32,11 @@ export default {
 
   // ─── EQUIPMENT (5 slots: head, weapon, body, accessory, feet) ──
   equipment: [
-    { slot: 'head',      emoji: '🧢', name: "Explorer's Cap", type: 'Headgear',  description: '+5 Sun Resist, +2 Style' },
-    { slot: 'weapon',    emoji: '📷', name: 'Sony A7III',     type: 'Main Hand', description: '+12 Photography, +5 Memory Capture' },
-    { slot: 'body',      emoji: '🦺', name: 'Travel Vest',    type: 'Armor',     description: '+8 Pocket Space, +4 Comfort' },
-    { slot: 'accessory', emoji: '🧭', name: 'Compass',        type: 'Accessory', description: '+7 Navigation, Cannot get lost' },
-    { slot: 'feet',      emoji: '🥾', name: 'Trail Runners',  type: 'Footwear',  description: '+6 Terrain, +3 Stamina Regen' },
+    { slot: 'head',      emoji: '🧢', name: "Explorer's Cap", type: 'Headgear',  description: '+5 Sun Resist. Survived the Côte d\'Azur.' },
+    { slot: 'weapon',    emoji: '📷', name: 'Sony A7III',     type: 'Main Hand', description: '+12 Photography. 3,412 memories captured.' },
+    { slot: 'body',      emoji: '🦺', name: 'Travel Vest',    type: 'Armor',     description: '+8 Pocket Space. Road-trip tested.' },
+    { slot: 'accessory', emoji: '🤿', name: 'Snorkel Mask',   type: 'Accessory', description: '+6 Underwater Vision. Paloma Beach veteran.' },
+    { slot: 'feet',      emoji: '🥾', name: 'Trail Runners',  type: 'Footwear',  description: '+6 Terrain. Caminito del Rey survivor.' },
   ],
 
   // ─── INVENTORY ───────────────────────────────────────────
@@ -46,29 +46,29 @@ export default {
   inventoryMax: 20,
   inventory: [
     { emoji: '🛂', name: 'Passport',       type: 'Key Item',    description: 'Your most valuable possession' },
-    { emoji: '🎫', name: 'Boarding Pass',   type: 'Quest Item',  description: 'YUL → RAK, Seat 14A' },
+    { emoji: '🎫', name: 'Boarding Pass',   type: 'Quest Item',  description: 'AMS → NCE, Window Seat' },
     { emoji: '🗺️', name: 'World Map',       type: 'Key Item',    description: 'Reveals all discovered locations' },
-    { emoji: '🫖', name: 'Mint Tea',        type: 'Consumable',  description: 'Restores 20 HP. Moroccan blend.', count: 5 },
-    { emoji: '🍜', name: 'Ramen Bowl',      type: 'Consumable',  description: 'Restores 35 HP. Tonkotsu.', count: 2 },
-    { emoji: '🥐', name: 'Croissant',       type: 'Consumable',  description: 'Restores 15 HP. Flaky & buttery.', count: 3 },
+    { emoji: '🫖', name: 'Mint Tea',        type: 'Consumable',  description: 'Restores 20 HP. Larache blend.', count: 5 },
+    { emoji: '🥐', name: 'Croissant',       type: 'Consumable',  description: 'Restores 15 HP. Nice boulangerie.', count: 3 },
     { emoji: '🥘', name: 'Paella',          type: 'Consumable',  description: 'Restores 30 HP. Barcelona special.', count: 1 },
     { emoji: '📓', name: 'Travel Journal',  type: 'Key Item',    description: 'Auto-records adventures' },
     { emoji: '📖', name: 'Phrasebook',      type: 'Tool',        description: '+5 Communication in any language' },
     { emoji: '🔋', name: 'Power Bank',      type: 'Tool',        description: 'Restores device charge. 20000mAh.' },
-    { emoji: '🪙', name: 'Lucky Coin',      type: 'Trinket',     description: 'Found in a Parisian fountain. +1 Luck' },
-    { emoji: '💌', name: 'Postcard Stack',  type: 'Collectible', description: 'From every visited city', count: 11 },
-    { emoji: '🫙', name: 'Tagine Spice',    type: 'Material',    description: 'Can be traded with NPC chefs' },
+    { emoji: '💌', name: 'Postcard Stack',  type: 'Collectible', description: 'From every visited city', count: 10 },
     { emoji: '🧇', name: 'Stroopwafel',     type: 'Consumable',  description: 'Restores 10 HP. Amsterdam souvenir.', count: 4 },
+    { emoji: '🐟', name: 'Sardine Espeto',  type: 'Consumable',  description: 'Restores 25 HP. Grilled Málaga-style.', count: 3 },
+    { emoji: '📡', name: 'Travel Router',   type: 'Tool',        description: 'Beryl AX. +10 Connectivity anywhere.' },
+    { emoji: '🏄', name: 'Surfboard Wax',   type: 'Consumable',  description: 'Grip boost. Halifax beach find.', count: 2 },
   ],
 
   // ─── TRAVEL STATS ───────────────────────────────────────
   travelStats: [
     { label: 'Cities Visited', value: '11' },
-    { label: 'Countries',      value: '7' },
+    { label: 'Countries',      value: '5' },
     { label: 'Continents',     value: '3' },
-    { label: 'Days Traveled',  value: '68' },
+    { label: 'Days Traveled',  value: '18' },
     { label: 'Photos Taken',   value: '3,412' },
-    { label: 'Flights Taken',  value: '14' },
+    { label: 'Flights Taken',  value: '5' },
     { label: 'KM Walked',      value: '512' },
     { label: 'Meals Eaten',    value: '204' },
     { label: 'Friends Made',   value: '41' },
@@ -80,160 +80,129 @@ export default {
   //   narrative, objectives[]?, rewards[]?
   quests: [
     {
-      status: 'active',
-      name: 'The Moroccan Chronicles',
-      nameArabic: 'الحكايات',
-      location: 'Marrakech, Morocco',
-      date: 'APR 2025',
-      xp: 200,
-      narrative: 'Lost in the medina in the best way possible. The souks are an overload of color, scent, and sound. Every wrong turn leads to something magical.',
-      objectives: [
-        { text: 'Arrive at Riad in Medina',        done: true },
-        { text: 'Explore Jemaa el-Fnaa square',    done: true },
-        { text: 'Drink mint tea with a local',      done: true },
-        { text: 'Visit the Majorelle Garden',       done: false },
-        { text: 'Haggle successfully in the souks', done: false },
-        { text: 'Day trip to Atlas Mountains',      done: false },
-      ],
-      rewards: ['200 XP', '🍲 Tagine Recipe', '📷 +3 Photos'],
-    },
-    {
       status: 'completed',
       name: 'The Mediterranean Arc',
-      location: 'Barcelona → Nerja → Nice → Cote d\'Azur',
-      date: 'SUMMER 2024',
+      location: 'Amsterdam → Nice → Barcelona → Málaga',
+      date: 'SUMMER 2025',
       xp: 400,
-      narrative: 'The great southern European coastal run. From the Gaudi-laced streets of Barcelona, down to the whitewashed cliffs of Nerja, across to the azure coast of Nice and the French Riviera. Sun, sea, and an unreasonable amount of seafood.',
+      narrative: 'Nine days carving a sun-soaked arc from the Dutch canals to the Andalusian coast. Snorkeling secret Riviera coves, sunset-chasing from Castle Hill and the Bunkers del Carmel, hiking cliff trails on the Costa Brava, kayaking to waterfalls in Nerja, wandering Frigiliana\'s white lanes, and walking the vertigo-inducing Caminito del Rey gorge. An unreasonable amount of seafood and sardine espetos along the way.',
       objectives: [
-        { text: 'Wander La Rambla at sunset',       done: true },
-        { text: 'See the Balcon de Europa in Nerja', done: true },
-        { text: 'Walk the Promenade des Anglais',    done: true },
-        { text: 'Swim in the Riviera',               done: true },
+        { text: 'Walk the Jordaan canals in Amsterdam',     done: true },
+        { text: 'Hike Sentier Littoral to Paloma Beach',    done: true },
+        { text: 'Coastal trail from Monaco to Plage de la Mala', done: true },
+        { text: 'Sunset picnic at Bunkers del Carmel',      done: true },
+        { text: 'Hike Camí de Ronda on the Costa Brava',    done: true },
+        { text: 'Kayak to the Maro waterfall in Nerja',     done: true },
+        { text: 'Wander Frigiliana\'s white-village lanes',  done: true },
+        { text: 'Walk the Caminito del Rey gorge',          done: true },
       ],
       rewards: ['400 XP', '🎉 Title: Coastal Wanderer'],
     },
     {
       status: 'completed',
-      name: 'City of Light & Croissants',
-      location: 'Paris, France',
-      date: 'JUN 2024',
+      name: 'The Atlantic Road',
+      questTypeOverride: 'side',
+      location: 'Ottawa → Quebec City → Moncton → Halifax',
+      date: 'SUMMER 2024',
       xp: 280,
-      narrative: 'Explored the Louvre, wandered through Montmartre at sunset, ate croissants at every corner cafe.',
+      narrative: 'Seven-day road trip with the crew — five friends, one car, and the open Trans-Canada. From Quebec City\'s old-world charm through New Brunswick\'s record-breaking tides at Hopewell Rocks, to finally catching waves on Nova Scotia\'s coast. Discovered a new obsession: surfing.',
       objectives: [
-        { text: 'Visit the Louvre Museum',            done: true },
-        { text: 'Climb the Eiffel Tower',             done: true },
-        { text: 'Sunset at Montmartre',               done: true },
-        { text: 'Eat 10 croissants (daily quest)',    done: true },
+        { text: 'Road trip Ottawa → Quebec City',          done: true },
+        { text: 'Drive to Moncton, catch up with Aya',    done: true },
+        { text: 'See Hopewell Rocks\' highest tides',      done: true },
+        { text: 'Surf for the first time in Halifax',      done: true },
+        { text: 'Catch a second surf session',             done: true },
+        { text: 'Survive the 8h+ drive home',              done: true },
       ],
-    },
-    {
-      status: 'completed',
-      name: 'Canals & Golden Light',
-      location: 'Amsterdam, Netherlands',
-      date: 'JUN 2024',
-      xp: 220,
-      narrative: 'Biking along the canals, Van Gogh Museum in the rain, and stroopwafels from every street vendor in sight.',
-    },
-    {
-      status: 'completed',
-      name: 'Land of the Rising Sun',
-      location: 'Tokyo, Japan',
-      date: 'MAR 2024',
-      xp: 350,
-      narrative: 'Two weeks during cherry blossom season. From the neon chaos of Shibuya to the serene temples of Asakusa. Ramen count: 23.',
-      objectives: [
-        { text: 'Visit Senso-ji Temple',                 done: true },
-        { text: 'Cross Shibuya Crossing at peak hour',   done: true },
-        { text: 'Eat ramen at a hidden Shinjuku shop',  done: true },
-        { text: 'Ride the Shinkansen to Kyoto',          done: true },
-      ],
-      rewards: ['350 XP', '🎉 Title: Sakura Seeker', '🍜 Ramen Mastery'],
-    },
-    {
-      status: 'completed',
-      name: 'Big Apple After Dark',
-      location: 'New York, USA',
-      date: 'DEC 2023',
-      xp: 300,
-      narrative: 'NYC during the holidays. The Rockefeller tree, ice skating in Central Park, Broadway shows, and the best 2am pizza in Brooklyn.',
+      rewards: ['280 XP', '🏄 Title: Wave Rider'],
     },
     {
       status: 'completed',
       name: 'Atlantic Coast Memories',
       nameArabic: 'ذكريات',
-      location: 'Larache, Morocco',
-      date: '2024',
+      location: 'Larache → Tangier, Morocco',
+      date: 'WINTER 2024',
       xp: 180,
-      narrative: 'The quiet Atlantic-side town where time moves differently. Fresh fish by the port, old medina walls, and sunsets that paint the whole sky.',
-    },
-    {
-      status: 'completed',
-      name: 'West Coast Detour',
-      questTypeOverride: 'side',  // Shows as "SIDE QUEST" but completed
-      location: 'Victoria, BC \u2022 Chelsea, QC \u2022 Ottawa',
-      date: 'ONGOING',
-      xp: 150,
-      narrative: 'Home-base adventures across Canada. Victoria\'s island charm, Chelsea\'s Gatineau hills, and Ottawa\'s familiar streets.',
+      narrative: 'The quiet Atlantic-side town where time moves differently. Fresh fish by the port, old medina walls, and sunsets that paint the whole sky. A day trip north to Tangier for the Kasbah and the Caves of Hercules.',
+      objectives: [
+        { text: 'Fresh fish at Larache port',            done: true },
+        { text: 'Walk the old medina walls',             done: true },
+        { text: 'Day trip to Tangier',                   done: true },
+        { text: 'See the Caves of Hercules',             done: true },
+        { text: 'Watch the Atlantic sunset',             done: true },
+      ],
+      rewards: ['180 XP', '🌅 Title: Atlantic Dreamer'],
     },
     {
       status: 'upcoming-main',
-      name: 'Island of the Gods',
-      location: 'Bali, Indonesia',
-      date: 'AUG 2025',
-      xp: 250,
-      narrative: 'Rice terraces, temple ceremonies, surf sessions, and digital nomad cafes. The ultimate island escape.',
+      name: 'The Grand Continental',
+      location: 'Paris → Italy → Switzerland → Nice → Rabat',
+      date: 'JUN 2026',
+      xp: 500,
+      narrative: 'The big one. Sixteen days across four countries — Parisian sunsets, Italian coastal trails, Swiss alpine peaks at Jungfraujoch, the Riviera one more time, then onward to Morocco.',
       objectives: [
-        { text: 'Tegallalang Rice Terraces',     done: false },
-        { text: 'Sunrise hike on Mount Batur',   done: false },
-        { text: 'Learn to surf in Canggu',       done: false },
-        { text: 'Uluwatu Temple at sunset',      done: false },
+        { text: 'Sunset at Sacré-Cœur, Paris',            done: false },
+        { text: 'Climb Milan\'s Duomo rooftop',            done: false },
+        { text: 'Ferry across Lake Como',                  done: false },
+        { text: 'Hike the Cinque Terre coastal trail',     done: false },
+        { text: 'Reach Jungfraujoch — Top of Europe',      done: false },
+        { text: 'Swim at Plage de la Gravette, Antibes',   done: false },
       ],
-    },
-    {
-      status: 'upcoming-side',
-      name: 'Fire & Ice Expedition',
-      location: 'Reykjavik, Iceland',
-      date: 'DEC 2025',
-      xp: 400,
-      narrative: 'Northern lights, geothermal lagoons, volcanic landscapes. The ultimate winter adventure.',
     },
   ],
 
   // ─── MAP: CITIES ────────────────────────────────────────
   // status: 'home' | 'visited' | 'current' | 'planned'
   cities: [
-    { name: 'Ottawa',     lon: -75.7, lat: 45.4, status: 'home',    label: 'OTTAWA (HOME)' },
-    { name: 'Chelsea',    lon: -75.8, lat: 45.5, status: 'visited', label: 'CHELSEA, QC' },
-    { name: 'Victoria',   lon:-123.4, lat: 48.4, status: 'visited', label: 'VICTORIA, BC' },
-    { name: 'New York',   lon: -74.0, lat: 40.7, status: 'visited', label: 'NEW YORK' },
-    { name: 'Paris',      lon:   2.4, lat: 48.9, status: 'visited', label: 'PARIS' },
-    { name: 'Amsterdam',  lon:   4.9, lat: 52.4, status: 'visited', label: 'AMSTERDAM' },
-    { name: 'Barcelona',  lon:   2.2, lat: 41.4, status: 'visited', label: 'BARCELONA' },
-    { name: 'Nice',       lon:   7.3, lat: 43.7, status: 'visited', label: 'NICE / COTE D\'AZUR' },
-    { name: 'Nerja',      lon:  -3.9, lat: 36.7, status: 'visited', label: 'NERJA' },
-    { name: 'Larache',    lon:  -6.2, lat: 35.2, status: 'visited', label: 'LARACHE' },
-    { name: 'Marrakech',  lon:  -8.0, lat: 31.6, status: 'current', label: 'MARRAKECH \u2605' },
-    { name: 'Tokyo',      lon: 139.7, lat: 35.7, status: 'visited', label: 'TOKYO' },
-    { name: 'Bali',       lon: 115.2, lat: -8.7, status: 'planned', label: 'BALI (PLANNED)' },
-    { name: 'Reykjavik',  lon: -22.0, lat: 64.1, status: 'planned', label: 'REYKJAVIK (PLANNED)' },
+    // Home
+    { name: 'Ottawa',       lon: -75.7, lat: 45.4, status: 'home',    label: 'OTTAWA (HOME)' },
+    // Maritimes road trip
+    { name: 'Quebec City',  lon: -71.2, lat: 46.8, status: 'visited', label: 'QUEBEC CITY' },
+    { name: 'Moncton',      lon: -64.8, lat: 46.1, status: 'visited', label: 'MONCTON' },
+    { name: 'Fredericton',  lon: -66.6, lat: 45.9, status: 'visited', label: 'FREDERICTON' },
+    { name: 'Halifax',      lon: -63.6, lat: 44.6, status: 'visited', label: 'HALIFAX' },
+    // Mediterranean Arc
+    { name: 'Amsterdam',    lon:   4.9, lat: 52.4, status: 'visited', label: 'AMSTERDAM' },
+    { name: 'Nice',         lon:   7.3, lat: 43.7, status: 'visited', label: 'NICE / COTE D\'AZUR' },
+    { name: 'Barcelona',    lon:   2.2, lat: 41.4, status: 'visited', label: 'BARCELONA' },
+    { name: 'Málaga',       lon:  -4.4, lat: 36.7, status: 'visited', label: 'MÁLAGA' },
+    { name: 'Nerja',        lon:  -3.9, lat: 36.7, status: 'visited', label: 'NERJA' },
+    // Atlantic Coast
+    { name: 'Larache',      lon:  -6.2, lat: 35.2, status: 'visited', label: 'LARACHE' },
+    { name: 'Tangier',      lon:  -5.8, lat: 35.8, status: 'visited', label: 'TANGIER' },
+    // Planned — Europe 2026
+    { name: 'Paris',        lon:   2.4, lat: 48.9, status: 'planned', label: 'PARIS (PLANNED)' },
+    { name: 'Milan',        lon:   9.2, lat: 45.5, status: 'planned', label: 'MILAN (PLANNED)' },
+    { name: 'Lucerne',      lon:   8.3, lat: 47.0, status: 'planned', label: 'LUCERNE (PLANNED)' },
+    { name: 'Geneva',       lon:   6.1, lat: 46.2, status: 'planned', label: 'GENEVA (PLANNED)' },
+    { name: 'Rabat',        lon:  -6.8, lat: 34.0, status: 'planned', label: 'RABAT (PLANNED)' },
   ],
 
   // ─── MAP: FLIGHTS ───────────────────────────────────────
   // Each entry: [fromCityName, toCityName]
   // Flights to 'planned' cities are drawn as dashed cyan lines.
   flights: [
-    ['Ottawa', 'New York'],
-    ['Ottawa', 'Tokyo'],
+    // Mediterranean Arc (Summer 2025)
+    ['Ottawa', 'Amsterdam'],
+    ['Amsterdam', 'Nice'],
+    ['Nice', 'Barcelona'],
+    ['Barcelona', 'Málaga'],
+    ['Málaga', 'Nerja'],
+    ['Málaga', 'Larache'],
+    ['Larache', 'Tangier'],
+    // Maritimes road trip (Summer 2024)
+    ['Ottawa', 'Quebec City'],
+    ['Quebec City', 'Moncton'],
+    ['Moncton', 'Halifax'],
+    ['Halifax', 'Fredericton'],
+    ['Fredericton', 'Ottawa'],
+    // Planned — Europe 2026
     ['Ottawa', 'Paris'],
-    ['Paris', 'Amsterdam'],
-    ['Amsterdam', 'Barcelona'],
-    ['Barcelona', 'Nerja'],
-    ['Nerja', 'Nice'],
-    ['Nice', 'Larache'],
-    ['Ottawa', 'Victoria'],
-    ['Ottawa', 'Marrakech'],
-    ['Marrakech', 'Bali'],
-    ['Marrakech', 'Reykjavik'],
+    ['Paris', 'Milan'],
+    ['Milan', 'Lucerne'],
+    ['Lucerne', 'Geneva'],
+    ['Geneva', 'Nice'],
+    ['Nice', 'Rabat'],
   ],
 
   // ─── MAP: CONTINENT POLYGONS ────────────────────────────
@@ -269,44 +238,47 @@ export default {
   // locked: true  → grayed out with 🔒 icon
   // locked: false → unlocked, shows the icon and date
   achievements: [
-    { icon: '🌍', name: 'Globe Trotter',     description: 'Visit 3+ continents',                locked: false, date: 'Unlocked Mar 2024' },
-    { icon: '🍜', name: 'Ramen Master',      description: 'Eat 20+ bowls of ramen',             locked: false, date: 'Unlocked Mar 2024' },
-    { icon: '📸', name: 'Shutterbug',        description: 'Take 3000+ travel photos',           locked: false, date: 'Unlocked Jun 2024' },
-    { icon: '✈️', name: 'Sky Rider',         description: 'Take 10+ flights',                   locked: false, date: 'Unlocked Apr 2025' },
-    { icon: '🫖', name: 'Tea Ceremony',      description: 'Drink local tea in 3 countries',     locked: false, date: 'Unlocked Apr 2025' },
-    { icon: '🌊', name: 'Coastal Wanderer',  description: 'Visit 4+ coastal cities in one trip',locked: false, date: 'Unlocked Summer 2024' },
-    { icon: '🏠', name: 'Return Voyager',    description: 'Visit Morocco twice',                locked: false, date: 'Unlocked Apr 2025' },
+    { icon: '🌍', name: 'Globe Trotter',     description: 'Visit 3+ continents',                locked: false, date: 'Unlocked Summer 2025' },
+    { icon: '📸', name: 'Shutterbug',        description: 'Take 3000+ travel photos',           locked: false, date: 'Unlocked Summer 2025' },
+    { icon: '✈️', name: 'Sky Rider',         description: 'Take 10+ flights',                   locked: false, date: 'Unlocked Summer 2025' },
+    { icon: '🌊', name: 'Coastal Wanderer',  description: 'Visit 4+ coastal cities in one trip',locked: false, date: 'Unlocked Summer 2025' },
+    { icon: '🏄', name: 'Wave Rider',        description: 'Catch your first wave',              locked: false, date: 'Unlocked Summer 2024' },
+    { icon: '🔒', name: 'Summit Seeker',     description: 'Reach Jungfraujoch, Top of Europe',  locked: true },
     { icon: '🔒', name: 'Aurora Hunter',     description: 'Witness the Northern Lights',        locked: true },
-    { icon: '🔒', name: 'Island Hopper',     description: 'Visit 3 island nations',             locked: true },
     { icon: '🔒', name: 'Seven Seas',        description: 'Visit all 7 continents',             locked: true },
   ],
 
-  // ─── TRAVEL PARTY ──────────────────────────────────────
-  // status: 'online' | 'away' | 'offline'
-  party: [
-    { emoji: '🧑‍💻', name: 'Youssef', role: 'PARTY LEADER',  status: 'online' },
-    { emoji: '👩‍🎨', name: 'Sarah',   role: 'PHOTOGRAPHER',  status: 'online' },
-    { emoji: '🧑‍🍳', name: 'Karim',   role: 'LOCAL GUIDE',   status: 'away' },
-    { emoji: '👨‍💼', name: 'Mike',    role: 'TRAVEL BUDDY',  status: 'offline' },
+  // ─── SKILL TREE ──────────────────────────────────────
+  // Each skill: { emoji, name, level (1-5), maxLevel, desc }
+  skills: [
+    { emoji: '🏄', name: 'Surfing',       level: 2, maxLevel: 5, desc: 'Halifax waves' },
+    { emoji: '🥾', name: 'Hiking',        level: 4, maxLevel: 5, desc: 'Caminito del Rey' },
+    { emoji: '🛶', name: 'Kayaking',      level: 1, maxLevel: 5, desc: 'Maro cliffs' },
+    { emoji: '🏊', name: 'Swimming',      level: 3, maxLevel: 5, desc: 'Côte d\'Azur' },
+    { emoji: '🍽️', name: 'Local Cuisine', level: 4, maxLevel: 5, desc: 'Espetos & socca' },
+    { emoji: '🗣️', name: 'Languages',     level: 3, maxLevel: 5, desc: 'FR · ES · AR' },
+    { emoji: '📷', name: 'Photography',   level: 3, maxLevel: 5, desc: '3,412 shots' },
+    { emoji: '🚗', name: 'Road Trip',     level: 2, maxLevel: 5, desc: 'Trans-Canada' },
   ],
 
-  // ─── WEATHER ───────────────────────────────────────────
+  // ─── LOOT LOG ──────────────────────────────────────────
+  // Items collected from each trip
+  lootLog: [
+    { icon: '🐟', text: '<strong>Sardine Espeto</strong> — Pedregalejo, Málaga',   trip: 'MED ARC' },
+    { icon: '🏄', text: '<strong>First Wave</strong> — Halifax, Nova Scotia',       trip: 'MARITIMES' },
+    { icon: '🏖️', text: '<strong>Riviera Shell</strong> — Paloma Beach, Cap-Ferrat', trip: 'MED ARC' },
+    { icon: '🧇', text: '<strong>Stroopwafel Box</strong> — Jordaan, Amsterdam',   trip: 'MED ARC' },
+    { icon: '🌊', text: '<strong>Fundy Tide Stone</strong> — Hopewell Rocks, NB',  trip: 'MARITIMES' },
+    { icon: '🐠', text: '<strong>Atlantic Catch</strong> — Port of Larache',       trip: 'LARACHE' },
+    { icon: '🥘', text: '<strong>Paella Recipe</strong> — El Born, Barcelona',     trip: 'MED ARC' },
+    { icon: '☕', text: '<strong>Tim Hortons Cup</strong> — Fredericton, NB',       trip: 'MARITIMES' },
+  ],
+
+  // ─── WEATHER (fallback — overridden by live fetch) ─────
   weather: {
-    icon: '☀️',
-    temp: '34°C',
-    description: 'Clear Skies',
-    location: 'MARRAKECH, MA',
+    icon: '🌤️',
+    temp: '--°C',
+    description: 'Loading...',
+    location: 'DETECTING...',
   },
-
-  // ─── ACTIVITY FEED ─────────────────────────────────────
-  // Each entry: { icon, html (raw HTML string), time }
-  activity: [
-    { icon: '📍', html: '<strong>You</strong> checked in at <strong>Jemaa el-Fnaa</strong>',        time: '2h ago' },
-    { icon: '📸', html: '<strong>Sarah</strong> uploaded 12 photos from the <strong>Medina</strong>', time: '3h ago' },
-    { icon: '🫖', html: '<strong>You</strong> completed: <strong>Drink mint tea</strong>',           time: '5h ago' },
-    { icon: '⭐', html: '<strong>Achievement:</strong> Tea Ceremony',                                time: '5h ago' },
-    { icon: '🎒', html: '<strong>Karim</strong> joined travel party',                                time: '1d ago' },
-    { icon: '✈️', html: '<strong>You</strong> arrived in <strong>Marrakech</strong>',                 time: '5d ago' },
-    { icon: '🏆', html: '<strong>Quest:</strong> Mediterranean Arc complete',                         time: '10d ago' },
-  ],
 };

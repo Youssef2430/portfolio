@@ -148,7 +148,10 @@ function placeCityPins() {
   const container = document.getElementById('map-pins');
   if (!container) return;
 
-  const parentRect = container.parentElement.getBoundingClientRect();
+  // Always use .map-container for sizing (not parentElement, which may be the zoom layer)
+  const mapContainer = document.querySelector('.map-container');
+  if (!mapContainer) return;
+  const parentRect = mapContainer.getBoundingClientRect();
   const scaleX = parentRect.width / MAP_W;
   const scaleY = parentRect.height / MAP_H;
   container.innerHTML = '';
@@ -198,3 +201,99 @@ window.addEventListener('resize', () => {
     placeCityPins();
   }
 });
+
+// ═══════════════════════════════════════════════
+// ZOOM & PAN
+// ═══════════════════════════════════════════════
+
+let zoomLevel = 1;
+let panX = 0, panY = 0;
+const ZOOM_MIN = 1, ZOOM_MAX = 4, ZOOM_STEP = 0.25;
+
+function applyZoom() {
+  const layer = document.querySelector('.map-zoom-layer');
+  if (!layer) return;
+  layer.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
+}
+
+function clampPan() {
+  const container = document.querySelector('.map-container');
+  if (!container) return;
+  const rect = container.getBoundingClientRect();
+  const maxPanX = (rect.width * (zoomLevel - 1)) / 2;
+  const maxPanY = (rect.height * (zoomLevel - 1)) / 2;
+  panX = Math.max(-maxPanX, Math.min(maxPanX, panX));
+  panY = Math.max(-maxPanY, Math.min(maxPanY, panY));
+}
+
+export function initMapZoom() {
+  const container = document.querySelector('.map-container');
+  if (!container) return;
+
+  // ── Wheel zoom ──
+  container.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+    zoomLevel = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoomLevel + delta));
+    if (zoomLevel <= 1) { panX = 0; panY = 0; zoomLevel = 1; }
+    clampPan();
+    applyZoom();
+  }, { passive: false });
+
+  // ── Drag to pan ──
+  let isDragging = false, startX = 0, startY = 0;
+
+  container.addEventListener('mousedown', (e) => {
+    if (zoomLevel <= 1) return;
+    // Don't hijack clicks on city pins
+    if (e.target.closest('.city-dot, .city-label')) return;
+    isDragging = true;
+    startX = e.clientX - panX;
+    startY = e.clientY - panY;
+    container.style.cursor = 'grabbing';
+    e.preventDefault();
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    panX = e.clientX - startX;
+    panY = e.clientY - startY;
+    clampPan();
+    applyZoom();
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    container.style.cursor = zoomLevel > 1 ? 'grab' : '';
+  });
+
+  // ── Zoom buttons ──
+  document.getElementById('map-zoom-in')?.addEventListener('click', () => {
+    zoomLevel = Math.min(ZOOM_MAX, zoomLevel + ZOOM_STEP);
+    clampPan();
+    applyZoom();
+    container.style.cursor = 'grab';
+  });
+
+  document.getElementById('map-zoom-out')?.addEventListener('click', () => {
+    zoomLevel = Math.max(ZOOM_MIN, zoomLevel - ZOOM_STEP);
+    if (zoomLevel <= 1) { panX = 0; panY = 0; zoomLevel = 1; container.style.cursor = ''; }
+    clampPan();
+    applyZoom();
+  });
+
+  document.getElementById('map-zoom-reset')?.addEventListener('click', () => {
+    zoomLevel = 1; panX = 0; panY = 0;
+    applyZoom();
+    container.style.cursor = '';
+  });
+
+  // ── Double-click to reset ──
+  container.addEventListener('dblclick', (e) => {
+    if (e.target.closest('.map-zoom-btn')) return;
+    zoomLevel = 1; panX = 0; panY = 0;
+    applyZoom();
+    container.style.cursor = '';
+  });
+}
