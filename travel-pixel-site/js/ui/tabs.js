@@ -63,6 +63,7 @@ export function initTabs() {
     if (key === 'q') switchTab('quests');
     if (key === 'm') switchTab('map');
     if (key === 'a') switchTab('achievements');
+    if (key === 'c') switchTab('magnets');
     if (e.key === 'F5') {
       e.preventDefault();
       showToast('★', 'PROGRESS SAVED.');

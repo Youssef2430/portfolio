@@ -11,6 +11,7 @@ import { renderLeftPanel }   from './render/leftpanel.js';
 import { renderQuestLog }    from './render/quests.js';
 import { initMap, initMapZoom } from './render/map.js';
 import { renderAchievements } from './render/achievements.js';
+import { renderMagnets }     from './render/magnets.js';
 import { renderRightPanel, initLiveWeather }  from './render/rightpanel.js';
 import { renderBottomBar }   from './render/bottombar.js';
 
@@ -39,7 +40,7 @@ document.title = config.site.title;
 renderTopBar(config.character, 'top-bar');
 renderLeftPanel(config, 'left-panel');
 renderRightPanel(config, 'right-panel');
-renderBottomBar(config.site, 'bottom-bar');
+renderBottomBar(config, 'bottom-bar');
 
 // Main panel: create the tab structure, then render content into each tab
 const mainPanel = document.getElementById('main-panel');
@@ -48,6 +49,7 @@ mainPanel.innerHTML = `
     <button class="tab-btn active" data-tab="quests">QUEST LOG</button>
     <button class="tab-btn" data-tab="map">WORLD MAP</button>
     <button class="tab-btn" data-tab="achievements">ACHIEVEMENTS</button>
+    <button class="tab-btn" data-tab="magnets">MAGNETS</button>
   </div>
   <div id="tab-quests" class="tab-content active"></div>
   <div id="tab-map" class="tab-content">
@@ -77,12 +79,14 @@ mainPanel.innerHTML = `
     </div>
   </div>
   <div id="tab-achievements" class="tab-content"></div>
+  <div id="tab-magnets" class="tab-content"></div>
 `;
 
 // Render tab contents
 renderQuestLog(config.quests, 'tab-quests');
-initMap(config.cities, config.flights, config.continents);
+initMap(config.cities, config.flights, config.continents, config.terrain);
 renderAchievements(config.achievements, 'tab-achievements');
+renderMagnets(config.magnets, 'tab-magnets');
 
 // ═══════════════════════════════════════════════
 // 3. Wire up interactions (DOM exists now)
@@ -91,7 +95,7 @@ initTabs();
 initMapZoom();
 initTooltips();
 initPanelToggles();
-initClock(config.site.currentDay);
+initClock(config.cities.filter(c => c.status === 'visited').length);
 initThemeToggle();
 
 // ═══════════════════════════════════════════════

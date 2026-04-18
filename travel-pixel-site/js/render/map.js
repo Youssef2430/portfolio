@@ -2,12 +2,13 @@
 // MAP — Canvas world map, flights, city pins
 // ═══════════════════════════════════════════════
 
-const MAP_W = 240;
-const MAP_H = 120;
+const MAP_W = 960;
+const MAP_H = 480;
 
 let mapCities = [];
 let mapFlights = [];
 let mapContinents = [];
+let mapTerrain = [];
 let animFrameId = null;
 
 function lonLatToXY(lon, lat) {
@@ -26,33 +27,198 @@ function getThemeColors() {
     gold:      s.getPropertyValue('--gold').trim(),
     green:     s.getPropertyValue('--green').trim(),
     cyan:      s.getPropertyValue('--cyan').trim(),
+    // Terrain biomes
+    forest:       s.getPropertyValue('--terrain-forest').trim(),
+    jungle:       s.getPropertyValue('--terrain-jungle').trim(),
+    desert:       s.getPropertyValue('--terrain-desert').trim(),
+    mountain:     s.getPropertyValue('--terrain-mountain').trim(),
+    mountainPeak: s.getPropertyValue('--terrain-mountain-peak').trim(),
+    tundra:       s.getPropertyValue('--terrain-tundra').trim(),
+    savanna:      s.getPropertyValue('--terrain-savanna').trim(),
   };
+}
+
+// ── Seeded PRNG for deterministic pixel patterns ──
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// ── Check if a point is inside a polygon (ray casting) ──
+function pointInPoly(px, py, poly) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i];
+    const [xj, yj] = poly[j];
+    if ((yi > py) !== (yj > py) && px < (xj - xi) * (py - yi) / (yj - yi) + xi) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+// ── Draw pixel-art texture detail inside a terrain polygon ──
+function drawTerrainTexture(ctx, type, polyCoords, colors) {
+  // polyCoords are already in canvas space [x, y]
+  // Find bounding box
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  polyCoords.forEach(([x, y]) => {
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+    if (y < minY) minY = y;
+    if (y > maxY) maxY = y;
+  });
+
+  const rng = mulberry32(Math.floor(minX * 7 + minY * 13 + 42));
+  const step = type === 'mountain' ? 8 : 10;
+
+  ctx.save();
+
+  // Clip to the terrain polygon
+  ctx.beginPath();
+  ctx.moveTo(polyCoords[0][0], polyCoords[0][1]);
+  for (let i = 1; i < polyCoords.length; i++) {
+    ctx.lineTo(polyCoords[i][0], polyCoords[i][1]);
+  }
+  ctx.closePath();
+  ctx.clip();
+
+  if (type === 'forest') {
+    // Small pixel trees: trunk + canopy
+    for (let x = minX; x < maxX; x += step) {
+      for (let y = minY; y < maxY; y += step) {
+        if (rng() > 0.45) continue;
+        const tx = Math.floor(x + rng() * step);
+        const ty = Math.floor(y + rng() * step);
+        // Canopy (3×2 dark block)
+        ctx.fillStyle = colors.forest;
+        ctx.fillRect(tx - 1, ty - 3, 3, 2);
+        // Trunk (1×1)
+        ctx.fillStyle = colors.land;
+        ctx.fillRect(tx, ty - 1, 1, 1);
+      }
+    }
+  } else if (type === 'jungle') {
+    // Dense canopy blobs — thicker, more packed
+    for (let x = minX; x < maxX; x += 7) {
+      for (let y = minY; y < maxY; y += 7) {
+        if (rng() > 0.55) continue;
+        const tx = Math.floor(x + rng() * 7);
+        const ty = Math.floor(y + rng() * 7);
+        ctx.fillStyle = colors.jungle;
+        // Thick canopy cluster
+        ctx.fillRect(tx - 1, ty - 2, 4, 3);
+        ctx.fillRect(tx, ty - 3, 2, 1);
+      }
+    }
+  } else if (type === 'desert') {
+    // Sandy dots + occasional dune ridges
+    for (let x = minX; x < maxX; x += step) {
+      for (let y = minY; y < maxY; y += step) {
+        if (rng() > 0.3) continue;
+        const tx = Math.floor(x + rng() * step);
+        const ty = Math.floor(y + rng() * step);
+        ctx.fillStyle = colors.desert;
+        if (rng() > 0.7) {
+          // Dune ridge (small horizontal line)
+          ctx.fillRect(tx, ty, 4, 1);
+        } else {
+          // Sand speckle
+          ctx.fillRect(tx, ty, 1, 1);
+        }
+      }
+    }
+  } else if (type === 'mountain') {
+    // Pixel-art triangle peaks ▲
+    for (let x = minX; x < maxX; x += step) {
+      for (let y = minY; y < maxY; y += step) {
+        if (rng() > 0.45) continue;
+        const tx = Math.floor(x + rng() * step);
+        const ty = Math.floor(y + rng() * step);
+        // Mountain body
+        ctx.fillStyle = colors.mountain;
+        ctx.fillRect(tx - 2, ty,     5, 1);  // base
+        ctx.fillRect(tx - 1, ty - 1, 3, 1);  // mid
+        ctx.fillRect(tx,     ty - 2, 1, 1);  // peak
+        // Snow cap
+        ctx.fillStyle = colors.mountainPeak;
+        ctx.fillRect(tx, ty - 2, 1, 1);
+        ctx.fillRect(tx - 1, ty - 1, 3, 1);
+      }
+    }
+  } else if (type === 'tundra') {
+    // Sparse icy speckles
+    for (let x = minX; x < maxX; x += 12) {
+      for (let y = minY; y < maxY; y += 12) {
+        if (rng() > 0.25) continue;
+        const tx = Math.floor(x + rng() * 12);
+        const ty = Math.floor(y + rng() * 12);
+        ctx.fillStyle = colors.tundra;
+        ctx.fillRect(tx, ty, 2, 1);
+      }
+    }
+  } else if (type === 'savanna') {
+    // Scattered short grass tufts + occasional lone tree
+    for (let x = minX; x < maxX; x += step) {
+      for (let y = minY; y < maxY; y += step) {
+        if (rng() > 0.35) continue;
+        const tx = Math.floor(x + rng() * step);
+        const ty = Math.floor(y + rng() * step);
+        ctx.fillStyle = colors.savanna;
+        if (rng() > 0.85) {
+          // Lone acacia-like tree
+          ctx.fillRect(tx, ty - 2, 1, 2);      // trunk
+          ctx.fillRect(tx - 2, ty - 3, 5, 1);  // flat canopy
+        } else {
+          // Grass tuft
+          ctx.fillRect(tx, ty, 2, 1);
+          ctx.fillRect(tx + 1, ty - 1, 1, 1);
+        }
+      }
+    }
+  }
+
+  ctx.restore();
 }
 
 function drawMap() {
   const canvas = document.getElementById('map-canvas');
   if (!canvas) return;
-  canvas.width = MAP_W;
-  canvas.height = MAP_H;
+
+  // Scale canvas resolution with zoom + devicePixelRatio so quality
+  // stays constant at every zoom level instead of just enlarging pixels.
+  const dpr = window.devicePixelRatio || 1;
+  const renderScale = zoomLevel * dpr;
+
+  canvas.width  = MAP_W * renderScale;
+  canvas.height = MAP_H * renderScale;
+
   const ctx = canvas.getContext('2d');
+  ctx.scale(renderScale, renderScale);
+
   const colors = getThemeColors();
 
   // Ocean
   ctx.fillStyle = colors.ocean;
   ctx.fillRect(0, 0, MAP_W, MAP_H);
 
-  // Grid dots
+  // Grid dots — subdivide as we zoom for better distance reading
   ctx.fillStyle = colors.grid;
-  for (let x = 0; x < MAP_W; x += 12) {
-    for (let y = 0; y < MAP_H; y += 12) {
-      ctx.fillRect(x, y, 1, 1);
+  const gridStep = Math.max(12, Math.floor(48 / zoomLevel));
+  for (let x = 0; x < MAP_W; x += gridStep) {
+    for (let y = 0; y < MAP_H; y += gridStep) {
+      ctx.fillRect(x, y, 2, 2);
     }
   }
 
   // Continents
   ctx.fillStyle = colors.land;
   ctx.strokeStyle = colors.stroke;
-  ctx.lineWidth = 0.5;
+  ctx.lineWidth = 1.5;
 
   mapContinents.forEach(poly => {
     ctx.beginPath();
@@ -67,6 +233,34 @@ function drawMap() {
     ctx.stroke();
   });
 
+  // Terrain biomes — fill + pixel-art textures
+  mapTerrain.forEach(({ type, poly }) => {
+    // Convert lon/lat polygon to canvas coords
+    const canvasCoords = poly.map(([lon, lat]) => lonLatToXY(lon, lat));
+
+    // Subtle fill for the biome area
+    const fillColors = {
+      forest:  colors.forest,
+      jungle:  colors.jungle,
+      desert:  colors.desert,
+      mountain: colors.mountain,
+      tundra:  colors.tundra,
+      savanna: colors.savanna,
+    };
+
+    ctx.fillStyle = fillColors[type] || colors.land;
+    ctx.beginPath();
+    ctx.moveTo(canvasCoords[0][0], canvasCoords[0][1]);
+    for (let i = 1; i < canvasCoords.length; i++) {
+      ctx.lineTo(canvasCoords[i][0], canvasCoords[i][1]);
+    }
+    ctx.closePath();
+    ctx.fill();
+
+    // Pixel-art texture detail on top
+    drawTerrainTexture(ctx, type, canvasCoords, colors);
+  });
+
   // City dots on base canvas
   const statusColors = {
     current: colors.gold,
@@ -78,7 +272,7 @@ function drawMap() {
   mapCities.forEach(c => {
     const [cx, cy] = lonLatToXY(c.lon, c.lat);
     ctx.fillStyle = statusColors[c.status] || colors.green;
-    ctx.fillRect(Math.round(cx) - 1, Math.round(cy) - 1, 2, 2);
+    ctx.fillRect(Math.round(cx) - 3, Math.round(cy) - 3, 6, 6);
   });
 }
 
@@ -88,8 +282,12 @@ function drawFlights() {
   if (!container || !canvas) return;
 
   const rect = container.getBoundingClientRect();
-  canvas.width = rect.width;
-  canvas.height = rect.height;
+  const dpr = window.devicePixelRatio || 1;
+  const renderScale = zoomLevel * dpr;
+
+  canvas.width  = rect.width  * renderScale;
+  canvas.height = rect.height * renderScale;
+
   const ctx = canvas.getContext('2d');
   const scaleX = rect.width / MAP_W;
   const scaleY = rect.height / MAP_H;
@@ -106,7 +304,11 @@ function drawFlights() {
   if (animFrameId) cancelAnimationFrame(animFrameId);
 
   function animate() {
+    // Reset transform so clearRect covers the full bitmap, then re-apply scale
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.scale(renderScale, renderScale);
+
     dashOffset -= 0.3;
 
     mapFlights.forEach(([fromName, toName]) => {
@@ -173,10 +375,11 @@ function placeCityPins() {
   });
 }
 
-export function initMap(cities, flights, continents) {
+export function initMap(cities, flights, continents, terrain) {
   mapCities = cities;
   mapFlights = flights;
   mapContinents = continents;
+  mapTerrain = terrain || [];
 }
 
 export function renderMap() {
@@ -201,6 +404,12 @@ window.addEventListener('resize', () => {
     placeCityPins();
   }
 });
+
+// Re-render both canvases at the current zoom resolution
+function redrawForZoom() {
+  drawMap();
+  drawFlights();
+}
 
 // ═══════════════════════════════════════════════
 // ZOOM & PAN
@@ -237,6 +446,7 @@ export function initMapZoom() {
     zoomLevel = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoomLevel + delta));
     if (zoomLevel <= 1) { panX = 0; panY = 0; zoomLevel = 1; }
     clampPan();
+    redrawForZoom();
     applyZoom();
   }, { passive: false });
 
@@ -272,6 +482,7 @@ export function initMapZoom() {
   document.getElementById('map-zoom-in')?.addEventListener('click', () => {
     zoomLevel = Math.min(ZOOM_MAX, zoomLevel + ZOOM_STEP);
     clampPan();
+    redrawForZoom();
     applyZoom();
     container.style.cursor = 'grab';
   });
@@ -280,11 +491,13 @@ export function initMapZoom() {
     zoomLevel = Math.max(ZOOM_MIN, zoomLevel - ZOOM_STEP);
     if (zoomLevel <= 1) { panX = 0; panY = 0; zoomLevel = 1; container.style.cursor = ''; }
     clampPan();
+    redrawForZoom();
     applyZoom();
   });
 
   document.getElementById('map-zoom-reset')?.addEventListener('click', () => {
     zoomLevel = 1; panX = 0; panY = 0;
+    redrawForZoom();
     applyZoom();
     container.style.cursor = '';
   });
@@ -293,6 +506,7 @@ export function initMapZoom() {
   container.addEventListener('dblclick', (e) => {
     if (e.target.closest('.map-zoom-btn')) return;
     zoomLevel = 1; panX = 0; panY = 0;
+    redrawForZoom();
     applyZoom();
     container.style.cursor = '';
   });

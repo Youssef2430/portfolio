@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════
-// RIGHT PANEL — Weather, skill tree, loot log
+// RIGHT PANEL — Weather, skill tree
 // ═══════════════════════════════════════════════
 
 // ── Weather code → emoji mapping ──
@@ -55,31 +55,12 @@ function renderSkillTree(skills) {
   `;
 }
 
-// ── Loot log ──
-function renderLootLog(lootLog) {
-  const items = lootLog.map(l => `
-    <div class="loot-item">
-      <span class="loot-icon">${l.icon}</span>
-      <span class="loot-text">${l.text}</span>
-      <span class="loot-trip">${l.trip}</span>
-    </div>
-  `).join('');
-
-  return `
-    <div class="panel-section">
-      <div class="panel-header">LOOT LOG</div>
-      <div class="loot-feed">${items}</div>
-    </div>
-  `;
-}
-
 // ── Main render ──
 export function renderRightPanel(config, containerId) {
   const el = document.getElementById(containerId);
   el.innerHTML =
     renderWeather(config.weather) +
-    renderSkillTree(config.skills) +
-    renderLootLog(config.lootLog);
+    renderSkillTree(config.skills);
 }
 
 // ── Live weather fetch (called after initial render) ──

@@ -41,10 +41,6 @@ export function renderTopBar(character, containerId) {
       </div>
     </div>
     <div class="top-nav">
-      <button class="nav-btn active" data-tab="quests">JOURNAL</button>
-      <button class="nav-btn" data-tab="map">MAP <span class="notif">!</span></button>
-      <button class="nav-btn" data-tab="achievements">FEATS</button>
-      <button class="nav-btn" data-action="save">SAVE</button>
       <button class="theme-toggle" data-action="theme" title="Toggle Day/Night">🌙</button>
     </div>
   `;

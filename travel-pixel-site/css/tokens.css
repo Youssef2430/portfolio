@@ -28,6 +28,15 @@
   --map-land-stroke: #2a3a2a;
   --map-grid:        rgba(200,170,118,0.04);
 
+  /* Map terrain biomes */
+  --terrain-forest:    #0e1e0e;
+  --terrain-jungle:    #0a2210;
+  --terrain-desert:    #2a2418;
+  --terrain-mountain:  #1a1a20;
+  --terrain-mountain-peak: #2e2e38;
+  --terrain-tundra:    #141820;
+  --terrain-savanna:   #1e2010;
+
   /* Hero scene */
   --sky-top:       #0a0e1a;
   --sky-bottom:    #121a24;
@@ -69,6 +78,15 @@
   --map-land:        #a8c898;
   --map-land-stroke: #7a9a6a;
   --map-grid:        rgba(60,40,10,0.06);
+
+  /* Map terrain biomes */
+  --terrain-forest:    #5a8a48;
+  --terrain-jungle:    #3a7a30;
+  --terrain-desert:    #d8c890;
+  --terrain-mountain:  #8a8a98;
+  --terrain-mountain-peak: #c8c8d8;
+  --terrain-tundra:    #c0d0d8;
+  --terrain-savanna:   #b8b868;
 
   /* Hero scene */
   --sky-top:       #88b8e0;
