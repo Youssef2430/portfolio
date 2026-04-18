@@ -1,0 +1,372 @@
+/* ═══════════════════════════════════════════════
+   COMPONENTS — Quest log, achievements,
+                party, weather, activity feed
+   ═══════════════════════════════════════════════ */
+
+/* ── QUEST LOG ── */
+.quest-entry {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  margin-bottom: 14px; cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+  position: relative; overflow: hidden;
+}
+.quest-entry::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+.quest-entry.main-quest::before  { background: var(--gold); }
+.quest-entry.side-quest::before  { background: var(--cyan); }
+.quest-entry.completed::before   { background: var(--green); }
+.quest-entry.active-quest::before {
+  background: var(--gold);
+  animation: activePulse 2s ease-in-out infinite;
+}
+.quest-entry:hover {
+  border-color: var(--gold);
+  transform: translateX(3px);
+}
+.quest-header {
+  padding: 16px 20px;
+  display: flex; justify-content: space-between; align-items: flex-start;
+}
+.quest-title-area { flex: 1; }
+.quest-type {
+  font-size: 9px; padding: 3px 10px;
+  margin-bottom: 8px; display: inline-block;
+  font-family: 'Roboto Mono', monospace;
+  letter-spacing: 0.1em;
+}
+.quest-type.main   { background: rgba(200,170,118,0.1); color: var(--gold); border: 1px solid var(--gold-dim); }
+.quest-type.side   { background: rgba(106,172,184,0.1); color: var(--cyan); border: 1px solid var(--cyan); }
+.quest-type.active { background: rgba(200,170,118,0.15); color: var(--gold); border: 1px solid var(--gold); }
+.quest-type.done   { background: rgba(90,154,106,0.1); color: var(--green); border: 1px solid var(--green); }
+
+.quest-name {
+  font-size: 14px; color: var(--text);
+  font-family: 'Inter', sans-serif; font-weight: 500;
+  margin-bottom: 6px;
+}
+.quest-location {
+  font-size: 11px; color: var(--muted);
+  font-family: 'Roboto Mono', monospace;
+}
+.quest-status { text-align: right; font-size: 11px; font-family: 'Roboto Mono', monospace; }
+.quest-date   { color: var(--muted); margin-bottom: 5px; }
+.quest-xp     { color: var(--gold); }
+
+.quest-body {
+  padding: 0 20px 18px; font-size: 13px;
+  line-height: 1.9; color: var(--dim);
+  display: none;
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+}
+.quest-entry.expanded .quest-body { display: block; }
+
+.quest-objectives {
+  margin-top: 14px; padding: 14px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--panel-border);
+}
+[data-theme="day"] .quest-objectives { background: rgba(0,0,0,0.02); }
+.quest-objectives h4 {
+  font-size: 10px; color: var(--gold); margin-bottom: 10px;
+  font-family: 'Roboto Mono', monospace;
+  letter-spacing: 0.1em;
+}
+.objective {
+  display: flex; align-items: center; gap: 10px;
+  padding: 5px 0; font-size: 12px;
+}
+.obj-check {
+  width: 16px; height: 16px;
+  border: 1px solid var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; flex-shrink: 0;
+}
+.obj-check.done { border-color: var(--green); color: var(--green); }
+.obj-text { color: var(--dim); font-family: 'Inter', sans-serif; }
+.obj-text.done { text-decoration: line-through; color: var(--muted); }
+
+.quest-rewards {
+  margin-top: 12px;
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+.reward {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(200,170,118,0.05);
+  border: 1px solid rgba(200,170,118,0.15);
+  padding: 6px 12px; font-size: 10px; color: var(--gold);
+}
+
+/* ── ACHIEVEMENTS ── */
+.achievement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+.achievement {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  padding: 16px;
+  display: flex; gap: 14px;
+  transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+  cursor: pointer;
+}
+.achievement:hover { border-color: var(--gold); }
+.achievement.unlocked {
+  border-color: rgba(200,170,118,0.3);
+  box-shadow: inset 0 0 20px rgba(200,170,118,0.03);
+}
+.achievement.locked { opacity: 0.3; filter: grayscale(1); }
+.achievement .ach-icon {
+  width: 52px; height: 52px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--gold-dim);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; flex-shrink: 0;
+}
+[data-theme="day"] .achievement .ach-icon { background: rgba(0,0,0,0.03); }
+.achievement.locked .ach-icon { border-color: #333; }
+[data-theme="day"] .achievement.locked .ach-icon { border-color: #bbb; }
+.ach-info { font-size: 12px; font-family: 'Inter', sans-serif; }
+.ach-name { color: var(--gold); font-size: 11px; margin-bottom: 5px; font-family: 'Press Start 2P'; }
+.achievement.locked .ach-name { color: var(--muted); }
+.ach-desc { color: var(--muted); line-height: 1.8; }
+.ach-date { color: var(--green); margin-top: 5px; font-size: 10px; font-family: 'Roboto Mono', monospace; }
+
+/* ── SKILL TREE ── */
+.skill-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  transition: background 0.2s;
+}
+[data-theme="day"] .skill-item { border-color: rgba(0,0,0,0.05); }
+.skill-item:hover { background: rgba(255,255,255,0.02); }
+[data-theme="day"] .skill-item:hover { background: rgba(0,0,0,0.02); }
+.skill-icon {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--panel-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+[data-theme="day"] .skill-icon { background: rgba(0,0,0,0.03); }
+.skill-info { flex: 1; font-family: 'Inter', sans-serif; }
+.skill-name {
+  font-size: 12px; color: var(--text); margin-bottom: 3px;
+}
+.skill-level {
+  font-size: 9px; color: var(--gold);
+  font-family: 'Roboto Mono', monospace;
+  margin-left: 6px;
+}
+.skill-bar {
+  font-size: 11px; color: var(--gold); letter-spacing: 2px;
+  margin-bottom: 2px;
+}
+.skill-desc {
+  font-size: 10px; color: var(--muted);
+  font-family: 'Roboto Mono', monospace;
+}
+
+/* ── WEATHER ── */
+.weather-widget {
+  padding: 20px; text-align: center;
+  border-bottom: 1px solid var(--panel-border);
+}
+.weather-icon { font-size: 42px; margin-bottom: 10px; }
+.weather-temp { font-size: 22px; color: var(--gold); }
+.weather-desc {
+  font-size: 12px; color: var(--muted); margin-top: 6px;
+  font-family: 'Inter', sans-serif;
+}
+.weather-location {
+  font-size: 10px; color: var(--gold-dim); margin-top: 8px;
+  font-family: 'Roboto Mono', monospace; letter-spacing: 0.1em;
+}
+
+/* ── MAGNET COLLECTION BOARD ── */
+.magnet-board { padding: 0; }
+
+.magnet-header {
+  margin-bottom: 24px;
+  padding: 0 4px;
+}
+.magnet-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+.magnet-title {
+  font-size: 12px;
+  color: var(--gold);
+  font-family: 'Roboto Mono', monospace;
+  letter-spacing: 0.15em;
+}
+.magnet-counter {
+  font-size: 14px;
+  color: var(--gold);
+  font-family: 'Press Start 2P', monospace;
+}
+
+/* Progress bar */
+.magnet-progress {
+  height: 8px;
+  background: #111;
+  border: 1px solid var(--panel-border);
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+[data-theme="day"] .magnet-progress { background: rgba(0,0,0,0.08); }
+.magnet-progress-bar {
+  height: 100%;
+  background: var(--gold);
+  position: relative;
+  transition: width 1.2s cubic-bezier(0.16,1,0.3,1);
+}
+.magnet-progress-bar::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.2), transparent);
+}
+
+/* Filter buttons */
+.magnet-filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.magnet-filter {
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  color: var(--muted);
+  font-family: 'Roboto Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  padding: 5px 14px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+.magnet-filter:hover { border-color: var(--gold); color: var(--text); }
+.magnet-filter.active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(200,170,118,0.08);
+}
+
+/* Magnet grid */
+.magnet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+/* Individual magnet card */
+.magnet-card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  transform: rotate(var(--rotate, 0deg));
+  transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+  animation: magnetSlideIn 0.5s cubic-bezier(0.16,1,0.3,1) var(--delay, 0ms) both;
+  position: relative;
+}
+
+@keyframes magnetSlideIn {
+  from {
+    opacity: 0;
+    transform: rotate(var(--rotate, 0deg)) translateY(20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(var(--rotate, 0deg)) translateY(0) scale(1);
+  }
+}
+
+.magnet-card.collected {
+  border-color: rgba(200,170,118,0.3);
+  box-shadow: inset 0 0 20px rgba(200,170,118,0.03);
+}
+.magnet-card.collected:hover {
+  border-color: var(--gold);
+  box-shadow:
+    0 0 20px rgba(200,170,118,0.1),
+    inset 0 0 20px rgba(200,170,118,0.05);
+  z-index: 2;
+}
+
+.magnet-card.locked {
+  opacity: 0.35;
+  filter: grayscale(0.8);
+}
+.magnet-card.locked:hover {
+  opacity: 0.5;
+  border-color: var(--cyan);
+}
+
+/* Magnet image */
+.magnet-img-wrap {
+  position: relative;
+  margin-bottom: 10px;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: rgba(255,255,255,0.01);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+[data-theme="day"] .magnet-img-wrap {
+  background: rgba(0,0,0,0.02);
+  border-color: rgba(0,0,0,0.06);
+}
+
+.magnet-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  padding: 6px;
+}
+
+/* Lock overlay for planned magnets */
+.magnet-lock {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  background: rgba(0,0,0,0.4);
+}
+[data-theme="day"] .magnet-lock {
+  background: rgba(255,255,255,0.3);
+}
+
+/* Labels */
+.magnet-label {
+  font-size: 10px;
+  color: var(--text);
+  font-family: 'Press Start 2P', monospace;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+.magnet-card.locked .magnet-label { color: var(--muted); }
+
+.magnet-country {
+  font-size: 9px;
+  color: var(--muted);
+  font-family: 'Roboto Mono', monospace;
+  letter-spacing: 0.1em;
+}
+.magnet-card.collected .magnet-country { color: var(--gold-dim); }
