@@ -8,6 +8,11 @@ export function renderTopBar(character, containerId) {
   const xpPct = Math.round((character.xp.current / character.xp.max) * 100);
   const stPct = Math.round((character.stamina.current / character.stamina.max) * 100);
 
+  // Determine current theme so we can render the correct accessible name
+  const currentTheme = document.documentElement.getAttribute('data-theme') || 'night';
+  const toggleIcon = currentTheme === 'night' ? '🌙' : '☀️';
+  const toggleLabel = currentTheme === 'night' ? 'Switch to Day' : 'Switch to Night';
+
   const arabicName = character.nameArabic
     ? ` <span class="arabic-bracket" style="font-size:16px;">${character.nameArabic}</span>`
     : '';
@@ -41,7 +46,7 @@ export function renderTopBar(character, containerId) {
       </div>
     </div>
     <div class="top-nav">
-      <button class="theme-toggle" data-action="theme" title="Toggle Day/Night">🌙</button>
+      <button class="theme-toggle" data-action="theme" type="button" title="${toggleLabel}" aria-label="${toggleLabel}">${toggleIcon}</button>
     </div>
   `;
 }

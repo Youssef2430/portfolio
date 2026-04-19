@@ -6,6 +6,7 @@ const MAP_W = 640;
 const MAP_H = 320;
 
 let mapCities = [];
+let mapCityIndex = new Map(); // name → city, built once in initMap for O(1) lookups
 let mapFlights = [];
 let mapContinents = [];
 let mapTerrain = [];
@@ -409,8 +410,9 @@ function drawFlights() {
     dashOffset -= 0.3;
 
     mapFlights.forEach(([fromName, toName]) => {
-      const from = mapCities.find(c => c.name === fromName);
-      const to   = mapCities.find(c => c.name === toName);
+      // Use the pre-built name→city index for O(1) lookup on every frame.
+      const from = mapCityIndex.get(fromName);
+      const to   = mapCityIndex.get(toName);
       if (!from || !to) return;
 
       const [x1, y1] = toScreen(from.lon, from.lat);
@@ -474,9 +476,23 @@ function placeCityPins() {
 
 export function initMap(cities, flights, continents, terrain) {
   mapCities = cities;
+  // Build a name→city Map once so the flight animation loop avoids
+  // O(flights * cities) Array#find calls on every requestAnimationFrame tick.
+  mapCityIndex = new Map(cities.map(c => [c.name, c]));
   mapFlights = flights;
   mapContinents = continents;
   mapTerrain = terrain || [];
+}
+
+// Cancel the flight animation loop. Called when the user switches away from
+// the map tab (or the tab becomes hidden) so we don't keep repainting in the
+// background — left unchecked, requestAnimationFrame will happily burn CPU
+// and battery forever.
+export function stopMapAnimation() {
+  if (animFrameId) {
+    cancelAnimationFrame(animFrameId);
+    animFrameId = null;
+  }
 }
 
 export function renderMap() {
@@ -499,6 +515,17 @@ window.addEventListener('resize', () => {
   if (mapTab && mapTab.classList.contains('active')) {
     drawFlights();
     placeCityPins();
+  }
+});
+
+// Pause/resume flight animation when the page visibility changes so we
+// don't keep a requestAnimationFrame loop running in a hidden tab.
+document.addEventListener('visibilitychange', () => {
+  const mapTab = document.getElementById('tab-map');
+  if (document.visibilityState === 'hidden') {
+    stopMapAnimation();
+  } else if (document.visibilityState === 'visible' && mapTab && mapTab.classList.contains('active')) {
+    drawFlights();
   }
 });
 

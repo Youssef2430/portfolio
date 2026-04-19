@@ -6,7 +6,9 @@ export function renderMagnets(magnets, containerId) {
   const el = document.getElementById(containerId);
   const collected = magnets.filter(m => m.collected).length;
   const total = magnets.length;
-  const pct = Math.round((collected / total) * 100);
+  // Guard against empty magnet arrays — 0/0 would produce NaN and emit
+  // `width:NaN%` into the progress-bar style.
+  const pct = total > 0 ? Math.round((collected / total) * 100) : 0;
 
   // Get unique regions for filter buttons
   const regions = [...new Set(magnets.map(m => m.region))];

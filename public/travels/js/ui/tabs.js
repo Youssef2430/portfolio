@@ -2,7 +2,7 @@
 // TABS — Tab switching + keyboard shortcuts
 // ═══════════════════════════════════════════════
 
-import { renderMap } from '../render/map.js';
+import { renderMap, stopMapAnimation } from '../render/map.js';
 import { showToast } from './toast.js';
 
 let mapInitialized = false;
@@ -30,6 +30,10 @@ export function switchTab(tabId) {
   } else if (tabId === 'map') {
     // Re-render flights/pins on subsequent opens (handles resize)
     renderMap();
+  } else {
+    // Leaving the map tab — cancel the RAF loop so we don't burn CPU/battery
+    // redrawing an offscreen canvas.
+    stopMapAnimation();
   }
 }
 
