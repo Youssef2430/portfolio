@@ -1,0 +1,44 @@
+/* ═══════════════════════════════════════════════
+   EFFECTS — Atmospheric overlays & keyframes
+   ═══════════════════════════════════════════════ */
+
+/* ── FILM GRAIN ── */
+#grain {
+  position: fixed; inset: 0; z-index: 9998;
+  pointer-events: none;
+  opacity: var(--grain-opacity, 0.035);
+  transition: opacity 0.6s ease;
+}
+
+/* ── SCANLINES ── */
+#scanlines {
+  position: fixed; inset: 0; z-index: 9997;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px
+  );
+  opacity: var(--scanline-opacity, 0.06);
+  transition: opacity 0.6s ease;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes activePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes cityPulse {
+  0%, 100% { box-shadow: 0 0 6px var(--gold); }
+  50% { box-shadow: 0 0 18px var(--gold); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
