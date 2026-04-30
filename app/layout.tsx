@@ -5,6 +5,7 @@ import "katex/dist/katex.min.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PostHogProvider } from "./providers";
 import { CustomCursor } from "@/components/custom-cursor";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "Youssef Chouay | يوسف شواي",
@@ -48,6 +49,7 @@ export default function RootLayout({
             {children}
           </ThemeProvider>
         </PostHogProvider>
+        <Analytics />
       </body>
     </html>
   );
