@@ -23,7 +23,7 @@ export function About() {
     >
       {/* Background */}
       <motion.div className="absolute inset-0 z-0" style={{ y: backgroundY }}>
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-[hsl(220,20%,6%)] to-black" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-[hsl(var(--wash))] to-background" />
       </motion.div>
 
       {/* Static noise with fade */}
@@ -41,7 +41,7 @@ export function About() {
       <div
         className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none z-[2]"
         style={{
-          background: `linear-gradient(to bottom, transparent 0%, black 100%)`,
+          background: `linear-gradient(to bottom, transparent 0%, hsl(var(--background)) 100%)`,
         }}
       />
 
@@ -56,13 +56,13 @@ export function About() {
             className="mb-8"
           >
             <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
-              <span className="text-4xl md:text-6xl lg:text-7xl font-light text-white tracking-tight">
+              <span className="text-4xl md:text-6xl lg:text-7xl font-light text-foreground tracking-tight">
                 YCAY
               </span>
-              <span className="font-mono text-[10px] md:text-xs tracking-[0.2em] text-[hsl(0,0%,40%)] uppercase">
+              <span className="font-mono text-[10px] md:text-xs tracking-[0.2em] text-[hsl(var(--foreground-subtle))] uppercase">
                 [HOME]
               </span>
-              <span className="text-2xl md:text-4xl lg:text-5xl font-light text-[hsl(0,0%,50%)] tracking-tight">
+              <span className="text-2xl md:text-4xl lg:text-5xl font-light text-[hsl(var(--foreground-muted))] tracking-tight">
                 IS THE FOLIO OF
               </span>
             </div>
@@ -80,19 +80,19 @@ export function About() {
             className="mb-16"
           >
             <div className="flex flex-wrap items-baseline gap-x-4">
-              <span className="text-4xl md:text-6xl lg:text-7xl font-light text-white tracking-tight">
+              <span className="text-4xl md:text-6xl lg:text-7xl font-light text-foreground tracking-tight">
                 YOUSSEF
               </span>
-              <span className="text-2xl md:text-4xl lg:text-5xl font-light text-[hsl(0,0%,40%)] tracking-tight">
+              <span className="text-2xl md:text-4xl lg:text-5xl font-light text-[hsl(var(--foreground-subtle))] tracking-tight">
                 [
               </span>
-              <span className="font-arabic text-3xl md:text-5xl lg:text-6xl text-[hsl(42,45%,75%)]">
+              <span className="font-arabic text-3xl md:text-5xl lg:text-6xl text-[hsl(var(--gold))]">
                 يوسف شواي
               </span>
-              <span className="text-2xl md:text-4xl lg:text-5xl font-light text-[hsl(0,0%,40%)] tracking-tight">
+              <span className="text-2xl md:text-4xl lg:text-5xl font-light text-[hsl(var(--foreground-subtle))] tracking-tight">
                 ]
               </span>
-              <span className="text-4xl md:text-6xl lg:text-7xl font-light text-white tracking-tight">
+              <span className="text-4xl md:text-6xl lg:text-7xl font-light text-foreground tracking-tight">
                 CHOUAY ↓
               </span>
             </div>
@@ -107,7 +107,7 @@ export function About() {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="flex justify-center mb-20"
           >
-            <div className="w-2 h-2 rounded-full bg-[hsl(42,45%,75%)]" />
+            <div className="w-2 h-2 rounded-full bg-[hsl(var(--gold))]" />
           </motion.div>
 
           {/* Role description - large typography */}
@@ -122,14 +122,14 @@ export function About() {
             className="max-w-5xl mx-auto mb-20"
           >
             <div className="text-center">
-              <h2 className="text-3xl md:text-5xl lg:text-6xl font-light text-white tracking-tight leading-tight mb-4">
+              <h2 className="text-3xl md:text-5xl lg:text-6xl font-light text-foreground tracking-tight leading-tight mb-4">
                 SOFTWARE ENGINEER, RESEARCHER
               </h2>
               <div className="flex items-center justify-center gap-4 flex-wrap">
-                <span className="font-arabic text-2xl md:text-4xl text-[hsl(42,45%,75%)] italic">
+                <span className="font-arabic text-2xl md:text-4xl text-[hsl(var(--gold))] italic">
                   and
                 </span>
-                <span className="text-3xl md:text-5xl lg:text-6xl font-light text-white tracking-tight">
+                <span className="text-3xl md:text-5xl lg:text-6xl font-light text-foreground tracking-tight">
                   GRAPH THEORY ENTHUSIAST
                 </span>
               </div>
@@ -150,17 +150,17 @@ export function About() {
             {/* Left column - Current role */}
             <div>
               <div className="mb-8">
-                <p className="font-mono text-xs tracking-[0.15em] text-[hsl(0,0%,50%)] uppercase">
+                <p className="font-mono text-xs tracking-[0.15em] text-[hsl(var(--foreground-muted))] uppercase">
                   AI RESEARCHER{" "}
-                  <span className="text-[hsl(42,45%,75%)]">@</span> NATIONAL
+                  <span className="text-[hsl(var(--gold))]">@</span> NATIONAL
                   RESEARCH COUNCIL
                 </p>
-                <p className="font-mono text-xs tracking-[0.15em] text-[hsl(0,0%,40%)] uppercase mt-1">
+                <p className="font-mono text-xs tracking-[0.15em] text-[hsl(var(--foreground-subtle))] uppercase mt-1">
                   BASED IN OTTAWA, CANADA
                 </p>
               </div>
 
-              <p className="text-[hsl(0,0%,70%)] leading-relaxed">
+              <p className="text-[hsl(var(--foreground-soft))] leading-relaxed">
                 I'm a software engineer and researcher with a passion for
                 creating elegant, efficient solutions to complex problems.
                 Growing up curious about the world and my surroundings, I've
@@ -171,16 +171,16 @@ export function About() {
             {/* Right column - Philosophy */}
             <div>
               <div className="mb-8">
-                <p className="font-mono text-xs tracking-[0.15em] text-[hsl(0,0%,50%)] uppercase">
+                <p className="font-mono text-xs tracking-[0.15em] text-[hsl(var(--foreground-muted))] uppercase">
                   M.SC COMPUTER SCIENCE{" "}
-                  <span className="text-[hsl(42,45%,75%)]">@</span> UOTTAWA
+                  <span className="text-[hsl(var(--gold))]">@</span> UOTTAWA
                 </p>
-                <p className="font-mono text-xs tracking-[0.15em] text-[hsl(0,0%,40%)] uppercase mt-1">
+                <p className="font-mono text-xs tracking-[0.15em] text-[hsl(var(--foreground-subtle))] uppercase mt-1">
                   FOCUS: GRAPH THEORY
                 </p>
               </div>
 
-              <p className="text-[hsl(0,0%,70%)] leading-relaxed">
+              <p className="text-[hsl(var(--foreground-soft))] leading-relaxed">
                 I've kept that approach and mindset throughout my whole life and
                 I'm slowly chipping the iceberg of knowledge hoping to make a
                 big enough dent to make my younger self proud. Currently

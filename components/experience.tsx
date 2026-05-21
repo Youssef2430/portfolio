@@ -41,7 +41,7 @@ const experiences: ExperienceItem[] = [
       {
         name: "AI-Enhanced Building Automation (BAS) for Modern Facilities",
         details: [
-          <>Published, as <strong>First-author</strong>, a peer-reviewed paper called &ldquo;<strong>Implementing AI in Smart Buildings: A Modular, Proof-of-Concept approach</strong>&rdquo; and presented to field experts at <a href="https://epec2025.ieee.ca/" target="_blank" rel="noopener noreferrer" className="text-[hsl(42,45%,75%)] hover:text-white transition-colors underline decoration-[hsl(42,45%,75%)]/30 hover:decoration-white">IEEE EPEC 2025</a>.</>,
+          <>Published, as <strong>First-author</strong>, a peer-reviewed paper called &ldquo;<strong>Implementing AI in Smart Buildings: A Modular, Proof-of-Concept approach</strong>&rdquo; and presented to field experts at <a href="https://epec2025.ieee.ca/" target="_blank" rel="noopener noreferrer" className="text-[hsl(var(--gold))] hover:text-foreground transition-colors underline decoration-[hsl(var(--gold))]/30 hover:decoration-foreground">IEEE EPEC 2025</a>.</>,
           "Designed and deployed using Python/LangChain agents bridging BAS and LLM tools, cutting data-processing time and operator workload by 49%.",
           "Built a SQLite-backed ingestion pipeline to process and integrate real-time BAS streams reliably.",
           "Partnered with Delta Controls and Carleton University to deliver AI building agents, achieving a 56% reduction in maintenance costs via automated fault detection, predictive maintenance, and real-time alerts.",
@@ -103,7 +103,7 @@ export function Experience() {
       className="relative py-32 overflow-hidden"
     >
       {/* Subtle background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[hsl(220,30%,5%)] to-transparent opacity-50" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[hsl(var(--wash))] to-transparent opacity-50" />
 
       {/* Static noise with fade */}
       <div
@@ -124,7 +124,7 @@ export function Experience() {
               initial={{ opacity: 0, x: -50 }}
               animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
               transition={{ duration: 1, ease: [0.55, 0.45, 0.16, 1] }}
-              className="text-section text-white font-light"
+              className="text-section text-foreground font-light"
             >
               EX
             </motion.span>
@@ -136,7 +136,7 @@ export function Experience() {
               className="flex flex-col items-center mx-2 md:mx-4"
             >
               <span className="arabic-bracket text-lg md:text-xl">「</span>
-              <span className="font-arabic text-xl md:text-3xl text-[hsl(42,45%,75%)]">
+              <span className="font-arabic text-xl md:text-3xl text-[hsl(var(--gold))]">
                 خبرة
               </span>
               <span className="arabic-bracket text-lg md:text-xl">」</span>
@@ -146,7 +146,7 @@ export function Experience() {
               initial={{ opacity: 0, x: 50 }}
               animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 50 }}
               transition={{ duration: 1, ease: [0.55, 0.45, 0.16, 1] }}
-              className="text-section text-white font-light"
+              className="text-section text-foreground font-light"
             >
               P
             </motion.span>
@@ -157,7 +157,7 @@ export function Experience() {
         <div className="max-w-4xl mx-auto">
           <div className="relative">
             {/* Vertical line */}
-            <div className="absolute left-0 md:left-8 top-0 bottom-0 w-px bg-[hsl(0,0%,15%)]" />
+            <div className="absolute left-0 md:left-8 top-0 bottom-0 w-px bg-border" />
 
             {experiences.map((item, index) => (
               <motion.div
@@ -172,9 +172,12 @@ export function Experience() {
               >
                 {/* Timeline dot */}
                 <motion.div
-                  className="absolute left-0 md:left-8 top-1 w-2 h-2 -ml-[3px] md:-ml-1 rounded-full bg-[hsl(0,0%,25%)] border-2 border-black"
+                  className={`absolute left-0 md:left-8 top-1 w-2 h-2 -ml-[3px] md:-ml-1 rounded-full border-2 border-background transition-colors duration-300 ${
+                    hoveredIndex === index
+                      ? "bg-[hsl(var(--gold))]"
+                      : "bg-[hsl(var(--timeline-dot))]"
+                  }`}
                   animate={{
-                    backgroundColor: hoveredIndex === index ? "hsl(42,45%,75%)" : "hsl(0,0%,25%)",
                     scale: hoveredIndex === index ? 1.5 : 1,
                   }}
                   transition={{ duration: 0.3 }}
@@ -184,7 +187,7 @@ export function Experience() {
                 <AnimatePresence>
                   {hoveredIndex === index && (
                     <motion.div
-                      className="absolute left-0 md:left-8 top-1 w-px bg-[hsl(42,45%,75%)] -ml-[1px] md:ml-0 origin-top"
+                      className="absolute left-0 md:left-8 top-1 w-px bg-[hsl(var(--gold))] -ml-[1px] md:ml-0 origin-top"
                       initial={{ height: 0 }}
                       animate={{ height: "100%" }}
                       exit={{ height: 0 }}
@@ -195,32 +198,32 @@ export function Experience() {
 
                 {/* Period */}
                 <div className="flex items-center gap-2 mb-3">
-                  <Calendar className="w-3 h-3 text-[hsl(42,45%,75%)]" />
-                  <span className="font-mono text-xs tracking-wider text-[hsl(0,0%,50%)]">
+                  <Calendar className="w-3 h-3 text-[hsl(var(--gold))]" />
+                  <span className="font-mono text-xs tracking-wider text-[hsl(var(--foreground-muted))]">
                     {item.period}
                   </span>
                 </div>
 
                 {/* Role */}
-                <h3 className="text-xl md:text-2xl font-light text-white mb-2">
+                <h3 className="text-xl md:text-2xl font-light text-foreground mb-2">
                   {item.role}
                 </h3>
 
                 {/* Company */}
                 <div className="flex items-center gap-2 mb-4 flex-wrap">
-                  <Briefcase className="w-4 h-4 text-[hsl(0,0%,50%)]" />
+                  <Briefcase className="w-4 h-4 text-[hsl(var(--foreground-muted))]" />
                   <a
                     href={item.companyUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[hsl(42,45%,75%)] hover:text-white transition-colors inline-flex items-center gap-1 group"
+                    className="text-[hsl(var(--gold))] hover:text-foreground transition-colors inline-flex items-center gap-1 group"
                   >
                     {item.company}
                     <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </a>
-                  <span className="text-[hsl(0,0%,30%)]">•</span>
-                  <MapPin className="w-3 h-3 text-[hsl(0,0%,50%)]" />
-                  <span className="text-[hsl(0,0%,50%)]">{item.location}</span>
+                  <span className="text-[hsl(var(--foreground-faint))]">•</span>
+                  <MapPin className="w-3 h-3 text-[hsl(var(--foreground-muted))]" />
+                  <span className="text-[hsl(var(--foreground-muted))]">{item.location}</span>
                 </div>
 
                 {/* Details */}
@@ -229,7 +232,7 @@ export function Experience() {
                     {item.details.map((detail, detailIndex) => (
                       <li
                         key={detailIndex}
-                        className="text-sm text-[hsl(0,0%,55%)] leading-relaxed pl-4 border-l border-[hsl(0,0%,20%)]"
+                        className="text-sm text-[hsl(var(--foreground-muted))] leading-relaxed pl-4 border-l border-border"
                       >
                         {detail}
                       </li>
@@ -242,14 +245,14 @@ export function Experience() {
                   <div className="space-y-6">
                     {item.projects.map((project, projectIndex) => (
                       <div key={projectIndex}>
-                        <h4 className="text-sm font-medium text-[hsl(42,45%,75%)] mb-3 tracking-wide">
+                        <h4 className="text-sm font-medium text-[hsl(var(--gold))] mb-3 tracking-wide">
                           {project.name}
                         </h4>
                         <ul className="space-y-3">
                           {project.details.map((detail, detailIndex) => (
                             <li
                               key={detailIndex}
-                              className="text-sm text-[hsl(0,0%,55%)] leading-relaxed pl-4 border-l border-[hsl(0,0%,20%)]"
+                              className="text-sm text-[hsl(var(--foreground-muted))] leading-relaxed pl-4 border-l border-border"
                             >
                               {detail}
                             </li>

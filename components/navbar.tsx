@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, FileText } from "lucide-react";
+import { Menu, X, FileText, Monitor, Moon, Sun } from "lucide-react";
 
 const navLinks = [
   { href: "#home", label: "HOME", arabic: "الرئيسية" },
@@ -12,6 +13,39 @@ const navLinks = [
   { href: "#experience", label: "EXPERIENCE", arabic: "خبرة" },
   { href: "#work", label: "WORKS", arabic: "أعمال" },
 ];
+
+const themeCycle = ["system", "light", "dark"] as const;
+
+function ThemeToggle({ className = "" }: { className?: string }) {
+  const [mounted, setMounted] = useState(false);
+  const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const currentTheme = themeCycle.includes(theme as (typeof themeCycle)[number])
+    ? (theme as (typeof themeCycle)[number])
+    : "system";
+  const nextTheme =
+    themeCycle[(themeCycle.indexOf(currentTheme) + 1) % themeCycle.length];
+  const Icon =
+    currentTheme === "light" ? Sun : currentTheme === "dark" ? Moon : Monitor;
+  const label = currentTheme[0].toUpperCase() + currentTheme.slice(1);
+  const nextLabel = nextTheme[0].toUpperCase() + nextTheme.slice(1);
+
+  return (
+    <button
+      type="button"
+      onClick={() => setTheme(nextTheme)}
+      className={`inline-flex h-9 w-9 items-center justify-center text-foreground/80 transition-colors duration-300 hover:text-gold focus-visible:outline-none focus-visible:text-gold ${className}`}
+      aria-label={`Theme: ${label}. Switch to ${nextLabel}.`}
+      title={mounted ? `Theme: ${label}` : "Theme"}
+    >
+      {mounted ? <Icon className="h-4 w-4" /> : <Monitor className="h-4 w-4" />}
+    </button>
+  );
+}
 
 export function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -59,8 +93,10 @@ export function Navbar() {
   return (
     <>
       <motion.header
-        className={`fixed top-0 left-0 right-0 z-50 mix-blend-difference transition-all duration-500 ${
-          scrolled ? "py-4" : "py-6"
+        className={`fixed top-0 left-0 right-0 z-50 border-b transition-all duration-500 ${
+          scrolled
+            ? "border-border/70 bg-background/85 py-3 shadow-sm backdrop-blur-md"
+            : "border-border/20 bg-background/55 py-5 backdrop-blur-sm"
         }`}
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: mounted ? 1 : 0 }}
@@ -71,7 +107,7 @@ export function Navbar() {
             {/* Logo */}
             <Link
               href="/"
-              className="text-white font-light text-lg tracking-[0.1em] hover:opacity-70 transition-opacity"
+              className="text-foreground font-light text-lg tracking-[0.1em] hover:text-gold transition-colors"
             >
               YCAY
             </Link>
@@ -103,25 +139,27 @@ export function Navbar() {
               </a>
             </nav>
 
-            {/* Year indicator */}
-            <div className="hidden md:block">
-              <span className="font-mono text-[10px] tracking-[0.15em] text-white/50">
+            <div className="hidden md:flex items-center gap-4">
+              <ThemeToggle />
+              <span className="font-mono text-[10px] tracking-[0.15em] text-foreground/50">
                 [2025]
               </span>
             </div>
 
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-white"
-              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-            >
-              {mobileMenuOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
-            </button>
+            <div className="flex items-center gap-2 md:hidden">
+              <ThemeToggle />
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 text-foreground transition-colors hover:text-gold"
+                aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </motion.header>
@@ -130,7 +168,7 @@ export function Navbar() {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            className="fixed inset-0 z-40 bg-black"
+            className="fixed inset-0 z-40 bg-background text-foreground"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -151,10 +189,10 @@ export function Navbar() {
                       onClick={(e) => handleNavClick(e, link.href)}
                       className="flex flex-col items-center group"
                     >
-                      <span className="text-4xl font-light text-white tracking-wider">
+                      <span className="text-4xl font-light text-foreground tracking-wider transition-colors group-hover:text-gold">
                         {link.label}
                       </span>
-                      <span className="font-arabic text-lg text-[hsl(42,45%,75%)] mt-1">
+                      <span className="font-arabic text-lg text-[hsl(var(--gold))] mt-1">
                         {link.arabic}
                       </span>
                     </a>
@@ -173,13 +211,22 @@ export function Navbar() {
                     rel="noopener noreferrer"
                     className="flex flex-col items-center group"
                   >
-                    <span className="text-4xl font-light text-white tracking-wider">
+                    <span className="text-4xl font-light text-foreground tracking-wider transition-colors group-hover:text-gold">
                       CV
                     </span>
-                    <span className="font-arabic text-lg text-[hsl(42,45%,75%)] mt-1">
+                    <span className="font-arabic text-lg text-[hsl(var(--gold))] mt-1">
                       السيرة
                     </span>
                   </a>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ delay: (navLinks.length + 1) * 0.1 }}
+                  className="pt-4"
+                >
+                  <ThemeToggle className="h-11 w-11" />
                 </motion.div>
               </nav>
             </div>

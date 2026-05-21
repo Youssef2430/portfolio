@@ -476,7 +476,7 @@ export function AskInput() {
         {isExpanded && (
           <motion.div
             ref={chatContainerRef}
-            className="relative mb-3 sm:mb-4 max-h-[65vh] sm:max-h-[400px] overflow-hidden bg-black border border-[hsl(var(--border))] rounded-lg pointer-events-auto"
+            className="relative mb-3 sm:mb-4 max-h-[65vh] sm:max-h-[400px] overflow-hidden bg-card text-card-foreground border border-[hsl(var(--border))] rounded-lg pointer-events-auto shadow-lg"
             initial={{ opacity: 0, y: 40, height: 0 }}
             animate={{ opacity: 1, y: 0, height: "auto" }}
             exit={{ opacity: 0, y: 40, height: 0 }}
@@ -499,14 +499,14 @@ export function AskInput() {
               <div className="flex gap-2">
                 <button
                   onClick={clearMessages}
-                  className="p-2 text-[hsl(var(--muted-foreground))] hover:text-white hover:bg-[hsl(var(--muted))] transition-all duration-300 active:scale-95"
+                  className="p-2 text-[hsl(var(--muted-foreground))] hover:text-foreground hover:bg-[hsl(var(--muted))] transition-all duration-300 active:scale-95"
                   aria-label="Clear conversation"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setIsExpanded(false)}
-                  className="p-2 text-[hsl(var(--muted-foreground))] hover:text-white hover:bg-[hsl(var(--muted))] transition-all duration-300 active:scale-95"
+                  className="p-2 text-[hsl(var(--muted-foreground))] hover:text-foreground hover:bg-[hsl(var(--muted))] transition-all duration-300 active:scale-95"
                   aria-label="Close conversation"
                 >
                   <X className="h-4 w-4" />
@@ -544,8 +544,8 @@ export function AskInput() {
                       className={cn(
                         "relative max-w-[85%] sm:max-w-[80%] px-4 py-3 text-sm whitespace-pre-wrap break-words leading-relaxed",
                         message.type === "question"
-                          ? "bg-[hsl(var(--gold))] text-black rounded-[20px] rounded-br-[4px]"
-                          : "bg-[hsl(var(--card))] text-white border border-[hsl(var(--border))] rounded-[20px] rounded-bl-[4px]",
+                          ? "bg-[hsl(var(--gold))] text-[hsl(var(--accent-foreground))] rounded-[20px] rounded-br-[4px]"
+                          : "bg-[hsl(var(--card))] text-card-foreground border border-[hsl(var(--border))] rounded-[20px] rounded-bl-[4px]",
                       )}
                     >
                       {message.type === "answer" && (
@@ -559,7 +559,7 @@ export function AskInput() {
                         !message.text ? (
                         <LoadingCube />
                       ) : message.type === "answer" ? (
-                        <div className="chat-message-text text-sm leading-relaxed [&_strong]:font-semibold [&_code]:bg-white/10 [&_code]:px-1 [&_code]:rounded [&_code]:text-[hsl(var(--gold))] [&_a]:text-[hsl(var(--gold))] [&_a]:underline [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:ml-0 [&_p+p]:mt-2">
+                        <div className="chat-message-text text-sm leading-relaxed [&_strong]:font-semibold [&_code]:bg-foreground/10 [&_code]:px-1 [&_code]:rounded [&_code]:text-[hsl(var(--gold))] [&_a]:text-[hsl(var(--gold))] [&_a]:underline [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:ml-0 [&_p+p]:mt-2">
                           <ReactMarkdown>{message.text}</ReactMarkdown>
                         </div>
                       ) : (
@@ -578,7 +578,7 @@ export function AskInput() {
       {/* Input form */}
       <form
         onSubmit={handleSubmit}
-        className="relative h-14 overflow-hidden bg-black border border-[hsl(var(--border))] rounded-lg flex items-center pointer-events-auto transition-all duration-300 hover:border-[hsl(var(--gold))/0.3]"
+        className="relative h-14 overflow-hidden bg-card text-card-foreground border border-[hsl(var(--border))] rounded-lg flex items-center pointer-events-auto transition-all duration-300 shadow-lg hover:border-[hsl(var(--gold))/0.3]"
       >
         {/* Canvas for vanishing effect */}
         <canvas
@@ -616,7 +616,7 @@ export function AskInput() {
             "text-sm font-mono placeholder:text-[hsl(var(--muted-foreground))] placeholder:font-mono placeholder:text-xs placeholder:uppercase placeholder:tracking-wider",
             animating && newDataRef.current.length > 0
               ? "text-transparent caret-transparent"
-              : "text-white",
+              : "text-card-foreground",
             "transition-colors duration-100",
           )}
           disabled={isStreamingRef.current}
@@ -645,7 +645,7 @@ export function AskInput() {
           )}
           aria-label="Send message"
         >
-          <Send className="h-4 w-4 text-[hsl(var(--muted-foreground))] group-hover:text-black transition-colors duration-300" />
+          <Send className="h-4 w-4 text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--accent-foreground))] transition-colors duration-300" />
         </button>
       </form>
 

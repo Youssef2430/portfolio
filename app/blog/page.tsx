@@ -15,7 +15,7 @@ export default function BlogIndexPage() {
   const posts = getAllPosts();
 
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="min-h-screen bg-background text-foreground">
       {/* Grain overlay */}
       <div className="grain-overlay" />
 
@@ -26,7 +26,7 @@ export default function BlogIndexPage() {
           {/* Back link */}
           <Link
             href="/"
-            className="mb-12 inline-flex items-center text-sm text-[hsl(0,0%,50%)] hover:text-white transition-colors group"
+            className="mb-12 inline-flex items-center text-sm text-[hsl(var(--foreground-muted))] hover:text-foreground transition-colors group"
           >
             <ArrowLeft className="mr-2 h-4 w-4 transform group-hover:-translate-x-1 transition-transform" />
             Back to Main
@@ -35,24 +35,24 @@ export default function BlogIndexPage() {
           {/* Section Title */}
           <div className="mb-16">
             <div className="flex items-center">
-              <h1 className="text-section text-white font-light">BL</h1>
+              <h1 className="text-section text-foreground font-light">BL</h1>
               <div className="flex flex-col items-center mx-4 md:mx-6">
                 <span className="arabic-bracket text-lg md:text-xl">「</span>
-                <span className="font-arabic text-xl md:text-3xl text-[hsl(42,45%,75%)]">
+                <span className="font-arabic text-xl md:text-3xl text-[hsl(var(--gold))]">
                   مقالات
                 </span>
                 <span className="arabic-bracket text-lg md:text-xl">」</span>
               </div>
-              <h1 className="text-section text-white font-light">OG</h1>
+              <h1 className="text-section text-foreground font-light">OG</h1>
             </div>
-            <p className="mt-6 font-mono text-xs tracking-[0.2em] text-[hsl(0,0%,45%)] uppercase">
+            <p className="mt-6 font-mono text-xs tracking-[0.2em] text-[hsl(var(--foreground-subtle))] uppercase">
               Writings & Research
             </p>
           </div>
 
           {/* Posts Grid */}
           {posts.length === 0 ? (
-            <div className="text-[hsl(0,0%,50%)]">
+            <div className="text-[hsl(var(--foreground-muted))]">
               No posts yet. Check back soon!
             </div>
           ) : (
@@ -85,15 +85,15 @@ export default function BlogIndexPage() {
 
                     {/* Content */}
                     <div className="p-6">
-                      <h2 className="text-lg font-light text-white mb-3 group-hover:text-[hsl(42,45%,75%)] transition-colors">
+                      <h2 className="text-lg font-light text-foreground mb-3 group-hover:text-[hsl(var(--gold))] transition-colors">
                         {post.title}
                       </h2>
 
-                      <p className="text-sm text-[hsl(0,0%,50%)] line-clamp-2 mb-4">
+                      <p className="text-sm text-[hsl(var(--foreground-muted))] line-clamp-2 mb-4">
                         {post.excerpt}
                       </p>
 
-                      <div className="flex items-center justify-between text-[hsl(0,0%,40%)]">
+                      <div className="flex items-center justify-between text-[hsl(var(--foreground-subtle))]">
                         <span className="font-mono text-xs">
                           {formatPostDate(post.date)}
                         </span>
@@ -112,7 +112,7 @@ export default function BlogIndexPage() {
                           {post.tags.slice(0, 3).map((tag) => (
                             <span
                               key={tag}
-                              className="px-2 py-1 text-[10px] font-mono uppercase tracking-wider bg-white/5 text-[hsl(0,0%,60%)] border border-white/10"
+                              className="px-2 py-1 text-[10px] font-mono uppercase tracking-wider bg-foreground/5 text-[hsl(var(--foreground-muted))] border border-foreground/10"
                             >
                               {tag}
                             </span>

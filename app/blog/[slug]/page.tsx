@@ -62,38 +62,38 @@ export async function generateMetadata({
 // Custom components for markdown rendering
 const MarkdownComponents: any = {
   h1: ({ children }: { children: React.ReactNode }) => (
-    <h1 className="text-3xl font-light tracking-tight mb-6 mt-12 first:mt-0 text-white">
+    <h1 className="text-3xl font-light tracking-tight mb-6 mt-12 first:mt-0 text-foreground">
       {children}
     </h1>
   ),
   h2: ({ children }: { children: React.ReactNode }) => (
-    <h2 className="text-2xl font-light tracking-tight mb-4 mt-10 text-white">
+    <h2 className="text-2xl font-light tracking-tight mb-4 mt-10 text-foreground">
       {children}
     </h2>
   ),
   h3: ({ children }: { children: React.ReactNode }) => (
-    <h3 className="text-xl font-light tracking-tight mb-3 mt-8 text-white">
+    <h3 className="text-xl font-light tracking-tight mb-3 mt-8 text-foreground">
       {children}
     </h3>
   ),
   p: ({ children }: { children: React.ReactNode }) => (
-    <p className="text-[hsl(0,0%,70%)] leading-relaxed mb-6">{children}</p>
+    <p className="text-[hsl(var(--foreground-soft))] leading-relaxed mb-6">{children}</p>
   ),
   ul: ({ children }: { children: React.ReactNode }) => (
-    <ul className="list-disc pl-6 space-y-2 mb-6 text-[hsl(0,0%,70%)]">
+    <ul className="list-disc pl-6 space-y-2 mb-6 text-[hsl(var(--foreground-soft))]">
       {children}
     </ul>
   ),
   ol: ({ children }: { children: React.ReactNode }) => (
-    <ol className="list-decimal pl-6 space-y-2 mb-6 text-[hsl(0,0%,70%)]">
+    <ol className="list-decimal pl-6 space-y-2 mb-6 text-[hsl(var(--foreground-soft))]">
       {children}
     </ol>
   ),
   li: ({ children }: { children: React.ReactNode }) => (
-    <li className="text-[hsl(0,0%,70%)] leading-relaxed">{children}</li>
+    <li className="text-[hsl(var(--foreground-soft))] leading-relaxed">{children}</li>
   ),
   blockquote: ({ children }: { children: React.ReactNode }) => (
-    <blockquote className="border-l-2 border-[hsl(42,45%,75%)] pl-6 py-2 my-6 italic text-[hsl(0,0%,60%)]">
+    <blockquote className="border-l-2 border-[hsl(var(--gold))] pl-6 py-2 my-6 italic text-[hsl(var(--foreground-muted))]">
       {children}
     </blockquote>
   ),
@@ -102,7 +102,7 @@ const MarkdownComponents: any = {
     if (isInline) {
       return (
         <code
-          className="bg-[hsl(0,0%,10%)] px-1.5 py-0.5 text-sm font-mono text-[hsl(42,45%,75%)] border border-[hsl(0,0%,15%)]"
+          className="bg-muted px-1.5 py-0.5 text-sm font-mono text-[hsl(var(--gold))] border border-border"
           {...props}
         >
           {children}
@@ -116,14 +116,14 @@ const MarkdownComponents: any = {
     );
   },
   pre: ({ children }: { children: React.ReactNode }) => (
-    <pre className="bg-[hsl(0,0%,6%)] p-4 overflow-x-auto my-6 text-sm border border-[hsl(0,0%,15%)]">
+    <pre className="bg-card p-4 overflow-x-auto my-6 text-sm border border-border">
       {children}
     </pre>
   ),
   a: ({ href, children, ...props }: any) => (
     <a
       href={href}
-      className="text-[hsl(42,45%,75%)] underline underline-offset-4 decoration-[hsl(42,45%,75%)]/30 hover:decoration-[hsl(42,45%,75%)] transition-colors"
+      className="text-[hsl(var(--gold))] underline underline-offset-4 decoration-[hsl(var(--gold))]/30 hover:decoration-[hsl(var(--gold))] transition-colors"
       target={href?.startsWith("http") ? "_blank" : undefined}
       rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
       {...props}
@@ -132,7 +132,7 @@ const MarkdownComponents: any = {
     </a>
   ),
   strong: ({ children }: { children: React.ReactNode }) => (
-    <strong className="font-medium text-white">{children}</strong>
+    <strong className="font-medium text-foreground">{children}</strong>
   ),
   img: ({ src, alt }: { src: string; alt: string }) => (
     <span className="block my-8">
@@ -141,28 +141,28 @@ const MarkdownComponents: any = {
         alt={alt || ""}
         width={800}
         height={450}
-        className="w-full border border-[hsl(0,0%,15%)]"
+        className="w-full border border-border"
       />
       {alt && (
-        <span className="block mt-2 text-center text-sm text-[hsl(0,0%,45%)]">
+        <span className="block mt-2 text-center text-sm text-[hsl(var(--foreground-subtle))]">
           {alt}
         </span>
       )}
     </span>
   ),
-  hr: () => <hr className="my-12 border-t border-[hsl(0,0%,15%)]" />,
+  hr: () => <hr className="my-12 border-t border-border" />,
   table: ({ children }: { children: React.ReactNode }) => (
     <div className="overflow-x-auto my-6">
-      <table className="w-full border border-[hsl(0,0%,15%)]">{children}</table>
+      <table className="w-full border border-border">{children}</table>
     </div>
   ),
   th: ({ children }: { children: React.ReactNode }) => (
-    <th className="border border-[hsl(0,0%,15%)] px-4 py-2 text-left font-medium text-white bg-[hsl(0,0%,8%)]">
+    <th className="border border-border px-4 py-2 text-left font-medium text-foreground bg-muted">
       {children}
     </th>
   ),
   td: ({ children }: { children: React.ReactNode }) => (
-    <td className="border border-[hsl(0,0%,15%)] px-4 py-2 text-[hsl(0,0%,70%)]">
+    <td className="border border-border px-4 py-2 text-[hsl(var(--foreground-soft))]">
       {children}
     </td>
   ),
@@ -173,7 +173,7 @@ function PostMeta({ post }: { post: BlogPost }) {
   const rt = post.readingTimeMinutes;
 
   return (
-    <div className="flex flex-wrap items-center gap-6 text-sm text-[hsl(0,0%,50%)]">
+    <div className="flex flex-wrap items-center gap-6 text-sm text-[hsl(var(--foreground-muted))]">
       <span className="flex items-center gap-2">
         <Calendar className="w-4 h-4" />
         {dateStr}
@@ -207,7 +207,7 @@ export default async function BlogPostPage({
     .replace(/\\\[([\s\S]*?)\\\]/g, (_match, m) => `$$${m}$$`);
 
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="min-h-screen bg-background text-foreground">
       {/* Grain overlay */}
       <div className="grain-overlay" />
 
@@ -218,7 +218,7 @@ export default async function BlogPostPage({
           {/* Back link */}
           <Link
             href="/blog"
-            className="mb-12 inline-flex items-center text-sm text-[hsl(0,0%,50%)] hover:text-white transition-colors group"
+            className="mb-12 inline-flex items-center text-sm text-[hsl(var(--foreground-muted))] hover:text-foreground transition-colors group"
           >
             <ArrowLeft className="mr-2 h-4 w-4 transform group-hover:-translate-x-1 transition-transform" />
             Back to Blog
@@ -226,7 +226,7 @@ export default async function BlogPostPage({
 
           {/* Post Header */}
           <header className="mb-12">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-light tracking-tight mb-6 text-white">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-light tracking-tight mb-6 text-foreground">
               {post.title}
             </h1>
 
@@ -238,7 +238,7 @@ export default async function BlogPostPage({
                 {post.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="px-3 py-1 text-[11px] font-mono uppercase tracking-wider bg-white/5 text-[hsl(0,0%,60%)] border border-white/10"
+                    className="px-3 py-1 text-[11px] font-mono uppercase tracking-wider bg-foreground/5 text-[hsl(var(--foreground-muted))] border border-foreground/10"
                   >
                     {tag}
                   </span>
@@ -249,7 +249,7 @@ export default async function BlogPostPage({
 
           {/* Cover Image */}
           {post.coverImage && (
-            <div className="relative mb-12 aspect-[16/9] w-full overflow-hidden border border-[hsl(0,0%,15%)]">
+            <div className="relative mb-12 aspect-[16/9] w-full overflow-hidden border border-border">
               <Image
                 src={post.coverImage}
                 alt={post.title}
@@ -262,7 +262,7 @@ export default async function BlogPostPage({
           )}
 
           {/* Article Content */}
-          <article className="prose prose-invert max-w-none">
+          <article className="prose max-w-none">
             <ReactMarkdown
               components={MarkdownComponents}
               remarkPlugins={[remarkGfm, remarkMath]}
@@ -276,17 +276,17 @@ export default async function BlogPostPage({
           </article>
 
           {/* Post Footer */}
-          <footer className="mt-16 pt-8 border-t border-[hsl(0,0%,15%)]">
+          <footer className="mt-16 pt-8 border-t border-border">
             <div className="flex items-center justify-between">
               <Link
                 href="/blog"
-                className="inline-flex items-center text-sm text-[hsl(0,0%,50%)] hover:text-white transition-colors group"
+                className="inline-flex items-center text-sm text-[hsl(var(--foreground-muted))] hover:text-foreground transition-colors group"
               >
                 <ArrowLeft className="mr-2 h-4 w-4 transform group-hover:-translate-x-1 transition-transform" />
                 All Posts
               </Link>
 
-              <span className="font-arabic text-sm text-[hsl(42,45%,75%)] opacity-60">
+              <span className="font-arabic text-sm text-[hsl(var(--gold))] opacity-60">
                 شكراً للقراءة
               </span>
             </div>

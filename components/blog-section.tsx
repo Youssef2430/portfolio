@@ -38,7 +38,7 @@ export function BlogSection() {
               initial={{ opacity: 0, x: -50 }}
               animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
               transition={{ duration: 1, ease: [0.55, 0.45, 0.16, 1] }}
-              className="text-section text-white font-light"
+              className="text-section text-foreground font-light"
             >
               BL
             </motion.span>
@@ -50,7 +50,7 @@ export function BlogSection() {
               className="flex flex-col items-center mx-2 md:mx-4"
             >
               <span className="arabic-bracket text-lg md:text-xl">「</span>
-              <span className="font-arabic text-xl md:text-3xl text-[hsl(42,45%,75%)]">
+              <span className="font-arabic text-xl md:text-3xl text-[hsl(var(--gold))]">
                 مقالات
               </span>
               <span className="arabic-bracket text-lg md:text-xl">」</span>
@@ -60,7 +60,7 @@ export function BlogSection() {
               initial={{ opacity: 0, x: 50 }}
               animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 50 }}
               transition={{ duration: 1, ease: [0.55, 0.45, 0.16, 1] }}
-              className="text-section text-white font-light"
+              className="text-section text-foreground font-light"
             >
               OG
             </motion.span>
@@ -70,7 +70,7 @@ export function BlogSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-6 font-mono text-xs tracking-[0.2em] text-[hsl(0,0%,45%)] uppercase"
+            className="mt-6 font-mono text-xs tracking-[0.2em] text-[hsl(var(--foreground-subtle))] uppercase"
           >
             Writings & Research
           </motion.p>
@@ -78,7 +78,7 @@ export function BlogSection() {
 
         {/* Blog Posts Grid */}
         {posts.length === 0 ? (
-          <div className="text-center text-[hsl(0,0%,50%)]">
+          <div className="text-center text-[hsl(var(--foreground-muted))]">
             No posts yet. Check back soon!
           </div>
         ) : (
@@ -113,11 +113,11 @@ export function BlogSection() {
 
                     {/* Content */}
                     <div className="p-5">
-                      <h3 className="text-base font-light text-white mb-2 group-hover:text-[hsl(42,45%,75%)] transition-colors line-clamp-2">
+                      <h3 className="text-base font-light text-foreground mb-2 group-hover:text-[hsl(var(--gold))] transition-colors line-clamp-2">
                         {post.title}
                       </h3>
 
-                      <div className="flex items-center justify-between text-[hsl(0,0%,40%)]">
+                      <div className="flex items-center justify-between text-[hsl(var(--foreground-subtle))]">
                         <span className="font-mono text-[10px]">
                           {formatPostDate(post.date)}
                         </span>
@@ -147,7 +147,7 @@ export function BlogSection() {
         >
           <Link
             href="/blog"
-            className="inline-flex items-center gap-2 font-mono text-sm tracking-wider text-[hsl(0,0%,50%)] hover:text-white transition-colors group"
+            className="inline-flex items-center gap-2 font-mono text-sm tracking-wider text-[hsl(var(--foreground-muted))] hover:text-foreground transition-colors group"
           >
             <span>VIEW ALL POSTS</span>
             <ArrowUpRight className="w-4 h-4 transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />

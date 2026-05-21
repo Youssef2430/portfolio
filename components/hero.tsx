@@ -79,9 +79,15 @@ export function Hero() {
         className="absolute inset-0 z-0"
         style={{ scale: backgroundScale }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black" />
+        <div className="absolute inset-0 bg-background" />
         {/* Subtle vignette */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,black_70%)]" />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse at center, transparent 0%, hsl(var(--background)) 70%)",
+          }}
+        />
       </motion.div>
 
       {/* Main content */}
@@ -100,7 +106,7 @@ export function Hero() {
                 variants={letterVariants}
                 initial="hidden"
                 animate={mounted ? "visible" : "hidden"}
-                className="text-massive text-white font-light select-none"
+                className="text-massive text-foreground font-light select-none"
               >
                 {letter}
               </motion.span>
@@ -115,10 +121,10 @@ export function Hero() {
             className="flex flex-col items-center mx-4 md:mx-8"
           >
             <span className="arabic-bracket text-2xl md:text-4xl mb-2">「</span>
-            <span className="font-arabic text-3xl md:text-5xl lg:text-6xl text-[hsl(42,45%,75%)] leading-tight">
+            <span className="font-arabic text-3xl md:text-5xl lg:text-6xl text-[hsl(var(--gold))] leading-tight">
               يوسف
             </span>
-            <span className="font-arabic text-3xl md:text-5xl lg:text-6xl text-[hsl(42,45%,75%)] leading-tight">
+            <span className="font-arabic text-3xl md:text-5xl lg:text-6xl text-[hsl(var(--gold))] leading-tight">
               شواي
             </span>
             <span className="arabic-bracket text-2xl md:text-4xl mt-2">」</span>
@@ -133,7 +139,7 @@ export function Hero() {
                 variants={letterVariants}
                 initial="hidden"
                 animate={mounted ? "visible" : "hidden"}
-                className="text-massive text-white font-light select-none"
+                className="text-massive text-foreground font-light select-none"
               >
                 {letter}
               </motion.span>
@@ -148,10 +154,10 @@ export function Hero() {
           animate={mounted ? "visible" : "hidden"}
           className="text-center mt-12 md:mt-16"
         >
-          <p className="font-mono text-xs md:text-sm tracking-[0.3em] text-[hsl(0,0%,65%)] uppercase">
+          <p className="font-mono text-xs md:text-sm tracking-[0.3em] text-[hsl(var(--foreground-muted))] uppercase">
             YOUSSEF [CHOUAY] ↓
           </p>
-          <p className="mt-4 text-sm md:text-base text-[hsl(0,0%,65%)] font-light max-w-md mx-auto">
+          <p className="mt-4 text-sm md:text-base text-[hsl(var(--foreground-muted))] font-light max-w-md mx-auto">
             software engineer, AI researcher and graph theory enthusiast
           </p>
         </motion.div>
@@ -164,10 +170,10 @@ export function Hero() {
         animate={mounted ? "visible" : "hidden"}
         className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center"
       >
-        <span className="font-mono text-[10px] tracking-[0.2em] text-[hsl(0,0%,45%)] uppercase mb-4">
+        <span className="font-mono text-[10px] tracking-[0.2em] text-[hsl(var(--foreground-subtle))] uppercase mb-4">
           Scroll
         </span>
-        <div className="w-px h-12 bg-gradient-to-b from-[hsl(0,0%,45%)] to-transparent scroll-indicator" />
+        <div className="w-px h-12 bg-gradient-to-b from-[hsl(var(--foreground-subtle))] to-transparent scroll-indicator" />
       </motion.div>
 
       {/* Year indicator - right side */}
@@ -177,7 +183,7 @@ export function Hero() {
         transition={{ delay: 2, duration: 1 }}
         className="absolute right-8 top-1/2 -translate-y-1/2 hidden lg:block"
       >
-        <span className="font-mono text-[10px] tracking-[0.2em] text-[hsl(0,0%,35%)] writing-mode-vertical">
+        <span className="font-mono text-[10px] tracking-[0.2em] text-[hsl(var(--foreground-faint))] writing-mode-vertical">
           2025
         </span>
       </motion.div>

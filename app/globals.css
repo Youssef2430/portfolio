@@ -8,42 +8,58 @@
 
 @layer base {
   :root {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
+    color-scheme: light;
 
-    --card: 0 0% 4%;
-    --card-foreground: 0 0% 100%;
+    --background: 220 24% 97%;
+    --foreground: 224 18% 10%;
 
-    --popover: 0 0% 4%;
-    --popover-foreground: 0 0% 100%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 18% 10%;
 
-    --primary: 0 0% 100%;
-    --primary-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 18% 10%;
 
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 0 0% 100%;
+    --primary: 224 18% 10%;
+    --primary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
+    --secondary: 218 22% 92%;
+    --secondary-foreground: 224 18% 12%;
 
-    --accent: 42 45% 75%;
-    --accent-foreground: 0 0% 0%;
+    --muted: 218 20% 90%;
+    --muted-foreground: 224 9% 42%;
 
-    --destructive: 0 62% 30%;
+    --accent: 40 52% 43%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
-    --ring: 42 45% 75%;
+    --border: 220 17% 82%;
+    --input: 220 17% 82%;
+    --ring: 40 52% 43%;
 
     --radius: 0rem;
 
-    /* Custom accent - gold/cream like Mason Wong */
-    --gold: 42 45% 75%;
-    --cream: 40 30% 90%;
+    --gold: 40 52% 43%;
+    --cream: 43 45% 94%;
+    --foreground-soft: 224 13% 32%;
+    --foreground-muted: 224 9% 42%;
+    --foreground-subtle: 224 7% 54%;
+    --foreground-faint: 224 8% 70%;
+    --wash: 217 24% 92%;
+    --wash-strong: 217 28% 88%;
+    --timeline-dot: 224 8% 58%;
+    --syntax-red: 4 62% 45%;
+    --syntax-blue: 210 72% 38%;
+    --syntax-purple: 275 48% 46%;
+    --syntax-orange: 28 70% 42%;
+    --syntax-green: 148 48% 34%;
+    --grain-opacity: 0.025;
   }
 
   .dark {
+    color-scheme: dark;
+
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
 
@@ -71,6 +87,22 @@
     --border: 0 0% 15%;
     --input: 0 0% 15%;
     --ring: 42 45% 75%;
+
+    --gold: 42 45% 75%;
+    --cream: 40 30% 90%;
+    --foreground-soft: 0 0% 70%;
+    --foreground-muted: 0 0% 50%;
+    --foreground-subtle: 0 0% 40%;
+    --foreground-faint: 0 0% 30%;
+    --wash: 220 30% 5%;
+    --wash-strong: 220 20% 6%;
+    --timeline-dot: 0 0% 25%;
+    --syntax-red: 2 100% 72%;
+    --syntax-blue: 207 100% 82%;
+    --syntax-purple: 270 100% 83%;
+    --syntax-orange: 27 100% 67%;
+    --syntax-green: 137 70% 70%;
+    --grain-opacity: 0.035;
   }
 }
 
@@ -81,7 +113,7 @@
 
   html {
     scroll-behavior: smooth;
-    background-color: #000;
+    background-color: hsl(var(--background));
   }
 
   body {
@@ -159,7 +191,7 @@
   height: 100%;
   pointer-events: none;
   z-index: 9999;
-  opacity: 0.035;
+  opacity: var(--grain-opacity);
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
 }
 
@@ -335,7 +367,7 @@
 .page-transition {
   position: fixed;
   inset: 0;
-  background: #000;
+  background: hsl(var(--background));
   z-index: 9998;
   pointer-events: none;
 }
@@ -400,39 +432,39 @@
 .hljs-keyword,
 .hljs-selector-tag,
 .hljs-type {
-  color: #ff7b72;
+  color: hsl(var(--syntax-red));
 }
 
 .hljs-string,
 .hljs-doctag {
-  color: #a5d6ff;
+  color: hsl(var(--syntax-blue));
 }
 
 .hljs-title,
 .hljs-section {
-  color: #d2a8ff;
+  color: hsl(var(--syntax-purple));
   font-weight: bold;
 }
 
 .hljs-variable,
 .hljs-template-variable {
-  color: #ffa657;
+  color: hsl(var(--syntax-orange));
 }
 
 .hljs-number,
 .hljs-literal {
-  color: #79c0ff;
+  color: hsl(var(--syntax-blue));
 }
 
 .hljs-tag,
 .hljs-name,
 .hljs-attribute {
-  color: #7ee787;
+  color: hsl(var(--syntax-green));
 }
 
 .hljs-built_in,
 .hljs-builtin-name {
-  color: #79c0ff;
+  color: hsl(var(--syntax-blue));
 }
 
 /* Line clamp utilities */
@@ -533,17 +565,6 @@
   font-family: 'Roboto Mono', ui-monospace, monospace !important;
 }
 
-/* Light mode overrides - keep dark aesthetic */
-html:not(.dark) {
-  --background: 0 0% 0%;
-  --foreground: 0 0% 100%;
-  --card: 0 0% 4%;
-  --card-foreground: 0 0% 100%;
-  --muted: 0 0% 15%;
-  --muted-foreground: 0 0% 65%;
-  --border: 0 0% 15%;
-}
-
 /* Works Section - Large Typography Style */
 .works-title {
   font-size: clamp(28px, 6vw, 72px);
@@ -601,7 +622,7 @@ html:not(.dark) {
 }
 
 .works-title-outline {
-  -webkit-text-stroke: 1px hsl(0, 0%, 30%);
+  -webkit-text-stroke: 1px hsl(var(--foreground-faint));
   color: transparent !important;
 }
 

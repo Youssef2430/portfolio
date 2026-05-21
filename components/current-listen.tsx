@@ -257,15 +257,15 @@ export function CurrentListen() {
           transition={{ duration: 0.8 }}
           className="flex items-center justify-center gap-4 mb-16 md:mb-24"
         >
-          <div className="flex-1 h-px bg-white/20" />
+          <div className="flex-1 h-px bg-foreground/20" />
           <div className="flex flex-col items-center px-4">
-            <span className="text-white/40 text-sm mb-1">{"\u300C"}</span>
-            <span className="font-arabic text-white/60 text-xl md:text-2xl leading-relaxed">
+            <span className="text-foreground/40 text-sm mb-1">{"\u300C"}</span>
+            <span className="font-arabic text-foreground/60 text-xl md:text-2xl leading-relaxed">
               {"موسيقى & سفر"}
             </span>
-            <span className="text-white/40 text-sm mt-1">{"\u300D"}</span>
+            <span className="text-foreground/40 text-sm mt-1">{"\u300D"}</span>
           </div>
-          <div className="flex-1 h-px bg-white/20" />
+          <div className="flex-1 h-px bg-foreground/20" />
         </motion.div>
 
         {/* ==================== */}
@@ -415,7 +415,7 @@ export function CurrentListen() {
                 initial={{ opacity: 0 }}
                 animate={isInView ? { opacity: 0.15 } : { opacity: 0 }}
                 transition={{ duration: 1, delay: 1 }}
-                className="absolute bottom-4 right-8 font-script text-white text-2xl md:text-3xl select-none pointer-events-none"
+                className="absolute bottom-4 right-8 font-script text-foreground text-2xl md:text-3xl select-none pointer-events-none"
                 style={{ transform: "rotate(-8deg)" }}
               >
                 memories
@@ -504,7 +504,7 @@ export function CurrentListen() {
                     />
 
                     {/* Inner ring */}
-                    <div className="absolute inset-[30%] rounded-full bg-[hsl(0,0%,25%)]">
+                    <div className="absolute inset-[30%] rounded-full bg-[hsl(var(--timeline-dot))]">
                       {/* Center label */}
                       <div className="absolute inset-[25%] rounded-full bg-[hsl(0,0%,35%)] flex items-center justify-center">
                         {/* Play/Pause button with progress ring */}

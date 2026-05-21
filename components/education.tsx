@@ -66,7 +66,7 @@ export function Education() {
               initial={{ opacity: 0, x: -50 }}
               animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
               transition={{ duration: 1, ease: [0.55, 0.45, 0.16, 1] }}
-              className="text-section text-white font-light"
+              className="text-section text-foreground font-light"
             >
               ED
             </motion.span>
@@ -78,7 +78,7 @@ export function Education() {
               className="flex flex-col items-center mx-2 md:mx-4"
             >
               <span className="arabic-bracket text-lg md:text-xl">「</span>
-              <span className="font-arabic text-xl md:text-3xl text-[hsl(42,45%,75%)]">
+              <span className="font-arabic text-xl md:text-3xl text-[hsl(var(--gold))]">
                 تعليم
               </span>
               <span className="arabic-bracket text-lg md:text-xl">」</span>
@@ -88,7 +88,7 @@ export function Education() {
               initial={{ opacity: 0, x: 50 }}
               animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 50 }}
               transition={{ duration: 1, ease: [0.55, 0.45, 0.16, 1] }}
-              className="text-section text-white font-light"
+              className="text-section text-foreground font-light"
             >
               U
             </motion.span>
@@ -99,7 +99,7 @@ export function Education() {
         <div className="max-w-4xl mx-auto">
           <div className="relative">
             {/* Vertical line */}
-            <div className="absolute left-0 md:left-8 top-0 bottom-0 w-px bg-[hsl(0,0%,15%)]" />
+            <div className="absolute left-0 md:left-8 top-0 bottom-0 w-px bg-border" />
 
             {educationItems.map((item, index) => (
               <motion.div
@@ -114,9 +114,12 @@ export function Education() {
               >
                 {/* Timeline dot */}
                 <motion.div
-                  className="absolute left-0 md:left-8 top-1 w-2 h-2 -ml-[3px] md:-ml-1 rounded-full bg-[hsl(0,0%,25%)] border-2 border-black"
+                  className={`absolute left-0 md:left-8 top-1 w-2 h-2 -ml-[3px] md:-ml-1 rounded-full border-2 border-background transition-colors duration-300 ${
+                    hoveredIndex === index
+                      ? "bg-[hsl(var(--gold))]"
+                      : "bg-[hsl(var(--timeline-dot))]"
+                  }`}
                   animate={{
-                    backgroundColor: hoveredIndex === index ? "hsl(42,45%,75%)" : "hsl(0,0%,25%)",
                     scale: hoveredIndex === index ? 1.5 : 1,
                   }}
                   transition={{ duration: 0.3 }}
@@ -126,7 +129,7 @@ export function Education() {
                 <AnimatePresence>
                   {hoveredIndex === index && (
                     <motion.div
-                      className="absolute left-0 md:left-8 top-1 w-px bg-[hsl(42,45%,75%)] -ml-[1px] md:ml-0 origin-top"
+                      className="absolute left-0 md:left-8 top-1 w-px bg-[hsl(var(--gold))] -ml-[1px] md:ml-0 origin-top"
                       initial={{ height: 0 }}
                       animate={{ height: "100%" }}
                       exit={{ height: 0 }}
@@ -137,24 +140,24 @@ export function Education() {
 
                 {/* Period */}
                 <div className="flex items-center gap-2 mb-3">
-                  <Calendar className="w-3 h-3 text-[hsl(42,45%,75%)]" />
-                  <span className="font-mono text-xs tracking-wider text-[hsl(0,0%,50%)]">
+                  <Calendar className="w-3 h-3 text-[hsl(var(--gold))]" />
+                  <span className="font-mono text-xs tracking-wider text-[hsl(var(--foreground-muted))]">
                     {item.period}
                   </span>
                 </div>
 
                 {/* Degree */}
-                <h3 className="text-xl md:text-2xl font-light text-white mb-2 group-hover:text-[hsl(42,45%,75%)] transition-colors">
+                <h3 className="text-xl md:text-2xl font-light text-foreground mb-2 group-hover:text-[hsl(var(--gold))] transition-colors">
                   {item.degree}
                 </h3>
 
                 {/* Institution */}
                 <div className="flex items-center gap-2 mb-4">
-                  <GraduationCap className="w-4 h-4 text-[hsl(0,0%,50%)]" />
-                  <span className="text-[hsl(0,0%,70%)]">{item.institution}</span>
-                  <span className="text-[hsl(0,0%,30%)]">•</span>
-                  <MapPin className="w-3 h-3 text-[hsl(0,0%,50%)]" />
-                  <span className="text-[hsl(0,0%,50%)]">{item.location}</span>
+                  <GraduationCap className="w-4 h-4 text-[hsl(var(--foreground-muted))]" />
+                  <span className="text-[hsl(var(--foreground-soft))]">{item.institution}</span>
+                  <span className="text-[hsl(var(--foreground-faint))]">•</span>
+                  <MapPin className="w-3 h-3 text-[hsl(var(--foreground-muted))]" />
+                  <span className="text-[hsl(var(--foreground-muted))]">{item.location}</span>
                 </div>
 
                 {/* Details */}
@@ -162,7 +165,7 @@ export function Education() {
                   {item.details.map((detail, detailIndex) => (
                     <li
                       key={detailIndex}
-                      className="text-sm text-[hsl(0,0%,55%)] leading-relaxed"
+                      className="text-sm text-[hsl(var(--foreground-muted))] leading-relaxed"
                     >
                       {detail}
                     </li>

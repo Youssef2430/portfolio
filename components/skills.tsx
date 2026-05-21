@@ -63,8 +63,8 @@ export function Skills() {
                       key={skillIndex}
                       className={`skill-item inline-block px-3 py-1 text-sm border rounded cursor-pointer transition-all duration-300 ${
                         hoveredSkill === skill
-                          ? "border-black dark:border-white bg-black dark:bg-white text-white dark:text-black"
-                          : "border-gray-200 dark:border-gray-700"
+                          ? "border-foreground bg-foreground text-background"
+                          : "border-border text-foreground"
                       }`}
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}

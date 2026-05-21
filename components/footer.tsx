@@ -20,7 +20,7 @@ export function Footer() {
   return (
     <footer
       ref={footerRef}
-      className="relative min-h-[60vh] flex flex-col justify-end overflow-hidden bg-black"
+      className="relative min-h-[60vh] flex flex-col justify-end overflow-hidden bg-background"
     >
       {/* Static noise with fade */}
       <div
@@ -38,14 +38,14 @@ export function Footer() {
         className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
         style={{ opacity: yearOpacity }}
       >
-        <span className="footer-year text-white">
+        <span className="footer-year text-foreground">
           {currentYear}
         </span>
       </motion.div>
 
       <div className="relative z-10 container mx-auto px-6 md:px-12 pb-12">
         {/* Main footer content */}
-        <div className="border-t border-[hsl(0,0%,15%)] pt-12">
+        <div className="border-t border-border pt-12">
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-12">
             {/* Left side - Name and tagline */}
             <motion.div
@@ -53,13 +53,13 @@ export function Footer() {
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
               transition={{ duration: 0.8, ease: [0.55, 0.45, 0.16, 1] }}
             >
-              <h2 className="text-3xl md:text-5xl font-light text-white mb-4">
+              <h2 className="text-3xl md:text-5xl font-light text-foreground mb-4">
                 YOUSSEF CHOUAY
               </h2>
-              <p className="font-arabic text-xl text-[hsl(42,45%,75%)]">
+              <p className="font-arabic text-xl text-[hsl(var(--gold))]">
                 「يوسف شواي」
               </p>
-              <p className="mt-4 font-mono text-xs tracking-wider text-[hsl(0,0%,45%)] uppercase">
+              <p className="mt-4 font-mono text-xs tracking-wider text-[hsl(var(--foreground-subtle))] uppercase">
                 Software Engineer & AI Researcher
               </p>
             </motion.div>
@@ -73,7 +73,7 @@ export function Footer() {
             >
               {/* Navigation */}
               <div>
-                <h3 className="font-mono text-[10px] tracking-[0.2em] text-[hsl(0,0%,35%)] uppercase mb-4">
+                <h3 className="font-mono text-[10px] tracking-[0.2em] text-[hsl(var(--foreground-faint))] uppercase mb-4">
                   Navigation
                 </h3>
                 <ul className="space-y-2">
@@ -81,7 +81,7 @@ export function Footer() {
                     <li key={item}>
                       <a
                         href={`#${item.toLowerCase()}`}
-                        className="text-sm text-[hsl(0,0%,60%)] hover:text-white transition-colors link-hover"
+                        className="text-sm text-[hsl(var(--foreground-muted))] hover:text-foreground transition-colors link-hover"
                       >
                         {item}
                       </a>
@@ -92,7 +92,7 @@ export function Footer() {
 
               {/* Social Links */}
               <div>
-                <h3 className="font-mono text-[10px] tracking-[0.2em] text-[hsl(0,0%,35%)] uppercase mb-4">
+                <h3 className="font-mono text-[10px] tracking-[0.2em] text-[hsl(var(--foreground-faint))] uppercase mb-4">
                   Connect
                 </h3>
                 <ul className="space-y-2">
@@ -101,7 +101,7 @@ export function Footer() {
                       href="https://github.com/Youssef2430"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-[hsl(0,0%,60%)] hover:text-white transition-colors group"
+                      className="flex items-center gap-2 text-sm text-[hsl(var(--foreground-muted))] hover:text-foreground transition-colors group"
                     >
                       <Github className="w-4 h-4" />
                       <span>GitHub</span>
@@ -113,7 +113,7 @@ export function Footer() {
                       href="https://linkedin.com/in/youssef-chouay"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-[hsl(0,0%,60%)] hover:text-white transition-colors group"
+                      className="flex items-center gap-2 text-sm text-[hsl(var(--foreground-muted))] hover:text-foreground transition-colors group"
                     >
                       <Linkedin className="w-4 h-4" />
                       <span>LinkedIn</span>
@@ -123,7 +123,7 @@ export function Footer() {
                   <li>
                     <a
                       href="mailto:ychou031@uottawa.ca"
-                      className="flex items-center gap-2 text-sm text-[hsl(0,0%,60%)] hover:text-white transition-colors group"
+                      className="flex items-center gap-2 text-sm text-[hsl(var(--foreground-muted))] hover:text-foreground transition-colors group"
                     >
                       <Mail className="w-4 h-4" />
                       <span>Email</span>
@@ -140,20 +140,20 @@ export function Footer() {
             initial={{ opacity: 0 }}
             animate={isInView ? { opacity: 1 } : { opacity: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-16 pt-8 border-t border-[hsl(0,0%,10%)]"
+            className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-16 pt-8 border-t border-border"
           >
-            <p className="font-mono text-[10px] tracking-wider text-[hsl(0,0%,35%)]">
+            <p className="font-mono text-[10px] tracking-wider text-[hsl(var(--foreground-faint))]">
               YOUSSEF CHOUAY © {currentYear}
             </p>
 
             <div className="flex items-center gap-4">
-              <span className="font-arabic text-sm text-[hsl(42,45%,75%)] opacity-60">
+              <span className="font-arabic text-sm text-[hsl(var(--gold))] opacity-60">
                 صُنع بإتقان
               </span>
-              <span className="font-mono text-[10px] tracking-wider text-[hsl(0,0%,35%)]">
+              <span className="font-mono text-[10px] tracking-wider text-[hsl(var(--foreground-faint))]">
                 •
               </span>
-              <span className="font-mono text-[10px] tracking-wider text-[hsl(0,0%,35%)]">
+              <span className="font-mono text-[10px] tracking-wider text-[hsl(var(--foreground-faint))]">
                 CRAFTED WITH INTENTION
               </span>
             </div>

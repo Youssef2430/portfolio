@@ -227,8 +227,8 @@ export function Projects() {
   const getColorValue = (color: "gold" | "white" | "cream") => {
     switch (color) {
       case "gold": return "hsl(var(--gold))";
-      case "cream": return "hsl(40, 30%, 90%)";
-      default: return "white";
+      case "cream": return "hsl(var(--cream))";
+      default: return "hsl(var(--foreground))";
     }
   };
 
@@ -236,13 +236,13 @@ export function Projects() {
     <section
       ref={sectionRef}
       id="work"
-      className="relative py-16 md:py-24 bg-black noise-bg overflow-hidden"
+      className="relative py-16 md:py-24 bg-background noise-bg overflow-hidden"
     >
       {/* Top fade overlay */}
       <div
         className="absolute top-0 left-0 right-0 h-32 pointer-events-none z-[2]"
         style={{
-          background: `linear-gradient(to top, transparent 0%, black 100%)`,
+          background: `linear-gradient(to top, transparent 0%, hsl(var(--background)) 100%)`,
         }}
       />
 
@@ -261,7 +261,7 @@ export function Projects() {
       <div
         className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none z-[2]"
         style={{
-          background: `linear-gradient(to bottom, transparent 0%, black 100%)`,
+          background: `linear-gradient(to bottom, transparent 0%, hsl(var(--background)) 100%)`,
         }}
       />
 
@@ -331,21 +331,21 @@ export function Projects() {
 
                   {/* Star gradients */}
                   <radialGradient id="nodeGradientGold" cx="30%" cy="30%">
-                    <stop offset="0%" stopColor="white" stopOpacity="0.9" />
+                    <stop offset="0%" stopColor="hsl(var(--cream))" stopOpacity="0.9" />
                     <stop offset="100%" stopColor="hsl(var(--gold))" stopOpacity="1" />
                   </radialGradient>
                   <radialGradient id="nodeGradientWhite" cx="30%" cy="30%">
-                    <stop offset="0%" stopColor="white" stopOpacity="1" />
-                    <stop offset="100%" stopColor="hsl(0, 0%, 85%)" stopOpacity="0.9" />
+                    <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity="1" />
+                    <stop offset="100%" stopColor="hsl(var(--foreground-soft))" stopOpacity="0.9" />
                   </radialGradient>
                   <radialGradient id="nodeGradientCream" cx="30%" cy="30%">
-                    <stop offset="0%" stopColor="white" stopOpacity="0.95" />
-                    <stop offset="100%" stopColor="hsl(220, 20%, 90%)" stopOpacity="0.9" />
+                    <stop offset="0%" stopColor="hsl(var(--cream))" stopOpacity="0.95" />
+                    <stop offset="100%" stopColor="hsl(var(--foreground-muted))" stopOpacity="0.9" />
                   </radialGradient>
                   <linearGradient id="shootingStarGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stopColor="transparent" />
-                    <stop offset="40%" stopColor="white" stopOpacity="0.6" />
-                    <stop offset="100%" stopColor="white" stopOpacity="1" />
+                    <stop offset="40%" stopColor="hsl(var(--foreground))" stopOpacity="0.6" />
+                    <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity="1" />
                   </linearGradient>
                 </defs>
 
@@ -360,7 +360,7 @@ export function Projects() {
                       cx={particle.x}
                       cy={particle.y}
                       r={particle.r * (0.9 + twinkle * 0.1)}
-                      fill="white"
+                      fill="hsl(var(--foreground))"
                       opacity={isInView ? opacity : 0}
                       style={{ transition: "opacity 0.5s" }}
                     />
@@ -401,7 +401,7 @@ export function Projects() {
                         {/* Head */}
                         <motion.circle
                           r="2"
-                          fill="white"
+                          fill="hsl(var(--foreground))"
                           filter="url(#glow-soft)"
                           initial={{
                             cx: star.startX,
@@ -527,7 +527,7 @@ export function Projects() {
                         cx={pos.x}
                         cy={pos.y}
                         r={node.r * 0.35}
-                        fill="white"
+                        fill="hsl(var(--foreground))"
                         opacity={isClosest ? 0.8 : isConnected ? 0.6 : 0.4 * node.opacity}
                         style={{ transition: "opacity 0.2s" }}
                       />
@@ -558,7 +558,7 @@ export function Projects() {
                   transition={{ duration: 0.6, delay: 0.1 }}
                   className="flex items-baseline gap-2 flex-wrap"
                 >
-                  <span className="font-condensed text-2xl md:text-3xl text-white uppercase">
+                  <span className="font-condensed text-2xl md:text-3xl text-foreground uppercase">
                     QUIETLY
                   </span>
                   <span className="font-script text-3xl md:text-4xl text-[hsl(var(--gold))]">
@@ -569,7 +569,7 @@ export function Projects() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                   transition={{ duration: 0.6, delay: 0.15 }}
-                  className="block font-condensed text-2xl md:text-3xl text-white uppercase"
+                  className="block font-condensed text-2xl md:text-3xl text-foreground uppercase"
                 >
                   DIGITAL EXPERIENCES
                 </motion.span>
@@ -609,7 +609,7 @@ export function Projects() {
                         }}
                       />
                       <div className="bg-[hsl(var(--gold))] px-6 py-2 shadow-lg">
-                        <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-black whitespace-nowrap">
+                        <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-[hsl(var(--accent-foreground))] whitespace-nowrap">
                           Coming Soon
                         </span>
                       </div>
@@ -664,7 +664,7 @@ export function Projects() {
                         {project.title}
                       </h3>
                       <h3
-                        className="works-title-xs text-white absolute top-full left-0 transition-transform duration-300 ease-out group-hover/title:-translate-y-full"
+                        className="works-title-xs text-foreground absolute top-full left-0 transition-transform duration-300 ease-out group-hover/title:-translate-y-full"
                         aria-hidden="true"
                       >
                         {project.title}

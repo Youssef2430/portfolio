@@ -77,7 +77,7 @@ export default function Home() {
 
   return (
     <PageTransition>
-      <main className="relative z-10 min-h-screen bg-black">
+      <main className="relative z-10 min-h-screen bg-background">
         {/* Grain overlay */}
         <div className="grain-overlay" />
 
