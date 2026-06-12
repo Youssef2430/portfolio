@@ -20,8 +20,21 @@ export const metadata: Metadata = {
     "Machine Learning",
   ],
   authors: [{ name: "Youssef Chouay" }],
+  creator: "Youssef Chouay",
+  publisher: "Youssef Chouay",
   alternates: {
     canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
   openGraph: {
     title: "Youssef Chouay | يوسف شواي",

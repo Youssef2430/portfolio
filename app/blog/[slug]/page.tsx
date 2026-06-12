@@ -19,6 +19,13 @@ import {
   type BlogPost,
 } from "@/lib/blog-data";
 import { getPostContent } from "@/lib/blog-content";
+import { JsonLd } from "@/components/json-ld";
+import {
+  jsonLdGraph,
+  personSchema,
+  breadcrumbSchema,
+  SITE_URL,
+} from "@/lib/seo";
 
 // Pre-generate static params for all published posts
 export function generateStaticParams() {
@@ -46,10 +53,18 @@ export async function generateMetadata({
   return {
     title,
     description,
+    keywords: post.tags,
+    alternates: {
+      canonical: `/blog/${post.slug}`,
+    },
     openGraph: {
       title,
       description,
       type: "article",
+      url: `/blog/${post.slug}`,
+      publishedTime: post.date,
+      authors: ["Youssef Chouay"],
+      tags: post.tags,
       images: post.coverImage ? [{ url: post.coverImage }] : undefined,
     },
     twitter: {
@@ -222,6 +237,34 @@ export default async function BlogPostPage({
 
   return (
     <main className="min-h-screen bg-background text-foreground">
+      <JsonLd
+        data={jsonLdGraph(
+          {
+            "@type": "BlogPosting",
+            "@id": `${SITE_URL}/blog/${post.slug}#article`,
+            headline: post.title,
+            description: post.excerpt,
+            datePublished: post.date,
+            dateModified: post.date,
+            url: `${SITE_URL}/blog/${post.slug}`,
+            mainEntityOfPage: {
+              "@type": "WebPage",
+              "@id": `${SITE_URL}/blog/${post.slug}`,
+            },
+            author: { "@id": `${SITE_URL}/#person` },
+            publisher: { "@id": `${SITE_URL}/#person` },
+            keywords: post.tags?.join(", "),
+            image: post.coverImage ? [`${SITE_URL}${post.coverImage}`] : undefined,
+            inLanguage: "en",
+          },
+          personSchema,
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Blog", path: "/blog" },
+            { name: post.title, path: `/blog/${post.slug}` },
+          ])
+        )}
+      />
       {/* Grain overlay */}
       <div className="grain-overlay" />
 

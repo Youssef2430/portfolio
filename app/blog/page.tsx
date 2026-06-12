@@ -5,10 +5,34 @@ import { ArrowLeft, ArrowUpRight, Clock } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { getAllPosts, formatPostDate } from "@/lib/blog-data";
+import { JsonLd } from "@/components/json-ld";
+import {
+  jsonLdGraph,
+  personSchema,
+  breadcrumbSchema,
+  SITE_URL,
+} from "@/lib/seo";
+
+const BLOG_DESCRIPTION =
+  "Writings on AI, software engineering, and graph theory by Youssef Chouay.";
 
 export const metadata: Metadata = {
   title: "Blog | Youssef Chouay",
-  description: "Writings on AI, software engineering, and graph theory.",
+  description: BLOG_DESCRIPTION,
+  alternates: {
+    canonical: "/blog",
+  },
+  openGraph: {
+    title: "Blog | Youssef Chouay",
+    description: BLOG_DESCRIPTION,
+    type: "website",
+    url: "/blog",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Blog | Youssef Chouay",
+    description: BLOG_DESCRIPTION,
+  },
 };
 
 export default function BlogIndexPage() {
@@ -16,6 +40,30 @@ export default function BlogIndexPage() {
 
   return (
     <main className="min-h-screen bg-background text-foreground">
+      <JsonLd
+        data={jsonLdGraph(
+          {
+            "@type": "Blog",
+            "@id": `${SITE_URL}/blog#blog`,
+            name: "Youssef Chouay's Blog",
+            description: BLOG_DESCRIPTION,
+            url: `${SITE_URL}/blog`,
+            author: { "@id": `${SITE_URL}/#person` },
+            inLanguage: "en",
+            blogPost: posts.map((post) => ({
+              "@type": "BlogPosting",
+              headline: post.title,
+              url: `${SITE_URL}/blog/${post.slug}`,
+              datePublished: post.date,
+            })),
+          },
+          personSchema,
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Blog", path: "/blog" },
+          ])
+        )}
+      />
       {/* Grain overlay */}
       <div className="grain-overlay" />
 

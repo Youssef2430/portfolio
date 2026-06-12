@@ -5,6 +5,13 @@ import {
   ProjectDetailView,
   type SerializableProject,
 } from "@/components/project-detail";
+import { JsonLd } from "@/components/json-ld";
+import {
+  jsonLdGraph,
+  personSchema,
+  breadcrumbSchema,
+  SITE_URL,
+} from "@/lib/seo";
 
 export function generateStaticParams() {
   return projects.map((p) => ({ id: p.id }));
@@ -30,10 +37,15 @@ export async function generateMetadata({
   return {
     title,
     description,
+    keywords: project.technologies,
+    alternates: {
+      canonical: `/projects/${project.id}`,
+    },
     openGraph: {
       title,
       description,
       type: "article",
+      url: `/projects/${project.id}`,
       images: [{ url: project.image }],
     },
     twitter: {
@@ -60,5 +72,31 @@ export default async function ProjectPage({
   // Strip the non-serializable icon before crossing into the client component
   const { icon: _icon, ...serializable } = project;
 
-  return <ProjectDetailView project={serializable as SerializableProject} />;
+  return (
+    <>
+      <JsonLd
+        data={jsonLdGraph(
+          {
+            "@type": "CreativeWork",
+            "@id": `${SITE_URL}/projects/${project.id}#work`,
+            name: project.title,
+            description: project.description[0],
+            url: `${SITE_URL}/projects/${project.id}`,
+            image: `${SITE_URL}${project.image}`,
+            genre: project.category,
+            keywords: project.technologies.join(", "),
+            author: { "@id": `${SITE_URL}/#person` },
+            ...(project.link ? { sameAs: project.link } : {}),
+          },
+          personSchema,
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Projects", path: "/#work" },
+            { name: project.title, path: `/projects/${project.id}` },
+          ])
+        )}
+      />
+      <ProjectDetailView project={serializable as SerializableProject} />
+    </>
+  );
 }

@@ -228,6 +228,13 @@ export function CurrentListen() {
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
+  const formatTime = (seconds: number) => {
+    if (!isFinite(seconds) || seconds < 0) return "0:00";
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
   return (
     <section
       ref={sectionRef}
@@ -466,119 +473,180 @@ export function CurrentListen() {
               >
                 {/* Vinyl Record */}
                 <motion.div
-                  animate={{
-                    x: getVinylX(),
-                    rotate: isPlaying ? 360 : 0,
+                  animate={{ x: getVinylX() }}
+                  transition={{
+                    x: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
                   }}
-                  transition={
-                    isPlaying
-                      ? {
-                          x: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-                          rotate: {
-                            duration: 2,
-                            ease: "linear",
-                            repeat: Infinity,
-                          },
-                        }
-                      : {
-                          x: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-                          rotate: { duration: 0.5 },
-                        }
-                  }
                   className="absolute z-0 w-[200px] h-[200px] md:w-[280px] md:h-[280px] top-0 left-0"
-                  style={{ originX: 0.5, originY: 0.5 }}
                 >
-                  {/* Vinyl base */}
-                  <div className="relative w-full h-full rounded-full bg-[hsl(42,30%,35%)] shadow-xl">
-                    {/* Vinyl grooves */}
+                  {/* Shadow cast by the disc */}
+                  <div className="absolute -bottom-4 left-[12%] right-[8%] h-5 rounded-[50%] bg-black/30 blur-lg pointer-events-none" />
+
+                  {/* Rotating disc — spins under the static sheen */}
+                  <motion.div
+                    animate={{ rotate: isPlaying ? 360 : 0 }}
+                    transition={
+                      isPlaying
+                        ? {
+                            rotate: {
+                              duration: 1.8,
+                              ease: "linear",
+                              repeat: Infinity,
+                            },
+                          }
+                        : { rotate: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+                    }
+                    className="relative w-full h-full rounded-full"
+                    style={{
+                      background:
+                        "radial-gradient(circle at center, hsl(0 0% 13%) 0%, hsl(0 0% 8%) 52%, hsl(0 0% 5%) 100%)",
+                    }}
+                  >
+                    {/* Groove texture */}
                     <div
-                      className="absolute inset-2 rounded-full"
+                      className="absolute inset-[4%] rounded-full"
                       style={{
                         background: `repeating-radial-gradient(
-                        circle at center,
-                        hsl(42, 25%, 30%) 0px,
-                        hsl(42, 20%, 25%) 1px,
-                        hsl(42, 25%, 32%) 2px
-                      )`,
+                          circle at center,
+                          hsl(0 0% 9%) 0px,
+                          hsl(0 0% 13%) 1px,
+                          hsl(0 0% 8%) 2px
+                        )`,
                       }}
                     />
 
-                    {/* Inner ring */}
-                    <div className="absolute inset-[30%] rounded-full bg-[hsl(var(--timeline-dot))]">
-                      {/* Center label */}
-                      <div className="absolute inset-[25%] rounded-full bg-[hsl(0,0%,35%)] flex items-center justify-center">
-                        {/* Play/Pause button with progress ring */}
-                        <AnimatePresence>
-                          {isExpanded && (
-                            <motion.div
-                              initial={{ opacity: 0, scale: 0.8 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              exit={{ opacity: 0, scale: 0.8 }}
-                              transition={{ duration: 0.2 }}
-                              className="relative"
-                            >
-                              {/* Progress ring */}
-                              <svg
-                                className="absolute -inset-1 w-[calc(100%+8px)] h-[calc(100%+8px)] -rotate-90"
-                                viewBox={`0 0 ${size} ${size}`}
-                              >
-                                <circle
-                                  cx={size / 2}
-                                  cy={size / 2}
-                                  r={radius}
-                                  fill="none"
-                                  stroke="rgba(255,255,255,0.2)"
-                                  strokeWidth={strokeWidth}
-                                />
-                                <circle
-                                  cx={size / 2}
-                                  cy={size / 2}
-                                  r={radius}
-                                  fill="none"
-                                  stroke="white"
-                                  strokeWidth={strokeWidth}
-                                  strokeLinecap="round"
-                                  strokeDasharray={circumference}
-                                  strokeDashoffset={strokeDashoffset}
-                                  className="transition-[stroke-dashoffset] duration-200 ease-linear"
-                                />
-                              </svg>
+                    {/* Dead-wax bands separating the "tracks" */}
+                    {["60%", "72%", "86%"].map((d) => (
+                      <div
+                        key={d}
+                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[0.06]"
+                        style={{ width: d, height: d }}
+                      />
+                    ))}
 
-                              {/* Button */}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handlePlayClick();
-                                }}
-                                disabled={!previewUrl || isLoading}
-                                className="relative w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                {isLoading ? (
-                                  <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                                ) : isPlaying ? (
-                                  <Pause className="w-5 h-5 md:w-6 md:h-6 text-black" />
-                                ) : (
-                                  <Play className="w-5 h-5 md:w-6 md:h-6 text-black ml-1" />
-                                )}
-                              </button>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    </div>
-
-                    {/* Vinyl shine effect */}
+                    {/* Paper label */}
                     <div
-                      className="absolute inset-0 rounded-full pointer-events-none"
+                      className="absolute inset-[31%] rounded-full"
                       style={{
-                        background: `linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(0,0,0,0.2) 100%)`,
+                        background:
+                          "radial-gradient(circle at 35% 30%, hsl(42 38% 54%) 0%, hsl(40 34% 44%) 60%, hsl(38 30% 37%) 100%)",
+                        boxShadow:
+                          "0 0 0 2px hsl(0 0% 6%), inset 0 1px 4px rgba(0,0,0,0.25)",
                       }}
-                    />
-                  </div>
+                    >
+                      {/* Label type — fades out when the play control appears */}
+                      <div
+                        className="absolute inset-0 flex flex-col items-center justify-center text-center select-none pointer-events-none"
+                        style={{
+                          opacity: isExpanded ? 0 : 1,
+                          transition: "opacity 0.3s ease",
+                        }}
+                      >
+                        <span className="font-mono text-[8px] md:text-[9px] tracking-[0.3em] uppercase text-black/75">
+                          Riles
+                        </span>
+                        <span className="my-[4px] block h-px w-7 bg-black/30" />
+                        <span className="font-mono text-[7px] md:text-[8px] tracking-[0.2em] uppercase text-black/60">
+                          Sometimes
+                        </span>
+                        <span className="mt-[3px] font-mono text-[6px] md:text-[7px] tracking-[0.18em] text-black/40">
+                          45 RPM
+                        </span>
+                      </div>
+
+                      {/* Spindle hole */}
+                      <div
+                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-[hsl(0,0%,7%)]"
+                        style={{
+                          boxShadow:
+                            "inset 0 1px 2px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.1)",
+                        }}
+                      />
+                    </div>
+                  </motion.div>
+
+                  {/* Static light sheen */}
+                  <div
+                    className="absolute inset-0 rounded-full pointer-events-none"
+                    style={{
+                      background:
+                        "conic-gradient(from 210deg at 50% 50%, transparent 0deg, rgba(255,255,255,0.10) 22deg, transparent 60deg, transparent 168deg, rgba(255,255,255,0.06) 200deg, transparent 245deg)",
+                    }}
+                  />
+
+                  {/* Rim light + depth */}
+                  <div
+                    className="absolute inset-0 rounded-full pointer-events-none"
+                    style={{
+                      boxShadow:
+                        "inset 0 1px 1px rgba(255,255,255,0.18), inset 0 -2px 6px rgba(0,0,0,0.55), 0 12px 35px rgba(0,0,0,0.35)",
+                    }}
+                  />
+
+                  {/* Play control — static overlay, never rotates with the disc */}
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.25 }}
+                        className="absolute inset-0 flex items-center justify-center"
+                      >
+                        <div className="relative">
+                          {/* Progress ring */}
+                          <svg
+                            className="absolute -inset-1 w-[calc(100%+8px)] h-[calc(100%+8px)] -rotate-90"
+                            viewBox={`0 0 ${size} ${size}`}
+                          >
+                            <circle
+                              cx={size / 2}
+                              cy={size / 2}
+                              r={radius}
+                              fill="none"
+                              stroke="rgba(255,255,255,0.15)"
+                              strokeWidth={strokeWidth}
+                            />
+                            <circle
+                              cx={size / 2}
+                              cy={size / 2}
+                              r={radius}
+                              fill="none"
+                              stroke="hsl(var(--gold))"
+                              strokeWidth={strokeWidth}
+                              strokeLinecap="round"
+                              strokeDasharray={circumference}
+                              strokeDashoffset={strokeDashoffset}
+                              className="transition-[stroke-dashoffset] duration-200 ease-linear"
+                            />
+                          </svg>
+
+                          {/* Button */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePlayClick();
+                            }}
+                            disabled={!previewUrl || isLoading}
+                            aria-label={isPlaying ? "Pause preview" : "Play preview"}
+                            className="relative w-12 h-12 md:w-14 md:h-14 rounded-full bg-black/75 hover:bg-black/90 backdrop-blur-sm border border-white/20 flex items-center justify-center transition-all duration-300 hover:scale-105 shadow-[0_4px_20px_rgba(0,0,0,0.5)] disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {isLoading ? (
+                              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            ) : isPlaying ? (
+                              <Pause className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                            ) : (
+                              <Play className="w-5 h-5 md:w-6 md:h-6 text-white ml-1" />
+                            )}
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
 
-                {/* Album Cover */}
-                <div className="relative z-10 w-[200px] h-[200px] md:w-[280px] md:h-[280px] rounded-2xl overflow-hidden shadow-2xl">
+                {/* Album Sleeve */}
+                <div className="relative z-10 w-[200px] h-[200px] md:w-[280px] md:h-[280px] rounded-[6px] overflow-hidden shadow-2xl">
                   <Image
                     src="/album-cover.jpg"
                     alt="SOMETIMES - Riles"
@@ -599,6 +667,17 @@ export function CurrentListen() {
                       backgroundImage: `radial-gradient(circle at 30% 30%, transparent 0%, rgba(0,0,0,0.3) 100%)`,
                     }}
                   />
+                  {/* Opening shadow where the record slips out */}
+                  <div
+                    className="absolute inset-y-0 right-0 w-10 pointer-events-none"
+                    style={{
+                      background:
+                        "linear-gradient(to left, rgba(0,0,0,0.35), transparent)",
+                    }}
+                  />
+                  {/* Spine highlight + sleeve edge */}
+                  <div className="absolute inset-y-0 left-0 w-px bg-white/20 pointer-events-none" />
+                  <div className="absolute inset-0 rounded-[6px] ring-1 ring-white/10 pointer-events-none" />
                 </div>
               </div>
 
@@ -611,7 +690,40 @@ export function CurrentListen() {
                 transition={{ duration: 0.6, delay: 0.5 }}
                 className="mt-8 text-center"
               >
-                <span className="bracket-label">Riles - SOMETIMES</span>
+                <span className="inline-flex items-center justify-center gap-3">
+                  <span className="bracket-label">Riles - SOMETIMES</span>
+                  {isPlaying && (
+                    <span className="inline-flex items-end gap-[2px] h-3" aria-hidden>
+                      {[0, 1, 2].map((i) => (
+                        <motion.span
+                          key={i}
+                          className="w-[2px] rounded-full bg-[hsl(var(--gold))]"
+                          animate={{ height: ["4px", "12px", "6px", "10px", "4px"] }}
+                          transition={{
+                            duration: 0.9,
+                            repeat: Infinity,
+                            delay: i * 0.15,
+                            ease: "easeInOut",
+                          }}
+                        />
+                      ))}
+                    </span>
+                  )}
+                </span>
+                <AnimatePresence>
+                  {isExpanded && duration > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="mt-2 font-mono text-[10px] tracking-[0.2em] text-[hsl(var(--foreground-muted))]"
+                    >
+                      {formatTime((progress / 100) * duration)} /{" "}
+                      {formatTime(duration)}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             </div>
           </motion.div>
