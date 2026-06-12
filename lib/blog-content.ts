@@ -1,5 +1,5 @@
 import { readFile } from 'fs/promises';
-import { join } from 'path';
+import { basename, join } from 'path';
 import type { BlogPost } from './blog-data';
 
 /**
@@ -17,7 +17,8 @@ export async function getPostContent(post: BlogPost): Promise<string> {
   }
 
   try {
-    const filePath = join(process.cwd(), post.contentFile);
+    // Statically scoped to blogs/ so the bundler can trace the fs access
+    const filePath = join(process.cwd(), 'blogs', basename(post.contentFile));
     const content = await readFile(filePath, 'utf-8');
     return content;
   } catch (error) {

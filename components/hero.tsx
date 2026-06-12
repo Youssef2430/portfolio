@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, type Variants } from "framer-motion";
 
 export function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -17,7 +17,7 @@ export function Hero() {
   }, []);
 
   // Staggered letter animation
-  const letterVariants = {
+  const letterVariants: Variants = {
     hidden: { opacity: 0, y: 150 },
     visible: (i: number) => ({
       opacity: 1,
@@ -30,7 +30,7 @@ export function Hero() {
     }),
   };
 
-  const arabicVariants = {
+  const arabicVariants: Variants = {
     hidden: { opacity: 0, scale: 0.8 },
     visible: {
       opacity: 1,
@@ -43,7 +43,7 @@ export function Hero() {
     },
   };
 
-  const subtitleVariants = {
+  const subtitleVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
@@ -56,7 +56,7 @@ export function Hero() {
     },
   };
 
-  const scrollIndicatorVariants = {
+  const scrollIndicatorVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,

@@ -58,6 +58,28 @@ interface ApiHistoryItem {
   content: string;
 }
 
+// Pixel sampled from the input text rendered to canvas
+interface PixelSample {
+  x: number;
+  y: number;
+  originX: number;
+  originY: number;
+  color: number[];
+}
+
+// Animated particle in the vanish effect
+interface Particle {
+  x: number;
+  y: number;
+  originX: number;
+  originY: number;
+  r: number;
+  vx: number;
+  vy: number;
+  opacity: number;
+  color: string;
+}
+
 // --- Main AskInput Component ---
 export function AskInput() {
   // States
@@ -78,7 +100,7 @@ export function AskInput() {
   const isStreamingRef = useRef(false);
   const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const newDataRef = useRef<any[]>([]);
+  const newDataRef = useRef<Particle[]>([]);
   const animationFrameRef = useRef<number | null>(null);
 
   // --- Load/Save Messages & Visibility Checks ---
@@ -219,7 +241,7 @@ export function AskInput() {
 
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const pixelData = imageData.data;
-    const newData: any[] = [];
+    const newData: PixelSample[] = [];
 
     for (let y = 0; y < canvas.height; y += 2) {
       for (let x = 0; x < canvas.width; x += 2) {

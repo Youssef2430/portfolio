@@ -58,7 +58,7 @@ For daily returns with $\Delta t = 1/252$ (trading days per year), the daily var
 
 The animation below demonstrates GBM path evolution. We simulate 20 paths with parameters calibrated to S&P 500 data ($\mu = 0.12$, $\sigma = 0.214$ annualized).
 
-![GBM Path Evolution](figures/anim1_gbm_paths.gif)
+![GBM Path Evolution](figures/anim1_gbm_paths.mp4)
 
 *Animation 1: Twenty GBM paths evolving over one trading year (252 days). All paths start at $S_0 = 100$ with identical parameters, yet diverge significantly due to independent Brownian increments. The day counter tracks progression. Observe how uncertainty (spread of paths) grows with $\sqrt{t}$, consistent with the diffusion term.*
 
@@ -107,7 +107,7 @@ This creates a U-shaped relationship: $\mathbb{E}[V_S \mid R_M]$ is minimized wh
 
 The following animation demonstrates how the conditional distribution $V_S | R_M$ shifts as we sweep through different market return values:
 
-![Conditional Distribution Sweep](figures/anim6_conditional_sweep.gif)
+![Conditional Distribution Sweep](figures/anim6_conditional_sweep.mp4)
 
 *Animation 2: Conditional distributions V_S|R_M sweeping from R_M = -0.03 to +0.03. Left panel: The distribution shifts rightward (higher volatility) as |R_M| increases, directly visualizing the leverage effect. Right panel: Vertical red line tracks current R_M on the joint density heatmap. Notice the U-shaped expected value displayed in the info bar.*
 
@@ -131,7 +131,7 @@ $$Z \perp\!\!\!\perp (R_M, V_S)$$
 
 The exogenous shock is statistically independent of both market returns and sector volatility. This assumption reflects the structural nature of certain events (e.g., an unexpected Fed announcement does not depend on yesterday's S&P 500 return).
 
-![Jump Process Evolution](figures/anim4_jump_process.gif)
+![Jump Process Evolution](figures/anim4_jump_process.mp4)
 
 *Animation 3: Compound Poisson jump process over 252 trading days. Top: Cumulative shock value Z(t) with discrete jumps marked by red stars. Between jumps, Z(t) remains constant, no continuous drift component. Bottom: Jump counting process N(t) following Poisson(λ). Statistics update in real-time showing empirical jump rate converging to theoretical 5%.*
 
@@ -208,7 +208,7 @@ R_M vs V_S: ρ = 0.024, p-value < 0.001 → Reject independence (expected)
 
 The joint density builds up from Monte Carlo samples as shown:
 
-![Joint Density Heatmap Build-up](figures/anim7_joint_density_heatmap.gif)
+![Joint Density Heatmap Build-up](figures/anim7_joint_density_heatmap.mp4)
 
 *Animation 4: Joint density f(R_M, V_S) emerging from 100 to 10,000 samples. White scatter points show raw data; contour colors reveal density concentration. The characteristic shape, higher density near (0, low V_S) with spread increasing for larger |R_M|, visualizes the conditional dependence structure.*
 
@@ -220,7 +220,7 @@ The joint density builds up from Monte Carlo samples as shown:
 
 We calibrate our model to S&P 500 (^GSPC) daily data from January 2020 to December 2024, a period encompassing the COVID-19 crash, subsequent recovery, 2022 bear market, and 2023-24 rally.
 
-![S&P 500 Evolution](figures/anim2_sp500_evolution.gif)
+![S&P 500 Evolution](figures/anim2_sp500_evolution.mp4)
 
 *Animation 5: Historical S&P 500 price evolution (normalized, base=100) with synchronized 20-day rolling volatility. Key events annotated: COVID crash bottom (March 2020), 2022 bear market onset, 2023 rally. Notice volatility clustering, spikes during crises, mean-reversion during calm periods.*
 
@@ -304,7 +304,7 @@ Cross-term:         0.4%
 
 The dominance of sector volatility under these weights highlights its role as the primary risk driver.
 
-![Risk Distribution Evolution](figures/anim5_risk_distribution.gif)
+![Risk Distribution Evolution](figures/anim5_risk_distribution.mp4)
 
 *Animation 6: Portfolio loss distribution building from 100 to 10,000 simulations. Left: Histogram with VaR thresholds (90%, 95%, 99%) stabilizing. Right: VaR (red) and ES (blue) convergence demonstrating Monte Carlo estimation consistency.*
 

@@ -161,9 +161,9 @@ export function About() {
               </div>
 
               <p className="text-[hsl(var(--foreground-soft))] leading-relaxed">
-                I'm a software engineer and researcher with a passion for
+                I&apos;m a software engineer and researcher with a passion for
                 creating elegant, efficient solutions to complex problems.
-                Growing up curious about the world and my surroundings, I've
+                Growing up curious about the world and my surroundings, I&apos;ve
                 always wanted to understand how they worked.
               </p>
             </div>
@@ -181,12 +181,12 @@ export function About() {
               </div>
 
               <p className="text-[hsl(var(--foreground-soft))] leading-relaxed">
-                I've kept that approach and mindset throughout my whole life and
-                I'm slowly chipping the iceberg of knowledge hoping to make a
+                I&apos;ve kept that approach and mindset throughout my whole life and
+                I&apos;m slowly chipping the iceberg of knowledge hoping to make a
                 big enough dent to make my younger self proud. Currently
-                pursuing a Master's in Computer Science with a focus on Graph
+                pursuing a Master&apos;s in Computer Science with a focus on Graph
                 Theory, and working as an AI researcher for the Canadian
-                National Research Council. I'm constantly exploring new
+                National Research Council. I&apos;m constantly exploring new
                 technologies and ways to contribute.
               </p>
             </div>
