@@ -477,33 +477,12 @@ export async function GET(req: Request) {
       },
     });
 
-    const reader = response.body?.getReader();
-    if (!reader) {
+    if (!response.body) {
       return new Response("No response body", { status: 500 });
     }
 
-    const stream = new ReadableStream({
-      async start(controller) {
-        const writer = transformStream.writable.getWriter();
-
-        try {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-              await writer.close();
-              break;
-            }
-            await writer.write(value);
-          }
-        } catch (error) {
-          console.error("Stream error:", error);
-          controller.error(error);
-        }
-      },
-    });
-
-    // Pipe through transform and return
-    const transformedStream = stream.pipeThrough(transformStream);
+    // Pipe the upstream SSE body through the transform and return
+    const transformedStream = response.body.pipeThrough(transformStream);
 
     return new Response(transformedStream, {
       headers: {

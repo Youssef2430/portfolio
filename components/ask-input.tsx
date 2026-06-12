@@ -98,7 +98,6 @@ export function AskInput() {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
   const isStreamingRef = useRef(false);
-  const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const newDataRef = useRef<Particle[]>([]);
   const animationFrameRef = useRef<number | null>(null);
@@ -206,7 +205,6 @@ export function AskInput() {
   // Cleanup intervals and animation frame on unmount
   useEffect(() => {
     return () => {
-      if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
       if (animationFrameRef.current)
         cancelAnimationFrame(animationFrameRef.current);
     };
@@ -379,58 +377,78 @@ export function AskInput() {
 
       if (!isExpanded) setIsExpanded(true);
 
+      // Prior turns only — the current question goes in `message`, the
+      // server appends it itself. Keep the last 10 turns to stay well under
+      // URL length limits on the streaming GET endpoint.
       const history: ApiHistoryItem[] = messages
         .filter((msg) => msg.text)
-        .map((msg) => ({
-          role: msg.type === "question" ? "user" : "assistant",
-          content: msg.text,
-        }));
-      history.push({ role: "user", content: currentInput });
+        .map(
+          (msg): ApiHistoryItem => ({
+            role: msg.type === "question" ? "user" : "assistant",
+            content: msg.text,
+          }),
+        )
+        .slice(-10);
 
       setIsTyping(true);
       isStreamingRef.current = true;
 
-      if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
-
-      // --- API Call ---
+      // --- API Call (SSE streaming) ---
       try {
-        const response = await fetch("/api/ask", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: currentInput, history }),
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`API Error (${response.status}): ${errorText}`);
+        const params = new URLSearchParams({ message: currentInput });
+        if (history.length > 0) {
+          params.set("history", JSON.stringify(history));
         }
 
-        const data = await response.json();
-        const fullText = data.response;
+        const response = await fetch(`/api/ask?${params.toString()}`);
 
-        if (typeof fullText !== "string") {
-          throw new Error("Invalid response format from API.");
+        if (!response.ok || !response.body) {
+          throw new Error(`API Error (${response.status})`);
         }
 
-        // --- Typing Effect ---
-        let index = 0;
-        const typingSpeed = 30;
-        typingIntervalRef.current = setInterval(() => {
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === answerId
-                ? { ...msg, text: fullText.substring(0, index + 1) }
-                : msg,
-            ),
-          );
-          index++;
-          if (index >= fullText.length) {
-            if (typingIntervalRef.current)
-              clearInterval(typingIntervalRef.current);
-            setIsTyping(false);
-            isStreamingRef.current = false;
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let accumulated = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
+
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            const data = line.slice(6).trim();
+            if (!data || data === "[DONE]") continue;
+
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.type === "metrics") continue;
+              const delta = parsed.choices?.[0]?.delta?.content;
+              if (delta) {
+                accumulated += delta;
+                const text = accumulated;
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === answerId ? { ...msg, text } : msg,
+                  ),
+                );
+              }
+            } catch {
+              // Incomplete JSON chunk — wait for the rest
+            }
           }
-        }, typingSpeed);
+        }
+
+        if (!accumulated) {
+          throw new Error("Empty response from AI.");
+        }
+
+        setIsTyping(false);
+        isStreamingRef.current = false;
       } catch (error) {
         console.error("API call or typing effect failed:", error);
         const errorMessage =
@@ -443,7 +461,6 @@ export function AskInput() {
               : msg,
           ),
         );
-        if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
         setIsTyping(false);
         isStreamingRef.current = false;
         setTimeout(() => {
@@ -469,7 +486,6 @@ export function AskInput() {
   );
 
   const clearMessages = () => {
-    if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
     setMessages([]);
     localStorage.removeItem("chatMessages");
     localStorage.removeItem("chatNextId");
