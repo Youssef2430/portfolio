@@ -1,13 +1,13 @@
 import type React from "react";
 import type { Metadata } from "next";
 import "./globals.css";
-import "katex/dist/katex.min.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PostHogProvider } from "./providers";
 import { CustomCursor } from "@/components/custom-cursor";
 import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://youssefchouay.com"),
   title: "Youssef Chouay | يوسف شواي",
   description:
     "Portfolio of Youssef Chouay — Software Engineer and AI Researcher based in Ottawa, Canada.",
@@ -20,10 +20,34 @@ export const metadata: Metadata = {
     "Machine Learning",
   ],
   authors: [{ name: "Youssef Chouay" }],
+  creator: "Youssef Chouay",
+  publisher: "Youssef Chouay",
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   openGraph: {
     title: "Youssef Chouay | يوسف شواي",
     description: "Software Engineer and AI Researcher",
     type: "website",
+    url: "/",
+    siteName: "Youssef Chouay",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Youssef Chouay | يوسف شواي",
+    description: "Software Engineer and AI Researcher",
   },
 };
 

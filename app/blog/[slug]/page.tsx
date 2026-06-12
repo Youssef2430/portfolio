@@ -1,9 +1,11 @@
+import "katex/dist/katex.min.css";
+
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Clock, Calendar } from "lucide-react";
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import remarkMath from "remark-math";
@@ -17,6 +19,13 @@ import {
   type BlogPost,
 } from "@/lib/blog-data";
 import { getPostContent } from "@/lib/blog-content";
+import { JsonLd } from "@/components/json-ld";
+import {
+  jsonLdGraph,
+  personSchema,
+  breadcrumbSchema,
+  SITE_URL,
+} from "@/lib/seo";
 
 // Pre-generate static params for all published posts
 export function generateStaticParams() {
@@ -44,10 +53,18 @@ export async function generateMetadata({
   return {
     title,
     description,
+    keywords: post.tags,
+    alternates: {
+      canonical: `/blog/${post.slug}`,
+    },
     openGraph: {
       title,
       description,
       type: "article",
+      url: `/blog/${post.slug}`,
+      publishedTime: post.date,
+      authors: ["Youssef Chouay"],
+      tags: post.tags,
       images: post.coverImage ? [{ url: post.coverImage }] : undefined,
     },
     twitter: {
@@ -60,44 +77,44 @@ export async function generateMetadata({
 }
 
 // Custom components for markdown rendering
-const MarkdownComponents: any = {
-  h1: ({ children }: { children: React.ReactNode }) => (
+const MarkdownComponents: Components = {
+  h1: ({ children }) => (
     <h1 className="text-3xl font-light tracking-tight mb-6 mt-12 first:mt-0 text-foreground">
       {children}
     </h1>
   ),
-  h2: ({ children }: { children: React.ReactNode }) => (
+  h2: ({ children }) => (
     <h2 className="text-2xl font-light tracking-tight mb-4 mt-10 text-foreground">
       {children}
     </h2>
   ),
-  h3: ({ children }: { children: React.ReactNode }) => (
+  h3: ({ children }) => (
     <h3 className="text-xl font-light tracking-tight mb-3 mt-8 text-foreground">
       {children}
     </h3>
   ),
-  p: ({ children }: { children: React.ReactNode }) => (
+  p: ({ children }) => (
     <p className="text-[hsl(var(--foreground-soft))] leading-relaxed mb-6">{children}</p>
   ),
-  ul: ({ children }: { children: React.ReactNode }) => (
+  ul: ({ children }) => (
     <ul className="list-disc pl-6 space-y-2 mb-6 text-[hsl(var(--foreground-soft))]">
       {children}
     </ul>
   ),
-  ol: ({ children }: { children: React.ReactNode }) => (
+  ol: ({ children }) => (
     <ol className="list-decimal pl-6 space-y-2 mb-6 text-[hsl(var(--foreground-soft))]">
       {children}
     </ol>
   ),
-  li: ({ children }: { children: React.ReactNode }) => (
+  li: ({ children }) => (
     <li className="text-[hsl(var(--foreground-soft))] leading-relaxed">{children}</li>
   ),
-  blockquote: ({ children }: { children: React.ReactNode }) => (
+  blockquote: ({ children }) => (
     <blockquote className="border-l-2 border-[hsl(var(--gold))] pl-6 py-2 my-6 italic text-[hsl(var(--foreground-muted))]">
       {children}
     </blockquote>
   ),
-  code: ({ children, className, ...props }: any) => {
+  code: ({ children, className, ...props }) => {
     const isInline = !className;
     if (isInline) {
       return (
@@ -115,12 +132,12 @@ const MarkdownComponents: any = {
       </code>
     );
   },
-  pre: ({ children }: { children: React.ReactNode }) => (
+  pre: ({ children }) => (
     <pre className="bg-card p-4 overflow-x-auto my-6 text-sm border border-border">
       {children}
     </pre>
   ),
-  a: ({ href, children, ...props }: any) => (
+  a: ({ href, children, ...props }) => (
     <a
       href={href}
       className="text-[hsl(var(--gold))] underline underline-offset-4 decoration-[hsl(var(--gold))]/30 hover:decoration-[hsl(var(--gold))] transition-colors"
@@ -131,18 +148,30 @@ const MarkdownComponents: any = {
       {children}
     </a>
   ),
-  strong: ({ children }: { children: React.ReactNode }) => (
+  strong: ({ children }) => (
     <strong className="font-medium text-foreground">{children}</strong>
   ),
-  img: ({ src, alt }: { src: string; alt: string }) => (
+  img: ({ src, alt }) => (
     <span className="block my-8">
-      <Image
-        src={src}
-        alt={alt || ""}
-        width={800}
-        height={450}
-        className="w-full border border-border"
-      />
+      {typeof src === "string" && src.endsWith(".mp4") ? (
+        <video
+          src={src}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full border border-border"
+          aria-label={alt || undefined}
+        />
+      ) : (
+        <Image
+          src={typeof src === "string" ? src : ""}
+          alt={alt || ""}
+          width={800}
+          height={450}
+          className="w-full border border-border"
+        />
+      )}
       {alt && (
         <span className="block mt-2 text-center text-sm text-[hsl(var(--foreground-subtle))]">
           {alt}
@@ -151,17 +180,17 @@ const MarkdownComponents: any = {
     </span>
   ),
   hr: () => <hr className="my-12 border-t border-border" />,
-  table: ({ children }: { children: React.ReactNode }) => (
+  table: ({ children }) => (
     <div className="overflow-x-auto my-6">
       <table className="w-full border border-border">{children}</table>
     </div>
   ),
-  th: ({ children }: { children: React.ReactNode }) => (
+  th: ({ children }) => (
     <th className="border border-border px-4 py-2 text-left font-medium text-foreground bg-muted">
       {children}
     </th>
   ),
-  td: ({ children }: { children: React.ReactNode }) => (
+  td: ({ children }) => (
     <td className="border border-border px-4 py-2 text-[hsl(var(--foreground-soft))]">
       {children}
     </td>
@@ -208,6 +237,34 @@ export default async function BlogPostPage({
 
   return (
     <main className="min-h-screen bg-background text-foreground">
+      <JsonLd
+        data={jsonLdGraph(
+          {
+            "@type": "BlogPosting",
+            "@id": `${SITE_URL}/blog/${post.slug}#article`,
+            headline: post.title,
+            description: post.excerpt,
+            datePublished: post.date,
+            dateModified: post.date,
+            url: `${SITE_URL}/blog/${post.slug}`,
+            mainEntityOfPage: {
+              "@type": "WebPage",
+              "@id": `${SITE_URL}/blog/${post.slug}`,
+            },
+            author: { "@id": `${SITE_URL}/#person` },
+            publisher: { "@id": `${SITE_URL}/#person` },
+            keywords: post.tags?.join(", "),
+            image: post.coverImage ? [`${SITE_URL}${post.coverImage}`] : undefined,
+            inLanguage: "en",
+          },
+          personSchema,
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Blog", path: "/blog" },
+            { name: post.title, path: `/blog/${post.slug}` },
+          ])
+        )}
+      />
       {/* Grain overlay */}
       <div className="grain-overlay" />
 

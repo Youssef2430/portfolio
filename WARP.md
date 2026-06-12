@@ -9,16 +9,16 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 # Start development server
 npm run dev
 
-# Build for production
+# Build for production (runs TypeScript checks — errors fail the build)
 npm run build
 
 # Start production server
 npm start
 
-# Run linting
+# Run linting (ESLint 9 flat config — `next lint` was removed in Next 16)
 npm run lint
 
-# Populate/refresh Supabase database with embeddings
+# Populate/refresh Supabase database with embeddings (optional, legacy RAG)
 npm run populate-db
 ```
 
@@ -26,121 +26,113 @@ npm run populate-db
 ```bash
 # Check TypeScript errors
 npx tsc --noEmit
-
-# Format code with Prettier (if configured)
-npx prettier --write .
-
-# Check bundle size
-npm run build && npx @next/bundle-analyzer
 ```
 
 ## Environment Setup
 
-Create `.env.local` file with:
+Create `.env` (or `.env.local`) with:
 ```bash
-# Required for AI chat functionality
+# Required for AI chat functionality (the /api/ask route calls OpenRouter)
+OPENROUTER_API_KEY=your_openrouter_api_key
+
+# Optional analytics / logging
+NEXT_PUBLIC_POSTHOG_KEY=your_posthog_key
+NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+
+# Only needed for the legacy populate-db script
 OPENAI_API_KEY=your_openai_api_key
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_key
-
-# Optional analytics
-NEXT_PUBLIC_POSTHOG_KEY=your_posthog_key
-NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
 ```
 
 ## Architecture Overview
 
-This is a modern Next.js 14 portfolio website with App Router, showcasing Youssef's work with an integrated AI chat system.
+This is a Next.js 16 portfolio website with App Router, showcasing Youssef's work with an integrated AI chat system.
 
 ### Tech Stack
-- **Framework**: Next.js 14 (App Router, TypeScript)
-- **Styling**: Tailwind CSS with custom animations
-- **UI Components**: Custom components with Radix UI primitives
-- **Animations**: Framer Motion for smooth interactions
-- **AI/Chat**: OpenAI GPT-4 with RAG (Retrieval-Augmented Generation)
-- **Database**: Supabase (PostgreSQL with vector embeddings)
-- **Analytics**: PostHog for user tracking
+- **Framework**: Next.js 16 (App Router, TypeScript, React 19)
+- **Styling**: Tailwind CSS v3 with custom animations
+- **Animations**: Framer Motion v12 for smooth interactions
+- **AI/Chat**: OpenRouter (`app/api/ask/route.ts`) with a hardcoded context prompt
+- **Logging**: OpenTelemetry logs exported to PostHog (`instrumentation.ts`)
+- **Analytics**: PostHog + Vercel Analytics
 
 ### Key Architectural Patterns
 
 #### 1. Component Architecture
-- **Server Components**: Default for pages and static content
+- **Server Components**: Pages are server components (`app/page.tsx`, blog and
+  project pages) so metadata and SSG work; interactivity lives in client
+  components under `components/`
 - **Client Components**: Marked with `"use client"` for interactive features
-- **Custom Hooks**: `use-mobile.tsx`, `use-toast.ts` for reusable logic
+  (e.g. `components/page-transition.tsx`, `components/project-detail.tsx`)
 - **Component Composition**: Modular sections (Hero, About, Projects, etc.)
 
 #### 2. AI Chat System (`components/ask-input.tsx`)
-- **RAG Pipeline**: Semantic search via Supabase vector matching
 - **Streaming UI**: Real-time typing effects with particle animations
 - **Context Management**: Persistent chat history in localStorage
 - **Responsive Design**: Mobile-optimized with touch handling
 
 #### 3. API Routes (`app/api/ask/route.ts`)
-- **Vector Search**: Uses OpenAI embeddings + Supabase similarity matching
-- **Fallback Content**: Hardcoded context when RAG is disabled
-- **Error Handling**: Comprehensive error boundaries and logging
-- **Rate Limiting**: Built-in OpenAI API management
+- **Provider**: OpenRouter chat completions (POST = non-streaming, GET = SSE streaming)
+- **Abuse protection**: model whitelist, per-IP rate limiting, message/history
+  length caps, role sanitization (no client-supplied system prompts)
+- **Errors**: generic messages to clients; details only in server logs
+- **Metrics**: token usage and cost logged via OpenTelemetry to PostHog
 
 #### 4. Data Management
 - **Project Data**: Centralized in `lib/project-data.ts` with TypeScript types
-- **Static Assets**: Images in `public/` directory
-- **Database Population**: Automated script (`scripts/populateSupabase.js`)
+- **Blog Data**: Metadata in `lib/blog-data.ts`, markdown content in `blogs/*.md`
+  read server-side via `lib/blog-content.ts`
+- **Static Assets**: Images in `public/`; blog animations are MP4 (not GIF)
 
-### Development Patterns
-
-#### Styling Approach
-- **Design System**: Custom Tailwind config with consistent spacing/colors
-- **Dark Mode**: Built-in theme switching via `next-themes`
-- **Animations**: Custom keyframes for skill pulses, glitch effects
-- **Mobile-First**: Responsive design with touch optimization
-
-#### Performance Optimizations
-- **Image Optimization**: Next.js Image component with proper sizing
-- **Bundle Splitting**: Automatic code splitting via App Router
-- **Static Generation**: SSG for portfolio content where possible
-- **Lazy Loading**: Intersection Observer for section animations
-
-#### State Management
-- **Local State**: React useState/useRef for component state
-- **Persistent State**: localStorage for chat history
-- **Global State**: Context providers for theme and analytics
+### SEO
+- `app/sitemap.ts` and `app/robots.ts` are generated routes
+- `app/opengraph-image.tsx` renders the default OG image
+- Blog posts and project pages have per-page `generateMetadata`
+- `app/not-found.tsx` and `app/error.tsx` handle error states
 
 ### File Structure Patterns
 
 ```
 app/                   # Next.js App Router
-  api/ask/            # AI chat API endpoint
-  layout.tsx          # Root layout with providers
-  page.tsx            # Main portfolio page
-  providers.tsx       # PostHog analytics setup
+  api/ask/             # AI chat API endpoint (OpenRouter)
+  api/music/preview/   # Deezer preview proxy
+  blog/                # Blog index + [slug] pages (SSG)
+  projects/[id]/       # Project pages (SSG, server metadata + client view)
+  layout.tsx           # Root layout with providers + metadata
+  page.tsx             # Main portfolio page (server component)
+  providers.tsx        # PostHog analytics setup
+  sitemap.ts, robots.ts, opengraph-image.tsx, not-found.tsx, error.tsx
 
-components/           # Reusable UI components
-  ask-input.tsx      # AI chat interface (complex)
-  hero.tsx           # Hero section with animations
-  projects.tsx       # Project showcase with modals
-  [section].tsx      # Other portfolio sections
+components/            # Reusable UI components (all actively used)
+  ask-input.tsx        # AI chat interface (complex)
+  page-transition.tsx  # Client wrapper for home page animations
+  project-detail.tsx   # Client view for project pages
+  [section].tsx        # Other portfolio sections
 
-lib/                 # Utilities and data
-  project-data.ts    # Centralized project information
-  utils.ts           # Helper functions
+lib/                   # Utilities and data
+  project-data.ts      # Centralized project information
+  blog-data.ts         # Blog post metadata
+  blog-content.ts      # Server-side markdown reading
+  utils.ts             # Helper functions
 
-scripts/             # Development tools
-  populateSupabase.js # Database seeding script
+blogs/                 # Markdown content for blog posts
+scripts/               # populateSupabase.js (legacy RAG seeding)
 ```
 
 ### Key Development Guidelines
 
 #### Component Development
 - Use TypeScript interfaces for all props and data structures
-- Implement proper error boundaries for client components
+- Keep pages as server components; push `"use client"` to leaf components
 - Follow the existing animation patterns using Framer Motion
-- Maintain consistent spacing and typography scales
+- Note: `framer-motion` v12 requires `Variants` type annotations on
+  standalone variant objects (ease arrays must infer as bezier tuples)
 
 #### API Development
 - All API routes should use proper TypeScript typing
-- Implement comprehensive error handling and logging
+- Never return upstream/internal error details to clients
 - Use environment variables for all external service configurations
-- Follow the RAG pattern for any new AI-powered features
 
 #### Styling Guidelines
 - Use Tailwind utility classes for consistent design
@@ -148,34 +140,9 @@ scripts/             # Development tools
 - Maintain mobile-first responsive design principles
 - Use the established color scheme and dark mode patterns
 
-#### Performance Considerations
-- Optimize images using Next.js Image component
-- Use dynamic imports for heavy client-side components
-- Implement proper loading states for async operations
-- Monitor bundle size when adding new dependencies
-
 ### Deployment Notes
 
-The application is configured for static export with:
-- `images.unoptimized: true` for static hosting
-- ESLint and TypeScript errors ignored during builds (development convenience)
-- All API routes require proper environment variable configuration
-
-### Database Schema (Supabase)
-
-The `documents` table structure:
-```sql
-CREATE TABLE documents (
-  id SERIAL PRIMARY KEY,
-  content TEXT NOT NULL,
-  embedding VECTOR(1536)
-);
-
-CREATE OR REPLACE FUNCTION match_documents(
-  query_embedding VECTOR(1536),
-  match_threshold FLOAT,
-  match_count INT
-) RETURNS TABLE (content TEXT, similarity FLOAT);
-```
-
-Run `npm run populate-db` to seed the database with portfolio content embeddings.
+- Deployed on Vercel; standard server build (NOT static export)
+- Next.js image optimization is enabled (no `unoptimized` flag)
+- TypeScript errors fail the build; lint runs separately via `npm run lint`
+- `/travels` is rewritten to the static site at `public/travels/index.html`

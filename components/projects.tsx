@@ -151,21 +151,6 @@ export function Projects() {
     };
   }, [isInView]);
 
-  const isNodeConnected = useCallback((nodeId: number) => {
-    if (hoveredNode === null) return false;
-    if (nodeId === hoveredNode) return true;
-    return edges.some(
-      (e) =>
-        (e.from === hoveredNode && e.to === nodeId) ||
-        (e.to === hoveredNode && e.from === nodeId)
-    );
-  }, [hoveredNode, edges]);
-
-  const isEdgeConnected = useCallback((from: number, to: number) => {
-    if (hoveredNode === null) return false;
-    return from === hoveredNode || to === hoveredNode;
-  }, [hoveredNode]);
-
   // Find closest node to cursor
   const closestNode = useMemo(() => {
     if (!svgMousePos) return null;

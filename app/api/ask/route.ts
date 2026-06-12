@@ -10,12 +10,55 @@ const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 
 // Default model - can be easily switched for cost/speed tradeoffs
-// Options: google/gemini-2.0-flash-001, anthropic/claude-3.5-haiku, meta-llama/llama-3.3-70b-instruct, etc.
 const DEFAULT_MODEL = "google/gemini-3-flash-preview";
 
 // --- Validate Environment Variables ---
 if (!OPENROUTER_API_KEY) {
   console.warn("Missing OPENROUTER_API_KEY - API will fail");
+}
+
+// --- Abuse limits ---
+// Only models with known pricing may be requested by the client; anything
+// else silently falls back to the default so the endpoint can't be used to
+// run arbitrary (expensive) models on our OpenRouter key.
+const MAX_MESSAGE_LENGTH = 2000;
+const MAX_HISTORY_MESSAGES = 20;
+const MAX_HISTORY_CONTENT_LENGTH = 4000;
+
+// Per-IP sliding-window rate limit. In-memory, so it's per serverless
+// instance — best-effort protection, not a hard guarantee.
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 10;
+const rateLimitBuckets = new Map<string, number[]>();
+
+function getClientIp(req: Request): string {
+  const forwarded = req.headers.get("x-forwarded-for");
+  return forwarded?.split(",")[0]?.trim() || "unknown";
+}
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const windowStart = now - RATE_LIMIT_WINDOW_MS;
+  const timestamps = (rateLimitBuckets.get(ip) ?? []).filter(
+    (t) => t > windowStart
+  );
+
+  if (timestamps.length >= RATE_LIMIT_MAX_REQUESTS) {
+    rateLimitBuckets.set(ip, timestamps);
+    return true;
+  }
+
+  timestamps.push(now);
+  rateLimitBuckets.set(ip, timestamps);
+
+  // Keep the map from growing unbounded on long-lived instances
+  if (rateLimitBuckets.size > 10_000) {
+    for (const [key, value] of rateLimitBuckets) {
+      if (value.every((t) => t <= windowStart)) rateLimitBuckets.delete(key);
+    }
+  }
+
+  return false;
 }
 
 // --- Define Types ---
@@ -64,12 +107,34 @@ const MODEL_PRICING: Record<string, { input: number; output: number }> = {
   "google/gemini-3-flash-preview": { input: 0.15, output: 0.6 },
   "google/gemini-2.0-flash-lite-preview-02-05:free": { input: 0, output: 0 },
   "google/gemini-2.0-flash-001": { input: 0.1, output: 0.4 },
-  "anthropic/claude-3.5-haiku": { input: 0.8, output: 4 },
-  "anthropic/claude-3.5-sonnet": { input: 3, output: 15 },
   "meta-llama/llama-3.3-70b-instruct": { input: 0.3, output: 0.3 },
   "openai/gpt-4o-mini": { input: 0.15, output: 0.6 },
-  "openai/gpt-4o": { input: 2.5, output: 10 },
 };
+
+const ALLOWED_MODELS = new Set(Object.keys(MODEL_PRICING));
+
+function resolveModel(requested: string | null | undefined): string {
+  return requested && ALLOWED_MODELS.has(requested) ? requested : DEFAULT_MODEL;
+}
+
+// Drop anything that isn't a plain user/assistant message (clients must not
+// inject system prompts), truncate oversized content, keep only recent turns.
+function sanitizeHistory(history: unknown): ChatMessage[] {
+  if (!Array.isArray(history)) return [];
+  return history
+    .filter(
+      (m): m is ChatMessage =>
+        !!m &&
+        typeof m === "object" &&
+        (m.role === "user" || m.role === "assistant") &&
+        typeof m.content === "string"
+    )
+    .slice(-MAX_HISTORY_MESSAGES)
+    .map((m) => ({
+      role: m.role,
+      content: m.content.slice(0, MAX_HISTORY_CONTENT_LENGTH),
+    }));
+}
 
 function calculateCost(
   model: string,
@@ -124,8 +189,15 @@ export async function POST(req: Request) {
   try {
     if (!OPENROUTER_API_KEY) {
       return NextResponse.json(
-        { error: "OpenRouter API key not configured" },
-        { status: 500 }
+        { error: "Service unavailable" },
+        { status: 503 }
+      );
+    }
+
+    if (isRateLimited(getClientIp(req))) {
+      return NextResponse.json(
+        { error: "Too many requests. Please slow down." },
+        { status: 429 }
       );
     }
 
@@ -136,18 +208,19 @@ export async function POST(req: Request) {
       model?: string;
     };
 
-    if (!message || typeof message !== "string") {
+    if (
+      !message ||
+      typeof message !== "string" ||
+      message.length > MAX_MESSAGE_LENGTH
+    ) {
       return NextResponse.json(
         { error: "Invalid message format" },
         { status: 400 }
       );
     }
 
-    const conversationHistory: ChatMessage[] = Array.isArray(history)
-      ? history
-      : [];
-
-    const model = requestedModel || DEFAULT_MODEL;
+    const conversationHistory = sanitizeHistory(history);
+    const model = resolveModel(requestedModel);
 
     // --- Construct the full message list for the LLM ---
     const messagesForAPI: ChatMessage[] = [
@@ -177,10 +250,10 @@ export async function POST(req: Request) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("OpenRouter API Error:", errorText);
+      console.error("OpenRouter API Error:", response.status, errorText);
       return NextResponse.json(
-        { error: "Failed to get response from AI", details: errorText },
-        { status: response.status }
+        { error: "Failed to get response from AI" },
+        { status: 502 }
       );
     }
 
@@ -264,7 +337,7 @@ export async function POST(req: Request) {
 
     console.error("API Route Error:", error);
     return NextResponse.json(
-      { error: "Internal server error", details: errorMessage },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
@@ -282,23 +355,29 @@ export async function GET(req: Request) {
   const requestId = `stream-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
   if (!OPENROUTER_API_KEY) {
-    return new Response("OpenRouter API key not configured", { status: 500 });
+    return new Response("Service unavailable", { status: 503 });
   }
 
-  if (!message) {
-    return new Response("Message is required", { status: 400 });
+  if (isRateLimited(getClientIp(req))) {
+    return new Response("Too many requests. Please slow down.", {
+      status: 429,
+    });
+  }
+
+  if (!message || message.length > MAX_MESSAGE_LENGTH) {
+    return new Response("Invalid message", { status: 400 });
   }
 
   let conversationHistory: ChatMessage[] = [];
   if (historyParam) {
     try {
-      conversationHistory = JSON.parse(historyParam);
+      conversationHistory = sanitizeHistory(JSON.parse(historyParam));
     } catch {
       // Ignore parse errors, use empty history
     }
   }
 
-  const model = requestedModel || DEFAULT_MODEL;
+  const model = resolveModel(requestedModel);
 
   const messagesForAPI: ChatMessage[] = [
     { role: "system", content: SYSTEM_PROMPT },
@@ -326,7 +405,8 @@ export async function GET(req: Request) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      return new Response(errorText, { status: response.status });
+      console.error("OpenRouter streaming error:", response.status, errorText);
+      return new Response("Failed to get response from AI", { status: 502 });
     }
 
     const generationId = response.headers.get("x-openrouter-generation-id");
@@ -397,33 +477,12 @@ export async function GET(req: Request) {
       },
     });
 
-    const reader = response.body?.getReader();
-    if (!reader) {
+    if (!response.body) {
       return new Response("No response body", { status: 500 });
     }
 
-    const stream = new ReadableStream({
-      async start(controller) {
-        const writer = transformStream.writable.getWriter();
-
-        try {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-              await writer.close();
-              break;
-            }
-            await writer.write(value);
-          }
-        } catch (error) {
-          console.error("Stream error:", error);
-          controller.error(error);
-        }
-      },
-    });
-
-    // Pipe through transform and return
-    const transformedStream = stream.pipeThrough(transformStream);
+    // Pipe the upstream SSE body through the transform and return
+    const transformedStream = response.body.pipeThrough(transformStream);
 
     return new Response(transformedStream, {
       headers: {

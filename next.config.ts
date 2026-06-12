@@ -1,13 +1,19 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  images: {
-    domains: [
-      "api.microlink.io", // Microlink Image Preview
-    ],
+  // Pin the workspace root: a stray lockfile in the home directory otherwise
+  // makes Next.js guess the wrong root
+  turbopack: {
+    root: path.join(__dirname),
   },
-  experimental: {
-    instrumentationHook: true,
+  async rewrites() {
+    return [
+      {
+        source: "/travels",
+        destination: "/travels/index.html",
+      },
+    ];
   },
 };
 
