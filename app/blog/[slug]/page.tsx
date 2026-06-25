@@ -27,6 +27,29 @@ import {
   SITE_URL,
 } from "@/lib/seo";
 
+const VIDEO_EXTENSIONS = [".mp4", ".webm", ".ogg", ".mov"];
+
+function normalizeMarkdownMediaSrc(src: unknown): string {
+  const value = typeof src === "string" ? src.trim() : "";
+
+  if (
+    !value ||
+    value.startsWith("/") ||
+    value.startsWith("data:") ||
+    value.startsWith("blob:") ||
+    /^(https?:)?\/\//.test(value)
+  ) {
+    return value;
+  }
+
+  return `/blog/${value.replace(/^\.?\//, "")}`;
+}
+
+function isVideoSrc(src: string): boolean {
+  const pathname = src.split(/[?#]/)[0]?.toLowerCase() ?? "";
+  return VIDEO_EXTENSIONS.some((extension) => pathname.endsWith(extension));
+}
+
 // Pre-generate static params for all published posts
 export function generateStaticParams() {
   return getAllPosts().map((p) => ({ slug: p.slug }));
@@ -151,34 +174,42 @@ const MarkdownComponents: Components = {
   strong: ({ children }) => (
     <strong className="font-medium text-foreground">{children}</strong>
   ),
-  img: ({ src, alt }) => (
-    <span className="block my-8">
-      {typeof src === "string" && src.endsWith(".mp4") ? (
-        <video
-          src={src}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full border border-border"
-          aria-label={alt || undefined}
-        />
-      ) : (
-        <Image
-          src={typeof src === "string" ? src : ""}
-          alt={alt || ""}
-          width={800}
-          height={450}
-          className="w-full border border-border"
-        />
-      )}
-      {alt && (
-        <span className="block mt-2 text-center text-sm text-[hsl(var(--foreground-subtle))]">
-          {alt}
-        </span>
-      )}
-    </span>
-  ),
+  img: ({ src, alt }) => {
+    const mediaSrc = normalizeMarkdownMediaSrc(src);
+
+    if (!mediaSrc) {
+      return null;
+    }
+
+    return (
+      <span className="block my-8">
+        {isVideoSrc(mediaSrc) ? (
+          <video
+            src={mediaSrc}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full border border-border"
+            aria-label={alt || undefined}
+          />
+        ) : (
+          <Image
+            src={mediaSrc}
+            alt={alt || ""}
+            width={800}
+            height={450}
+            className="w-full border border-border"
+          />
+        )}
+        {alt && (
+          <span className="block mt-2 text-center text-sm text-[hsl(var(--foreground-subtle))]">
+            {alt}
+          </span>
+        )}
+      </span>
+    );
+  },
   hr: () => <hr className="my-12 border-t border-border" />,
   table: ({ children }) => (
     <div className="overflow-x-auto my-6">

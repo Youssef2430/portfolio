@@ -157,6 +157,7 @@ Context about Youssef:
 --- START CONTEXT ---
 Youssef Chouay is a software engineer and AI researcher pursuing a Master's in Computer Science at the University of Ottawa (Jan 2025–Dec 2026) under Prof. Vida Dujmović; he has received over $52,000 in research scholarships.
 He completed a BASc in Software Engineering (Sept 2020–Dec 2024) with coursework in DS&A, Embedded Systems, Databases, Discrete Math, Real-Time Systems Design, and Enterprise Architecture.
+Since Jan 2026, he has been a Software Engineer Intern at Trend Micro / TrendAI in Ottawa, working with the AI Security team. He migrated a prompt-scan engine to state-of-the-art detection models for LLM threat analysis, implemented chunking behavior for an inference engine in Rust and Go to support long prompts and document-style inputs, and owned the design, testing, and AWS deployment of a backend service that retrieves company profiles and market data through MCP-based integrations for cybersecurity research workflows.
 Since May 2024, he's an AI Researcher at Canada's National Research Council. He was first author on a peer-reviewed IEEE EPEC 2025 paper presenting live-building results for an AI agent layer for BAS; he built Python/LangChain agents that cut data-processing time and operator workload by 49%, a SQLite-backed ingestion pipeline for real-time BAS streams, and—through partnerships with Delta Controls and Carleton University—achieved a 56% maintenance-cost reduction via automated fault detection, predictive maintenance, and real-time alerts. He also built an enhanced, multi-agent utilities chatbot that explains bills, simulates alternative rate plans, and diagnoses anomalies by linking AMI data with weather/holidays/tariffs. The system includes a retrieval-augmented policy/tariff QA layer with deterministic function calling and inline citations, plus a time-series engine (seasonal decomposition + change-point detection) that flags spikes, persistent baseload, and overnight leaks and generates plain-English "why it happened" narratives and savings playbooks.
 Previously at Wind River Systems (Sept 2022–Aug 2023), he delivered an Angular/TypeScript/Django Automation Dashboard with PostgreSQL used by programs at NASA, Airbus, and Ford, and improved query/UI performance by over 90% through API and DB optimizations.
 As a University of Ottawa Software Developer (May 2022–Apr 2024), he redesigned the university search engine (PHP/MySQL/Apache), improving response times by 80% and saving $30,000+ annually; he also shipped PHP/Bash/Cron automations that further boosted search speed by 54% and streamlined data migration.
@@ -177,7 +178,7 @@ Impact (by the numbers):
     80% faster university search + $30k/yr savings.
     98.4% phishing-classifier accuracy.
     Sub-20 ms real-time API latency (Rust + Actix).
-Experience snapshot: Research & industry roles since 2022 (NRC, Wind River, uOttawa; TA since 2023).
+Experience snapshot: Research & industry roles since 2022 (Trend Micro / TrendAI, NRC, Wind River, uOttawa; TA since 2023).
 Market value: $120k+.
 --- END META ADDENDUM ---`;
 
