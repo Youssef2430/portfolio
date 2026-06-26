@@ -11,8 +11,6 @@ import Image from "next/image";
  * `.dark` class, so there is no flash and no client theme read.
  */
 
-const BEZEL = "#1c1c1e";
-
 type ShotProps = {
   src: string;
   alt: string;
@@ -24,9 +22,10 @@ function ThemeShot({
   src,
   alt,
   objectClass,
+  shotClass,
   priority,
   sizes,
-}: ShotProps & { objectClass: string }) {
+}: ShotProps & { objectClass: string; shotClass?: string }) {
   return (
     <>
       <Image
@@ -35,7 +34,7 @@ function ThemeShot({
         fill
         priority={priority}
         sizes={sizes}
-        className={`${objectClass} dark:hidden`}
+        className={`device-shot ${shotClass ?? ""} ${objectClass} dark:hidden`}
       />
       <Image
         src={`${src}-dark.png`}
@@ -44,7 +43,7 @@ function ThemeShot({
         fill
         priority={priority}
         sizes={sizes}
-        className={`hidden ${objectClass} dark:block`}
+        className={`device-shot ${shotClass ?? ""} hidden ${objectClass} dark:block`}
       />
     </>
   );
@@ -53,26 +52,24 @@ function ThemeShot({
 export function MacBook({ src, alt, priority, sizes = "(max-width: 768px) 100vw, 56rem" }: ShotProps) {
   return (
     <div className="mx-auto w-full">
-      {/* lid - thin uniform bezel, big rounded corners (modern MBP) */}
-      <div
-        className="relative rounded-[18px] p-[8px] shadow-[0_40px_90px_-40px_rgba(0,0,0,0.55)] ring-1 ring-black/20"
-        style={{ background: BEZEL }}
-      >
-        <div className="relative aspect-[294/183] overflow-hidden rounded-[11px] bg-card">
-          <ThemeShot src={src} alt={alt} priority={priority} sizes={sizes} objectClass="object-cover" />
+      <div className="device-frame device-frame-mac relative rounded-[22px] p-[9px] md:p-[10px]">
+        <div className="device-screen relative aspect-[294/183] overflow-hidden rounded-[14px]">
+          <ThemeShot
+            src={src}
+            alt={alt}
+            priority={priority}
+            sizes={sizes}
+            objectClass="object-cover"
+            shotClass="device-shot-mac"
+          />
           {/* camera notch */}
-          <div
-            className="absolute left-1/2 top-0 z-10 h-[15px] w-[26%] max-w-[170px] -translate-x-1/2 rounded-b-[9px]"
-            style={{ background: BEZEL }}
-            aria-hidden
-          >
+          <div className="absolute left-1/2 top-0 z-20 h-[15px] w-[15%] min-w-[84px] max-w-[128px] -translate-x-1/2 rounded-b-[10px] bg-[#09090a] shadow-[inset_0_-1px_0_rgba(255,255,255,0.08)]" aria-hidden>
             <span className="absolute left-1/2 top-[5px] h-[3px] w-[3px] -translate-x-1/2 rounded-full bg-white/25" />
           </div>
         </div>
       </div>
-      {/* bottom lid with centre indent — dark aluminium, not bright silver */}
-      <div className="relative mx-auto -mt-[2px] h-[10px] w-[104%] -translate-x-[1.92%] rounded-b-[10px] bg-gradient-to-b from-[#4a4a4d] to-[#1c1c1e] ring-1 ring-black/30">
-        <div className="absolute left-1/2 top-0 h-[5px] w-[15%] max-w-[120px] -translate-x-1/2 rounded-b-[7px] bg-[#2a2a2c]" />
+      <div className="macbook-base relative mx-auto -mt-px h-[14px] w-full rounded-b-[16px]">
+        <div className="macbook-base-indent absolute left-1/2 top-0 h-[6px] w-[18%] max-w-[136px] -translate-x-1/2 rounded-b-[9px]" />
       </div>
     </div>
   );
@@ -81,13 +78,16 @@ export function MacBook({ src, alt, priority, sizes = "(max-width: 768px) 100vw,
 export function IPad({ src, alt, sizes = "(max-width: 768px) 100vw, 36rem" }: ShotProps) {
   return (
     <div className="mx-auto w-full">
-      <div
-        className="relative rounded-[24px] p-[10px] shadow-[0_40px_90px_-40px_rgba(0,0,0,0.55)] ring-1 ring-black/20"
-        style={{ background: BEZEL }}
-      >
-        <span className="absolute left-1/2 top-[5px] z-10 h-1 w-1 -translate-x-1/2 rounded-full bg-white/25" />
-        <div className="relative aspect-[1030/773] overflow-hidden rounded-[16px] bg-card">
-          <ThemeShot src={src} alt={alt} sizes={sizes} objectClass="object-cover" />
+      <div className="device-frame device-frame-tablet relative rounded-[28px] p-[10px] md:p-[11px]">
+        <span className="absolute left-1/2 top-[5px] z-20 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-black/30 dark:bg-white/25" />
+        <div className="device-screen relative aspect-[1030/773] overflow-hidden rounded-[17px]">
+          <ThemeShot
+            src={src}
+            alt={alt}
+            sizes={sizes}
+            objectClass="object-cover"
+            shotClass="device-shot-tablet"
+          />
         </div>
       </div>
     </div>
@@ -97,14 +97,16 @@ export function IPad({ src, alt, sizes = "(max-width: 768px) 100vw, 36rem" }: Sh
 export function IPhone({ src, alt, sizes = "(max-width: 768px) 60vw, 18rem" }: ShotProps) {
   return (
     <div className="mx-auto w-full">
-      {/* iPhone Pro - thin bezel, Dynamic Island */}
-      <div
-        className="relative rounded-[46px] p-[9px] shadow-[0_40px_90px_-40px_rgba(0,0,0,0.55)] ring-1 ring-black/20"
-        style={{ background: BEZEL }}
-      >
-        <span className="absolute left-1/2 top-[16px] z-10 h-[24px] w-[84px] -translate-x-1/2 rounded-full bg-black" />
-        <div className="relative aspect-[383/818] overflow-hidden rounded-[38px] bg-card">
-          <ThemeShot src={src} alt={alt} sizes={sizes} objectClass="object-cover" />
+      <div className="device-frame device-frame-phone relative rounded-[50px] p-[8px] md:p-[9px]">
+        <span className="absolute left-1/2 top-[16px] z-20 h-[24px] w-[84px] -translate-x-1/2 rounded-full bg-[#050505] shadow-[0_1px_0_rgba(255,255,255,0.10)]" />
+        <div className="device-screen relative aspect-[383/818] overflow-hidden rounded-[40px]">
+          <ThemeShot
+            src={src}
+            alt={alt}
+            sizes={sizes}
+            objectClass="object-cover"
+            shotClass="device-shot-phone"
+          />
         </div>
       </div>
     </div>

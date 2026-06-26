@@ -1,6 +1,6 @@
 /* Import Arabic display font - Aref Ruqaa for elegant Arabic calligraphy */
 /* Added Oswald for condensed headings and Pinyon Script for elegant cursive */
-@import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Amiri:wght@400;700&family=Roboto+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&family=Oswald:wght@400;500;600;700&family=Pinyon+Script&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Amiri:wght@400;700&family=Roboto+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&family=Oswald:wght@400;500;600;700&family=Pinyon+Script&family=Newsreader:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Mono:wght@300;400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -914,6 +914,113 @@
   background-size: 46px 46px;
 }
 
+/* AtlasLLM device mockups. The shell colors track Apple-like silver in light
+   mode and space gray in dark mode, while the screen surface masks screenshot
+   edge pixels that were captured outside the app viewport. */
+.device-frame {
+  background:
+    linear-gradient(145deg, #f7f7f3 0%, #d8d9d4 34%, #b5b7b3 58%, #8f9290 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -2px 4px rgba(76, 79, 82, 0.22),
+    0 38px 82px -46px rgba(28, 31, 35, 0.5);
+}
+
+.dark .device-frame {
+  background:
+    linear-gradient(145deg, #4a4b4d 0%, #323335 34%, #202123 62%, #151618 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.55),
+    0 38px 82px -44px rgba(0, 0, 0, 0.85);
+}
+
+.device-frame-mac {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -2px 5px rgba(73, 76, 80, 0.2),
+    0 44px 96px -50px rgba(28, 31, 35, 0.52);
+}
+
+.dark .device-frame-mac {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.58),
+    0 44px 96px -48px rgba(0, 0, 0, 0.9);
+}
+
+.device-screen {
+  background: #fbfbf9;
+  box-shadow:
+    inset 0 0 0 1px rgba(38, 39, 42, 0.2),
+    inset 0 0 24px rgba(38, 39, 42, 0.08);
+}
+
+.dark .device-screen {
+  background: #111112;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 0 24px rgba(0, 0, 0, 0.38);
+}
+
+.device-screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: inherit;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+}
+
+.dark .device-screen::after {
+  border-color: rgba(0, 0, 0, 0.32);
+  mix-blend-mode: normal;
+}
+
+.device-shot {
+  transform: scale(var(--device-overscan, 1.01));
+  transform-origin: center;
+}
+
+.device-shot-mac {
+  --device-overscan: 1.004;
+}
+
+.device-shot-tablet,
+.device-shot-phone {
+  --device-overscan: 1.014;
+}
+
+.macbook-base {
+  background:
+    linear-gradient(180deg, #eeeee9 0%, #c9cac6 42%, #8e9291 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 2px rgba(58, 61, 64, 0.25),
+    0 18px 36px -26px rgba(28, 31, 35, 0.65);
+}
+
+.dark .macbook-base {
+  background:
+    linear-gradient(180deg, #454649 0%, #2d2f32 42%, #17181a 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.72),
+    0 18px 36px -24px rgba(0, 0, 0, 0.9);
+}
+
+.macbook-base-indent {
+  background: rgba(118, 121, 120, 0.28);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.45);
+}
+
+.dark .macbook-base-indent {
+  background: rgba(12, 13, 14, 0.55);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08);
+}
+
 /* Dashed flow along workflow edges. */
 @keyframes atlas-flow {
   to {
@@ -930,4 +1037,139 @@
   .atlas-flow {
     animation: none;
   }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Clui identity - mirrors the product's own design tokens.
+   A warm, editorial surface: cream/charcoal neutrals, a terracotta
+   accent (#d97757 - the same one the Electron app uses at runtime),
+   Newsreader serif display with italic accent words, DM Mono labels.
+   Overriding the shared tokens in-scope re-skins the generic
+   primitives (borders, foreground ramp, --gold accent) to Clui.
+   ───────────────────────────────────────────────────────────── */
+.clui-theme {
+  /* terracotta accent (#d97757) reuses every hsl(var(--gold)) reference */
+  --gold: 15 63% 60%;
+  --ring: 15 63% 60%;
+  --clui-accent: 15 63% 60%;
+  --clui-accent-dim: 15 55% 52%;
+  --clui-green: 142 24% 58%;
+  --clui-amber: 38 92% 50%;
+  --clui-red: 9 47% 58%;
+
+  /* warm light neutrals (#FAFAF7 / #F0F0EB / #E5E4DF / #191919) */
+  --background: 60 23% 97%;
+  --card: 60 14% 93%;
+  --card-foreground: 0 0% 10%;
+  --border: 50 10% 89%;
+  --foreground: 0 0% 10%;
+  --foreground-soft: 60 2% 25%;
+  --foreground-muted: 60 2% 40%;
+  --foreground-subtle: 60 3% 56%;
+  --foreground-faint: 50 8% 75%;
+  --muted-foreground: 60 3% 56%;
+}
+
+.dark .clui-theme {
+  --gold: 15 70% 64%;
+  --ring: 15 70% 64%;
+  --clui-accent: 15 70% 64%;
+  --clui-accent-dim: 15 55% 52%;
+  --clui-green: 142 22% 58%;
+  --clui-amber: 38 92% 55%;
+  --clui-red: 9 42% 58%;
+
+  /* warm charcoal neutrals (#1A1A18 / #242422 / #333330 / #EAEAE6) */
+  --background: 60 4% 10%;
+  --card: 60 5% 14%;
+  --card-foreground: 60 9% 91%;
+  --border: 60 6% 20%;
+  --foreground: 60 9% 91%;
+  --foreground-soft: 60 3% 68%;
+  --foreground-muted: 60 3% 52%;
+  --foreground-subtle: 60 3% 43%;
+  --foreground-faint: 60 4% 32%;
+  --muted-foreground: 60 3% 43%;
+}
+
+/* Editorial serif display - the Clui headline voice (italic = accent). */
+.clui-display {
+  font-family: 'Newsreader', 'Tiempos Headline', Georgia, serif;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.04;
+}
+.clui-display em {
+  font-style: italic;
+  font-weight: 300;
+  color: hsl(var(--gold));
+}
+
+.clui-serif {
+  font-family: 'Newsreader', Georgia, serif;
+}
+
+.clui-mono {
+  font-family: 'DM Mono', 'Roboto Mono', ui-monospace, monospace;
+}
+
+/* Faint dotted canvas - echoes the product's launch surface. */
+.clui-dots {
+  background-image: radial-gradient(hsl(var(--foreground) / 0.07) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Warm terracotta aurora behind the hero - mirrors the clui.app site. */
+.clui-aurora {
+  position: relative;
+}
+.clui-aurora::before {
+  content: '';
+  position: absolute;
+  inset: -10% -10% auto -10%;
+  height: 540px;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 50% at 50% 0%, hsl(15 63% 60% / 0.13), transparent 72%),
+    radial-gradient(40% 45% at 16% 6%, hsl(28 52% 62% / 0.12), transparent 72%),
+    radial-gradient(42% 48% at 86% 4%, hsl(15 63% 60% / 0.10), transparent 74%);
+  filter: blur(12px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 45%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 45%, transparent 100%);
+}
+.dark .clui-aurora::before {
+  background:
+    radial-gradient(58% 50% at 50% 0%, hsl(15 70% 60% / 0.18), transparent 72%),
+    radial-gradient(40% 45% at 16% 6%, hsl(28 55% 55% / 0.10), transparent 72%),
+    radial-gradient(42% 48% at 86% 4%, hsl(15 70% 60% / 0.12), transparent 74%);
+}
+
+/* Blinking caret + waveform for the recreated input pill. */
+@keyframes clui-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+@keyframes clui-wave { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.32); } }
+.clui-caret {
+  display: inline-block;
+  width: 1.5px;
+  height: 15px;
+  margin-left: 2px;
+  background: hsl(var(--gold));
+  animation: clui-blink 1.1s ease-in-out infinite;
+}
+.clui-wave-bar {
+  width: 3px;
+  border-radius: 3px;
+  background: hsl(var(--gold));
+  animation: clui-wave 1.4s ease-in-out infinite;
+}
+
+/* Dashed flow along the architecture-graph edges. */
+@keyframes clui-dash { to { stroke-dashoffset: -24; } }
+.clui-flow-line {
+  stroke-dasharray: 4 8;
+  animation: clui-dash 1.1s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clui-caret, .clui-wave-bar, .clui-flow-line { animation: none; }
 }

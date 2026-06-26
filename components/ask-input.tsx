@@ -223,9 +223,8 @@ export function AskInput() {
     const rect = inputRef.current.getBoundingClientRect();
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, rect.width, rect.height);
     const computedStyles = getComputedStyle(inputRef.current);
     const fontSize = Number.parseFloat(computedStyles.fontSize);
     const fontFamily = computedStyles.fontFamily;
@@ -281,8 +280,8 @@ export function AskInput() {
     if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-    ctx.clearRect(0, 0, rect.width * dpr, rect.height * dpr);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     let particlesRemaining = false;
     for (let i = newDataRef.current.length - 1; i >= 0; i--) {
@@ -503,18 +502,19 @@ export function AskInput() {
   // --- JSX Rendering ---
   return (
     <motion.div
-      className="fixed bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 w-[95%] sm:w-full max-w-lg px-4 sm:px-6 z-40"
+      className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-40 flex justify-center px-3 pointer-events-none sm:bottom-8 sm:px-4"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
     >
+      <div className="w-full max-w-lg">
       {/* Messages container */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
             ref={chatContainerRef}
-            className="relative mb-3 sm:mb-4 max-h-[65vh] sm:max-h-[400px] overflow-hidden bg-card text-card-foreground border border-[hsl(var(--border))] rounded-lg pointer-events-auto shadow-lg"
+            className="relative mb-2.5 max-h-[calc(100dvh-8.5rem)] overflow-hidden bg-card text-card-foreground border border-[hsl(var(--border))] rounded-lg pointer-events-auto shadow-lg sm:mb-4 sm:max-h-[400px]"
             initial={{ opacity: 0, y: 40, height: 0 }}
             animate={{ opacity: 1, y: 0, height: "auto" }}
             exit={{ opacity: 0, y: 40, height: 0 }}
@@ -525,26 +525,26 @@ export function AskInput() {
             }}
           >
             {/* Header */}
-            <div className="flex justify-between items-center p-4 border-b border-[hsl(var(--border))]">
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-xs text-[hsl(var(--muted-foreground))] uppercase tracking-wider">
+            <div className="flex items-center justify-between gap-3 p-3 border-b border-[hsl(var(--border))] sm:p-4">
+              <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                <span className="truncate font-mono text-[11px] text-[hsl(var(--muted-foreground))] uppercase tracking-wider sm:text-xs">
                   Conversation
                 </span>
-                <span className="text-[hsl(var(--gold))] opacity-50">「</span>
-                <span className="text-[hsl(var(--gold))] font-arabic text-base">محادثة</span>
-                <span className="text-[hsl(var(--gold))] opacity-50">」</span>
+                <span className="hidden text-[hsl(var(--gold))] opacity-50 min-[360px]:inline">「</span>
+                <span className="hidden text-[hsl(var(--gold))] font-arabic text-sm min-[360px]:inline sm:text-base">محادثة</span>
+                <span className="hidden text-[hsl(var(--gold))] opacity-50 min-[360px]:inline">」</span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex shrink-0 gap-1 sm:gap-2">
                 <button
                   onClick={clearMessages}
-                  className="p-2 text-[hsl(var(--muted-foreground))] hover:text-foreground hover:bg-[hsl(var(--muted))] transition-all duration-300 active:scale-95"
+                  className="flex h-9 w-9 items-center justify-center text-[hsl(var(--muted-foreground))] hover:text-foreground hover:bg-[hsl(var(--muted))] transition-all duration-300 active:scale-95"
                   aria-label="Clear conversation"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setIsExpanded(false)}
-                  className="p-2 text-[hsl(var(--muted-foreground))] hover:text-foreground hover:bg-[hsl(var(--muted))] transition-all duration-300 active:scale-95"
+                  className="flex h-9 w-9 items-center justify-center text-[hsl(var(--muted-foreground))] hover:text-foreground hover:bg-[hsl(var(--muted))] transition-all duration-300 active:scale-95"
                   aria-label="Close conversation"
                 >
                   <X className="h-4 w-4" />
@@ -553,7 +553,7 @@ export function AskInput() {
             </div>
 
             {/* Messages Area */}
-            <div className="overflow-y-auto max-h-[50vh] sm:max-h-[300px] p-4 space-y-4 scrollbar-thin">
+            <div className="overflow-y-auto max-h-[calc(100dvh-14rem)] sm:max-h-[300px] p-3 sm:p-4 space-y-3 sm:space-y-4 scrollbar-thin">
               {apiError && (
                 <motion.div
                   className="text-center text-red-400 text-xs font-mono p-3 bg-red-900/20 border border-red-900/50"
@@ -580,10 +580,10 @@ export function AskInput() {
                   >
                     <div
                       className={cn(
-                        "relative max-w-[85%] sm:max-w-[80%] px-4 py-3 text-sm whitespace-pre-wrap break-words leading-relaxed",
+                        "relative max-w-[92%] sm:max-w-[80%] px-3 py-2.5 sm:px-4 sm:py-3 text-[13px] sm:text-sm whitespace-pre-wrap break-words leading-relaxed",
                         message.type === "question"
-                          ? "bg-[hsl(var(--gold))] text-[hsl(var(--accent-foreground))] rounded-[20px] rounded-br-[4px]"
-                          : "bg-[hsl(var(--card))] text-card-foreground border border-[hsl(var(--border))] rounded-[20px] rounded-bl-[4px]",
+                          ? "bg-[hsl(var(--gold))] text-[hsl(var(--accent-foreground))] rounded-[16px] rounded-br-[4px] sm:rounded-[20px] sm:rounded-br-[4px]"
+                          : "bg-[hsl(var(--card))] text-card-foreground border border-[hsl(var(--border))] rounded-[16px] rounded-bl-[4px] sm:rounded-[20px] sm:rounded-bl-[4px]",
                       )}
                     >
                       {message.type === "answer" && (
@@ -597,11 +597,11 @@ export function AskInput() {
                         !message.text ? (
                         <LoadingCube />
                       ) : message.type === "answer" ? (
-                        <div className="chat-message-text text-sm leading-relaxed [&_strong]:font-semibold [&_code]:bg-foreground/10 [&_code]:px-1 [&_code]:rounded [&_code]:text-[hsl(var(--gold))] [&_a]:text-[hsl(var(--gold))] [&_a]:underline [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:ml-0 [&_p+p]:mt-2">
+                        <div className="chat-message-text text-[13px] sm:text-sm leading-relaxed [&_*]:break-words [&_strong]:font-semibold [&_code]:bg-foreground/10 [&_code]:px-1 [&_code]:rounded [&_code]:text-[hsl(var(--gold))] [&_a]:text-[hsl(var(--gold))] [&_a]:underline [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:ml-0 [&_p+p]:mt-2">
                           <ReactMarkdown>{message.text}</ReactMarkdown>
                         </div>
                       ) : (
-                        <p className="chat-message-text">{message.text}</p>
+                        <p className="chat-message-text text-[13px] sm:text-sm">{message.text}</p>
                       )}
                     </div>
                   </motion.div>
@@ -616,7 +616,7 @@ export function AskInput() {
       {/* Input form */}
       <form
         onSubmit={handleSubmit}
-        className="relative h-14 overflow-hidden bg-card text-card-foreground border border-[hsl(var(--border))] rounded-lg flex items-center pointer-events-auto transition-all duration-300 shadow-lg hover:border-[hsl(var(--gold))/0.3]"
+        className="relative h-14 w-full min-w-0 overflow-hidden bg-card text-card-foreground border border-[hsl(var(--border))] rounded-lg flex items-center pointer-events-auto transition-all duration-300 shadow-lg hover:border-[hsl(var(--gold))/0.3]"
       >
         {/* Canvas for vanishing effect */}
         <canvas
@@ -630,7 +630,7 @@ export function AskInput() {
         />
 
         {/* Arabic decoration */}
-        <div className="absolute left-4 text-[hsl(var(--gold))] opacity-40 font-arabic text-sm pointer-events-none">
+        <div className="absolute left-3 sm:left-4 text-[hsl(var(--gold))] opacity-40 font-arabic text-sm pointer-events-none">
           「
         </div>
 
@@ -649,9 +649,9 @@ export function AskInput() {
           }}
           placeholder="Ask me anything..."
           className={cn(
-            "relative z-10 w-full h-full pl-8 pr-14",
+            "relative z-10 w-full min-w-0 h-full pl-7 pr-12 sm:pl-8 sm:pr-14",
             "bg-transparent border-none focus:outline-none focus:ring-0",
-            "text-sm font-mono placeholder:text-[hsl(var(--muted-foreground))] placeholder:font-mono placeholder:text-xs placeholder:uppercase placeholder:tracking-wider",
+            "text-[16px] sm:text-sm font-mono placeholder:text-[hsl(var(--muted-foreground))] placeholder:font-mono placeholder:text-[11px] sm:placeholder:text-xs placeholder:uppercase placeholder:tracking-wider",
             animating && newDataRef.current.length > 0
               ? "text-transparent caret-transparent"
               : "text-card-foreground",
@@ -664,7 +664,7 @@ export function AskInput() {
         />
 
         {/* Arabic decoration */}
-        <div className="absolute right-14 text-[hsl(var(--gold))] opacity-40 font-arabic text-sm pointer-events-none">
+        <div className="absolute right-12 sm:right-14 text-[hsl(var(--gold))] opacity-40 font-arabic text-sm pointer-events-none">
           」
         </div>
 
@@ -675,7 +675,7 @@ export function AskInput() {
           disabled={!inputValue.trim() || isStreamingRef.current || animating}
           className={cn(
             "absolute right-0 top-0 bottom-0 z-20",
-            "w-14 border-l border-[hsl(var(--border))]",
+            "w-12 sm:w-14 border-l border-[hsl(var(--border))]",
             "bg-transparent hover:bg-[hsl(var(--gold))]",
             "transition-all duration-300 flex items-center justify-center group",
             "active:scale-95",
@@ -689,7 +689,7 @@ export function AskInput() {
 
       {/* Hint text */}
       <motion.p
-        className="text-center mt-3 text-[10px] font-mono text-[hsl(var(--muted-foreground))] uppercase tracking-widest"
+        className="text-center mt-2 px-2 text-[9px] sm:text-[10px] leading-tight font-mono text-[hsl(var(--muted-foreground))] uppercase tracking-widest sm:mt-3"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
@@ -736,6 +736,7 @@ export function AskInput() {
           }
         }
       `}</style>
+      </div>
     </motion.div>
   );
 }
