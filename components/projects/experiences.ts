@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import type { SerializableProject } from "@/components/project-detail";
 import { AtlasLLMExperience } from "@/components/projects/atlasllm-experience";
 import { CluiExperience } from "@/components/projects/clui-experience";
+import { NLPPhishingExperience } from "@/components/projects/nlp-phishing-experience";
 
 /**
  * Per-project bespoke "experience" pages.
@@ -16,4 +17,5 @@ export const projectExperiences: Record<
 > = {
   atlasllm: AtlasLLMExperience,
   clui: CluiExperience,
+  "nlp-phishing-detection": NLPPhishingExperience,
 };

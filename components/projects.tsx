@@ -5,6 +5,10 @@ import { motion, useInView, AnimatePresence, useAnimationFrame } from "framer-mo
 import Image from "next/image";
 import Link from "next/link";
 import { projects } from "@/lib/project-data";
+import {
+  hasProjectSignatureTransition,
+  startProjectSignatureTransition,
+} from "@/components/project-signature-transition";
 
 // Seeded random for consistent values
 const seededRandom = (seed: number) => {
@@ -191,6 +195,22 @@ export function Projects() {
 
   const handleMouseMove = (e: React.MouseEvent) => {
     setMousePosition({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleProjectClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    projectId: string
+  ) => {
+    const isModifiedNavigation =
+      e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0;
+
+    if (isModifiedNavigation || !hasProjectSignatureTransition(projectId)) {
+      return;
+    }
+
+    e.preventDefault();
+    setHoveredProject(null);
+    startProjectSignatureTransition(projectId, `/projects/${projectId}`);
   };
 
   const handleSvgMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
@@ -640,6 +660,7 @@ export function Projects() {
                   <Link
                     href={`/projects/${project.id}`}
                     className="inline-block group/title"
+                    onClick={(e) => handleProjectClick(e, project.id)}
                     onMouseEnter={() => setHoveredProject(project.id)}
                     onMouseLeave={() => setHoveredProject(null)}
                     onMouseMove={handleMouseMove}

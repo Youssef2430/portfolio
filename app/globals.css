@@ -1,6 +1,6 @@
 /* Import Arabic display font - Aref Ruqaa for elegant Arabic calligraphy */
 /* Added Oswald for condensed headings and Pinyon Script for elegant cursive */
-@import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Amiri:wght@400;700&family=Roboto+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&family=Oswald:wght@400;500;600;700&family=Pinyon+Script&family=Newsreader:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Mono:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Amiri:wght@400;700&family=Roboto+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&family=Oswald:wght@400;500;600;700&family=Pinyon+Script&family=Newsreader:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Mono:wght@300;400;500&family=Cormorant+Garamond:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -1172,4 +1172,225 @@
 
 @media (prefers-reduced-motion: reduce) {
   .clui-caret, .clui-wave-bar, .clui-flow-line { animation: none; }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   NLP phishing detector identity.
+   Dark navy security surface, copper signal color, restrained green/red
+   verdicts, and a high-contrast editorial serif inspired by brand-protection
+   campaigns.
+   ───────────────────────────────────────────────────────────── */
+.phish-theme {
+  color-scheme: dark;
+  --background: 218 52% 9%;
+  --card: 218 43% 12%;
+  --card-foreground: 38 48% 92%;
+  --border: 216 28% 24%;
+  --foreground: 38 48% 94%;
+  --foreground-soft: 36 28% 76%;
+  --foreground-muted: 34 17% 58%;
+  --foreground-subtle: 35 12% 48%;
+  --foreground-faint: 218 18% 31%;
+  --muted-foreground: 34 17% 58%;
+  --gold: 24 94% 64%;
+  --ring: 24 94% 64%;
+  --phish-ink: 218 52% 9%;
+  --phish-ink-soft: 218 44% 15%;
+  --phish-copper: 24 94% 64%;
+  --phish-clay: 29 22% 53%;
+  --phish-safe: 145 58% 45%;
+  --phish-danger: 3 82% 60%;
+}
+
+.dark .phish-theme {
+  --background: 218 52% 9%;
+  --card: 218 43% 12%;
+  --card-foreground: 38 48% 92%;
+  --border: 216 28% 24%;
+  --foreground: 38 48% 94%;
+  --foreground-soft: 36 28% 76%;
+  --foreground-muted: 34 17% 58%;
+  --foreground-subtle: 35 12% 48%;
+  --foreground-faint: 218 18% 31%;
+  --muted-foreground: 34 17% 58%;
+  --gold: 24 94% 64%;
+  --ring: 24 94% 64%;
+}
+
+.phish-display {
+  font-family: 'Cormorant Garamond', 'Newsreader', Georgia, serif;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.phish-mono {
+  font-family: 'IBM Plex Mono', 'DM Mono', 'Roboto Mono', ui-monospace, monospace;
+  letter-spacing: 0;
+}
+
+.phish-mark {
+  display: inline-flex;
+  height: 44px;
+  width: 44px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid hsl(var(--gold) / 0.55);
+  background:
+    linear-gradient(135deg, hsl(var(--gold) / 0.18), transparent 58%),
+    hsl(var(--card));
+  color: hsl(var(--gold));
+  font-family: 'IBM Plex Mono', 'DM Mono', ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.phish-mark-small {
+  height: 34px;
+  width: 34px;
+  font-size: 10px;
+}
+
+.phish-stat-value {
+  font-size: 3.5rem;
+  line-height: 0.92;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 1024px) {
+  .phish-stat-value {
+    font-size: 4.25rem;
+  }
+}
+
+.phish-hero {
+  position: relative;
+  isolation: isolate;
+}
+
+.phish-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(hsl(var(--phish-clay) / 0.34) 0.75px, transparent 0.75px),
+    linear-gradient(115deg, hsl(var(--gold) / 0.12), transparent 32%, transparent 68%, hsl(var(--phish-clay) / 0.09));
+  background-size: 8px 8px, 100% 100%;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+  opacity: 0.55;
+}
+
+.phish-hero-field,
+.phish-map {
+  position: relative;
+  background:
+    linear-gradient(135deg, hsl(var(--card)), hsl(var(--background))),
+    radial-gradient(hsl(var(--foreground) / 0.08) 1px, transparent 1px);
+  background-size: 100% 100%, 18px 18px;
+}
+
+.phish-hero-field::before,
+.phish-map::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='900' height='420' viewBox='0 0 900 420' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23d19967' stroke-width='1.2' stroke-opacity='0.42'%3E%3Cpath d='M-50 82C82 62 118 128 242 98c121-29 157-104 302-66 113 30 140 111 263 83 71-16 106-58 171-45'/%3E%3Cpath d='M-62 214c92-44 175-39 249 15 89 65 180 70 273 14 112-67 191-70 291-7 67 42 124 51 202 29'/%3E%3Cpath d='M-42 347c125-67 230-66 315 4 76 63 150 61 221-7 96-91 200-93 312-9 58 43 104 55 168 37'/%3E%3Cpath d='M95-30c-6 84 20 142 78 174 68 37 89 91 62 162-20 55-14 103 20 144'/%3E%3Cpath d='M622-40c-48 77-49 149-2 216 40 57 39 114-2 171-29 41-37 78-23 113'/%3E%3C/g%3E%3C/svg%3E");
+  background-position: center;
+  background-size: cover;
+  opacity: 0.62;
+}
+
+.phish-hero-field > *,
+.phish-map > * {
+  position: relative;
+  z-index: 1;
+}
+
+.phish-map-path {
+  fill: none;
+  stroke: hsl(var(--border));
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+}
+
+.phish-map-path-live {
+  stroke: hsl(var(--gold) / 0.72);
+  stroke-dasharray: 7 13;
+  animation: phish-path-dash 1.4s linear infinite;
+}
+
+.phish-map-path-branch {
+  stroke: hsl(var(--phish-safe) / 0.65);
+  stroke-dasharray: 5 12;
+  animation: phish-path-dash 1.8s linear infinite;
+}
+
+.phish-map-path-faint {
+  stroke: hsl(var(--foreground) / 0.16);
+}
+
+.phish-map-packet {
+  fill: hsl(var(--gold));
+}
+
+.phish-map-packet-alt {
+  fill: hsl(var(--phish-safe));
+}
+
+.phish-map-node {
+  min-height: 154px;
+}
+
+.phish-map-node::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  border: 1px solid transparent;
+  background: linear-gradient(135deg, hsl(var(--gold) / 0.38), transparent 32%, hsl(var(--foreground) / 0.08)) border-box;
+  -webkit-mask:
+    linear-gradient(#000 0 0) padding-box,
+    linear-gradient(#000 0 0);
+          mask:
+    linear-gradient(#000 0 0) padding-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.phish-map-node:hover::before {
+  opacity: 1;
+}
+
+.phish-tech-strip {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.phish-tech-strip::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes phish-path-dash {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phish-map-path-live,
+  .phish-map-path-branch {
+    animation: none;
+  }
+
+  .phish-map-packet {
+    display: none;
+  }
 }

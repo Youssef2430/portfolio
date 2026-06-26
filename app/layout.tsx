@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PostHogProvider } from "./providers";
 import { CustomCursor } from "@/components/custom-cursor";
+import { ProjectSignatureTransitionProvider } from "@/components/project-signature-transition";
 import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
@@ -71,6 +72,7 @@ export default function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <CustomCursor />
             {children}
+            <ProjectSignatureTransitionProvider />
           </ThemeProvider>
         </PostHogProvider>
         <Analytics />
