@@ -5,6 +5,7 @@ import {
   ProjectDetailView,
   type SerializableProject,
 } from "@/components/project-detail";
+import { projectExperiences } from "@/components/projects/experiences";
 import { JsonLd } from "@/components/json-ld";
 import {
   jsonLdGraph,
@@ -71,6 +72,11 @@ export default async function ProjectPage({
 
   // Strip the non-serializable icon before crossing into the client component
   const { icon: _icon, ...serializable } = project;
+  const serializableProject = serializable as SerializableProject;
+
+  // Render a bespoke experience if this project has one; otherwise fall back
+  // to the generic detail view.
+  const Experience = projectExperiences[project.id];
 
   return (
     <>
@@ -96,7 +102,11 @@ export default async function ProjectPage({
           ])
         )}
       />
-      <ProjectDetailView project={serializable as SerializableProject} />
+      {Experience ? (
+        <Experience project={serializableProject} />
+      ) : (
+        <ProjectDetailView project={serializableProject} />
+      )}
     </>
   );
 }

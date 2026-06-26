@@ -467,6 +467,157 @@
   color: hsl(var(--syntax-blue));
 }
 
+.blog-code-surface pre {
+  scrollbar-color: hsl(var(--border)) transparent;
+  scrollbar-width: thin;
+}
+
+.blog-code-surface pre::-webkit-scrollbar {
+  height: 10px;
+}
+
+.blog-code-surface pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.blog-code-surface pre::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+.blog-code-surface .hljs {
+  display: block;
+  overflow: visible;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: hsl(var(--foreground));
+}
+
+.blog-code-surface code {
+  font-family: 'Roboto Mono', ui-monospace, monospace;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.blog-code-surface .hljs-comment,
+.blog-code-surface .hljs-quote {
+  color: hsl(var(--foreground-muted));
+  font-style: normal;
+}
+
+.blog-data-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.prose .blog-data-table {
+  margin: 0;
+}
+
+.blog-data-table-wrap {
+  scrollbar-color: hsl(var(--border)) transparent;
+  scrollbar-width: thin;
+}
+
+.blog-data-table-wrap::-webkit-scrollbar {
+  height: 10px;
+}
+
+.blog-data-table-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.blog-data-table-wrap::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+.blog-data-table tbody tr {
+  transition: background-color 160ms ease;
+}
+
+.blog-data-table tbody tr:hover {
+  background: hsl(var(--wash) / 0.32);
+}
+
+.blog-data-table td,
+.blog-data-table th {
+  white-space: nowrap;
+}
+
+.blog-data-table td:last-child,
+.blog-data-table th:last-child {
+  white-space: normal;
+}
+
+.blog-data-table td:nth-child(2),
+.blog-data-table td:nth-child(3),
+.blog-data-table td:nth-child(4) {
+  font-variant-numeric: tabular-nums;
+}
+
+.blog-data-table:has(thead th:nth-child(2):last-child) th,
+.blog-data-table:has(thead th:nth-child(2):last-child) td {
+  width: 50%;
+}
+
+.blog-data-table:has(thead th:nth-child(3):last-child) th:nth-child(1),
+.blog-data-table:has(thead th:nth-child(3):last-child) td:nth-child(1) {
+  width: 32%;
+}
+
+.blog-data-table:has(thead th:nth-child(3):last-child) th:nth-child(2),
+.blog-data-table:has(thead th:nth-child(3):last-child) td:nth-child(2) {
+  width: 32%;
+}
+
+.blog-data-table:has(thead th:nth-child(3):last-child) th:nth-child(3),
+.blog-data-table:has(thead th:nth-child(3):last-child) td:nth-child(3) {
+  width: 36%;
+}
+
+.blog-data-table:has(thead th:nth-child(4)) th:nth-child(1),
+.blog-data-table:has(thead th:nth-child(4)) td:nth-child(1) {
+  width: 30%;
+}
+
+.blog-data-table:has(thead th:nth-child(4)) th:nth-child(2),
+.blog-data-table:has(thead th:nth-child(4)) td:nth-child(2) {
+  width: 20%;
+}
+
+.blog-data-table:has(thead th:nth-child(4)) th:nth-child(3),
+.blog-data-table:has(thead th:nth-child(4)) td:nth-child(3) {
+  width: 18%;
+}
+
+.blog-data-table:has(thead th:nth-child(4)) th:nth-child(4),
+.blog-data-table:has(thead th:nth-child(4)) td:nth-child(4) {
+  width: 32%;
+}
+
+@media (max-width: 640px) {
+  .blog-data-table th {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    font-size: 10px;
+    line-height: 1.55;
+    white-space: normal;
+  }
+
+  .blog-data-table td {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .blog-data-table td:nth-child(2),
+  .blog-data-table td:nth-child(3) {
+    white-space: nowrap;
+  }
+}
+
 /* Line clamp utilities */
 .line-clamp-2 {
   overflow: hidden;
@@ -519,6 +670,11 @@
 .prose {
   max-width: none;
   color: hsl(var(--foreground));
+}
+
+.blog-article,
+.blog-article :where(h1, h2, h3, h4, h5, h6, p, li, blockquote, table, th, td, figcaption) {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .prose p {
@@ -726,4 +882,52 @@
   opacity: 0.04;
   pointer-events: none;
   mix-blend-mode: multiply;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Project experiences — bespoke per-project pages
+   ───────────────────────────────────────────────────────────── */
+
+/* AtlasLLM identity: mirror the product's own palette — a near-monochrome
+   surface with a coral accent (and a teal secondary). Overriding --gold
+   locally means existing hsl(var(--gold)) references turn coral in-scope.
+   Values taken from the app's own tokens (--brand 14°, --brand-foreground 164°). */
+.atlas-theme {
+  --gold: 14 84% 52%;
+  --ring: 14 84% 52%;
+  --atlas-coral: 14 84% 52%;
+  --atlas-teal: 168 64% 38%;
+}
+
+.dark .atlas-theme {
+  --gold: 14 78% 62%;
+  --ring: 14 78% 62%;
+  --atlas-coral: 14 78% 62%;
+  --atlas-teal: 164 70% 60%;
+}
+
+/* Faint blueprint grid — echoes the product's launch surface. */
+.atlas-grid {
+  background-image:
+    linear-gradient(to right, hsl(var(--foreground) / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--foreground) / 0.05) 1px, transparent 1px);
+  background-size: 46px 46px;
+}
+
+/* Dashed flow along workflow edges. */
+@keyframes atlas-flow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+.atlas-flow {
+  stroke-dasharray: 4 8;
+  animation: atlas-flow 1.1s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atlas-flow {
+    animation: none;
+  }
 }
