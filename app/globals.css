@@ -914,6 +914,44 @@
   background-size: 46px 46px;
 }
 
+/* ─────────────────────────────────────────────────────────────
+   Signature-transition auras - each one a brand-matched wash so
+   the loading screen already feels like the project being opened.
+   These live inside the themed overlay (.atlas-theme etc.), so the
+   project tokens (--gold, --atlas-teal, --phish-ink…) resolve here.
+   ───────────────────────────────────────────────────────────── */
+
+/* AtlasLLM - calm near-mono surface, coral bloom + a teal whisper. */
+.sig-aura-atlas {
+  background:
+    radial-gradient(circle at 50% 40%, hsl(var(--gold) / 0.16) 0%, transparent 46%),
+    radial-gradient(circle at 82% 80%, hsl(var(--atlas-teal) / 0.10) 0%, transparent 44%),
+    linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--card) / 0.85) 100%);
+}
+
+/* Clui - warm terracotta-on-cream, light from the top-left. */
+.sig-aura-clui {
+  background:
+    radial-gradient(circle at 50% 44%, hsl(var(--gold) / 0.20) 0%, transparent 48%),
+    radial-gradient(circle at 16% 14%, hsl(var(--gold) / 0.10) 0%, transparent 42%),
+    linear-gradient(150deg, hsl(var(--background)) 0%, hsl(var(--card) / 0.9) 100%);
+}
+
+/* NLP Phishing - dark navy "scanner" surface: a diagonal sweep crossed
+   with fine data-rows, the email-analysis motif, lit by a copper bloom. */
+.sig-aura-phish {
+  background-color: hsl(var(--phish-ink));
+  background-image:
+    /* faint focus bloom so the signature stays legible */
+    radial-gradient(circle at 50% 40%, hsl(var(--gold) / 0.14) 0%, transparent 52%),
+    /* diagonal scanner sweep */
+    repeating-linear-gradient(135deg, hsl(var(--gold) / 0.06) 0 2px, transparent 2px 16px),
+    /* fine horizontal data-rows */
+    repeating-linear-gradient(0deg, hsl(var(--foreground) / 0.05) 0 1px, transparent 1px 11px),
+    /* clay depth pooling in the corner */
+    radial-gradient(circle at 85% 88%, hsl(var(--phish-clay) / 0.14) 0%, transparent 50%);
+}
+
 /* AtlasLLM device mockups. The shell colors track Apple-like silver in light
    mode and space gray in dark mode, while the screen surface masks screenshot
    edge pixels that were captured outside the app viewport. */

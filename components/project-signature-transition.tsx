@@ -17,6 +17,8 @@ type SignatureConfig = {
   status: string;
   themeClassName: string;
   backgroundClassName: string;
+  /** Brand-matched gradient wash behind the texture, unique per project. */
+  auraClassName: string;
   viewBox: string;
   signaturePath: string;
   strokeWidth: number;
@@ -46,6 +48,7 @@ const SIGNATURE_PROJECTS: Record<SignatureProjectId, SignatureConfig> = {
     status: "signing",
     themeClassName: "atlas-theme",
     backgroundClassName: "atlas-grid",
+    auraClassName: "sig-aura-atlas",
     viewBox: "0 0 1200 260",
     signaturePath:
       "M86 184 C121 75 178 45 216 184 M116 146 C156 134 205 136 252 151 M306 85 C292 122 277 164 270 189 C304 190 337 176 361 151 M282 122 C322 122 353 119 379 116 M425 57 C404 111 387 160 381 190 C418 185 449 170 471 145 M520 122 C487 119 462 143 464 168 C466 195 504 196 535 156 C527 191 558 196 589 160 M650 116 C603 104 583 125 598 145 C616 169 666 157 676 180 C684 201 630 211 594 189 M747 61 C724 113 705 158 695 190 C736 187 775 186 811 190 M854 61 C831 113 812 158 802 190 C842 187 882 186 916 190 M948 190 C962 135 979 85 998 61 C1015 117 1032 154 1052 187 C1081 122 1113 79 1140 61 C1126 109 1114 151 1106 190",
@@ -60,6 +63,7 @@ const SIGNATURE_PROJECTS: Record<SignatureProjectId, SignatureConfig> = {
     status: "signing",
     themeClassName: "clui-theme",
     backgroundClassName: "clui-dots",
+    auraClassName: "sig-aura-clui",
     viewBox: "0 0 1000 260",
     signaturePath:
       "M286 92 C235 61 155 75 126 126 C94 181 165 217 246 184 C274 173 296 154 308 134 M365 55 C343 107 326 155 320 189 C354 187 386 171 409 145 M459 122 C444 158 435 188 463 190 C498 193 531 158 548 122 C532 167 543 193 577 190 C608 188 630 164 650 139 M708 122 C693 157 680 189 711 190 C742 191 770 171 790 145 M719 78 C719 68 733 68 733 78",
@@ -74,6 +78,7 @@ const SIGNATURE_PROJECTS: Record<SignatureProjectId, SignatureConfig> = {
     status: "signing",
     themeClassName: "phish-theme",
     backgroundClassName: "phish-hero-field",
+    auraClassName: "sig-aura-phish",
     viewBox: "0 0 1000 260",
     signaturePath:
       "M154 190 C170 131 187 84 207 61 C239 116 278 160 324 190 C338 136 354 91 374 61 M452 61 C432 112 416 158 407 190 C451 187 495 187 535 190 M612 190 C630 130 651 79 674 62 C738 61 779 90 769 130 C758 174 690 174 638 143 C679 143 731 141 758 122",
@@ -101,13 +106,11 @@ function splitStrokes(d: string): string[] {
 }
 
 const clamp01 = (n: number) => (n < 0 ? 0 : n > 1 ? 1 : n);
-const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-const smoothstep = (t: number) => t * t * (3 - 2 * t);
 
-/** A pen stroke is close to constant-speed, with a gentle touch-down and lift at the ends. */
+/** Smootherstep — gentle acceleration in, gentle settle out, for a fluid stroke. */
 function penEase(t: number) {
   const c = clamp01(t);
-  return c * 0.6 + smoothstep(c) * 0.4;
+  return c * c * c * (c * (c * 6 - 15) + 10);
 }
 
 /** Deterministic per-stroke jitter so the rhythm feels human but renders identically every run. */
@@ -152,20 +155,17 @@ function Signature({
   const strokes = useMemo(() => splitStrokes(config.signaturePath), [config.signaturePath]);
   const inkRefs = useRef<(SVGPathElement | null)[]>([]);
   const bleedRefs = useRef<(SVGPathElement | null)[]>([]);
-  const nibRef = useRef<SVGGElement | null>(null);
 
   const sw = config.strokeWidth;
 
   useLayoutEffect(() => {
     const inks = inkRefs.current;
     const bleeds = bleedRefs.current;
-    const nib = nibRef.current;
 
-    // Reduced motion: present the finished signature, no nib, no animation.
+    // Reduced motion: present the finished signature, no animation.
     if (reduceMotion) {
       inks.forEach((p) => p && (p.style.strokeDashoffset = "0"));
       bleeds.forEach((p) => p && (p.style.strokeDashoffset = "0"));
-      if (nib) nib.style.opacity = "0";
       return;
     }
 
@@ -173,8 +173,8 @@ function Signature({
     const n = inks.length;
     const total = config.drawDuration;
 
-    // Carve out brief pen-lifts between strokes; the rest is writing time,
-    // distributed by stroke length so the nib moves at a roughly steady pace.
+    // Carve out brief pauses between strokes; the rest is writing time,
+    // distributed by stroke length so the ink flows at a roughly steady pace.
     const gap = n > 1 ? Math.min(0.085, (total * 0.12) / (n - 1)) : 0;
     const writeTime = Math.max(0.2, total - gap * (n - 1));
     const totalLen = lens.reduce((a, b) => a + b, 0) || 1;
@@ -190,9 +190,6 @@ function Signature({
     });
 
     const writeEnd = schedule[n - 1]?.end ?? total;
-    const liftOut = 0.34; // pen lifting off the page after the last stroke
-    const point = (i: number, len: number) =>
-      inks[i]?.getPointAtLength(len) ?? { x: 0, y: 0 };
 
     let raf = 0;
     const startTime = performance.now();
@@ -200,7 +197,7 @@ function Signature({
     const frame = (now: number) => {
       const t = (now - startTime) / 1000;
 
-      // Reveal each stroke up to the nib.
+      // Reveal each stroke as the ink flows on.
       for (let i = 0; i < n; i++) {
         const s = schedule[i];
         let revealed: number;
@@ -212,50 +209,7 @@ function Signature({
         if (bleeds[i]) bleeds[i]!.style.strokeDashoffset = offset;
       }
 
-      // Place + fade the nib.
-      if (nib) {
-        let nx = 0;
-        let ny = 0;
-        let opacity = 0;
-
-        const active = schedule.findIndex((s) => t >= s.start && t < s.end);
-        if (active !== -1) {
-          const s = schedule[active];
-          const revealed = penEase((t - s.start) / s.duration);
-          const p = point(active, revealed * lens[active]);
-          nx = p.x;
-          ny = p.y;
-          // touch-down on the very first stroke, otherwise the pen is already down
-          opacity = active === 0 ? clamp01((t - s.start) / 0.07) : 1;
-        } else if (t < writeEnd) {
-          // pen-lift between two strokes: glide toward the next start, dip the nib
-          let prev = -1;
-          for (let i = 0; i < n; i++) {
-            if (t >= schedule[i].end) prev = i;
-          }
-          const next = prev + 1;
-          if (prev >= 0 && next < n) {
-            const g = clamp01((t - schedule[prev].end) / (schedule[next].start - schedule[prev].end));
-            const from = point(prev, lens[prev]);
-            const to = point(next, 0);
-            nx = lerp(from.x, to.x, smoothstep(g));
-            ny = lerp(from.y, to.y, smoothstep(g));
-            opacity = 0.22 + 0.78 * Math.abs(2 * g - 1);
-          }
-        } else {
-          // last stroke done: lift the nib up and away
-          const last = point(n - 1, lens[n - 1]);
-          const l = clamp01((t - writeEnd) / liftOut);
-          nx = last.x;
-          ny = last.y - l * sw * 1.6;
-          opacity = 1 - l;
-        }
-
-        nib.setAttribute("transform", `translate(${nx.toFixed(2)} ${ny.toFixed(2)})`);
-        nib.style.opacity = opacity.toFixed(3);
-      }
-
-      if (t < writeEnd + liftOut) {
+      if (t < writeEnd) {
         raf = requestAnimationFrame(frame);
       }
     };
@@ -276,16 +230,27 @@ function Signature({
         transition={{ duration: reduceMotion ? 0.01 : 0.4, ease: EASE }}
       >
         <defs>
-          <filter id={glowId} x="-12%" y="-50%" width="124%" height="200%">
-            <feGaussianBlur stdDeviation="2.2" result="b" />
+          <filter
+            id={glowId}
+            x="-15%"
+            y="-60%"
+            width="130%"
+            height="220%"
+            colorInterpolationFilters="sRGB"
+          >
+            {/* soft outer glow */}
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2.4" result="halo" />
             <feColorMatrix
-              in="b"
+              in="halo"
               type="matrix"
-              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.32 0"
+              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.3 0"
+              result="glow"
             />
+            {/* feather the ink's own edge so the curves read silky, not jagged */}
+            <feGaussianBlur in="SourceGraphic" stdDeviation="0.6" result="ink" />
             <feMerge>
-              <feMergeNode />
-              <feMergeNode in="SourceGraphic" />
+              <feMergeNode in="glow" />
+              <feMergeNode in="ink" />
             </feMerge>
           </filter>
           <filter id={bleedId} x="-20%" y="-80%" width="140%" height="260%">
@@ -325,6 +290,7 @@ function Signature({
             pathLength={1}
             strokeDasharray="1 1"
             strokeDashoffset={reduceMotion ? 0 : 1}
+            shapeRendering="geometricPrecision"
             filter={`url(#${bleedId})`}
           />
         ))}
@@ -345,28 +311,10 @@ function Signature({
             pathLength={1}
             strokeDasharray="1 1"
             strokeDashoffset={reduceMotion ? 0 : 1}
+            shapeRendering="geometricPrecision"
             filter={`url(#${glowId})`}
           />
         ))}
-
-        {/* the nib riding the ink tip */}
-        {!reduceMotion && (
-          <g ref={nibRef} style={{ opacity: 0 }}>
-            <circle r={sw * 1.15} fill="hsl(var(--gold) / 0.5)" filter={`url(#${bleedId})`} />
-            <circle r={sw * 0.46} fill="hsl(var(--gold))" />
-            {/* pen held at a steady angle, just touching the page */}
-            <path
-              d={`M0 0 L ${sw * 1.5} ${-sw * 2.0} L ${sw * 2.5} ${-sw * 1.45} Z`}
-              fill="hsl(var(--foreground) / 0.78)"
-            />
-            <path
-              d={`M ${sw * 2.1} ${-sw * 1.75} L ${sw * 5.4} ${-sw * 4.7}`}
-              stroke="hsl(var(--foreground) / 0.55)"
-              strokeWidth={sw * 0.7}
-              strokeLinecap="round"
-            />
-          </g>
-        )}
       </motion.svg>
     </div>
   );
@@ -393,8 +341,8 @@ function SignatureOverlay({
       exit={{ opacity: 0 }}
       transition={{ duration: reduceMotion ? 0.08 : 0.34, ease: EASE }}
     >
-      <div className={`absolute inset-0 ${config.backgroundClassName} opacity-45`} />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_48%,hsl(var(--gold)/0.13)_0%,transparent_38%),linear-gradient(135deg,hsl(var(--background))_0%,hsl(var(--card)/0.84)_100%)]" />
+      <div className={`absolute inset-0 ${config.auraClassName}`} />
+      <div className={`absolute inset-0 ${config.backgroundClassName} opacity-40`} />
 
       <div className="relative z-10 flex min-h-dvh flex-col items-center justify-center px-5 py-10 text-center">
         <motion.p
