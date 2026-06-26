@@ -1,7 +1,7 @@
 export const SITE_URL = "https://youssefchouay.com";
 export const SITE_NAME = "Youssef Chouay";
 export const SITE_DESCRIPTION =
-  "Portfolio of Youssef Chouay — Software Engineer and AI Researcher based in Ottawa, Canada.";
+  "Portfolio of Youssef Chouay, Software Engineer and AI Researcher based in Ottawa, Canada.";
 
 export const SOCIAL_LINKS = [
   "https://github.com/Youssef2430",
@@ -9,7 +9,7 @@ export const SOCIAL_LINKS = [
 ];
 
 /**
- * schema.org Person — reused across pages so search engines build a
+ * schema.org Person - reused across pages so search engines build a
  * consistent knowledge-graph entity for the site owner.
  */
 export const personSchema = {

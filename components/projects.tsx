@@ -567,7 +567,7 @@ export function Projects() {
                 className="text-[hsl(var(--muted-foreground))] text-sm leading-relaxed font-mono"
               >
                 Engineering is a bridge between logic and creativity. My goal is to
-                build solutions that are not just functional, but elegant—quietly
+                build solutions that are not just functional, but elegant, quietly
                 threading innovation into every line of code.
               </motion.p>
 

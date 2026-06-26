@@ -885,10 +885,10 @@
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Project experiences — bespoke per-project pages
+   Project experiences - bespoke per-project pages
    ───────────────────────────────────────────────────────────── */
 
-/* AtlasLLM identity: mirror the product's own palette — a near-monochrome
+/* AtlasLLM identity: mirror the product's own palette - a near-monochrome
    surface with a coral accent (and a teal secondary). Overriding --gold
    locally means existing hsl(var(--gold)) references turn coral in-scope.
    Values taken from the app's own tokens (--brand 14°, --brand-foreground 164°). */
@@ -906,7 +906,7 @@
   --atlas-teal: 164 70% 60%;
 }
 
-/* Faint blueprint grid — echoes the product's launch surface. */
+/* Faint blueprint grid - echoes the product's launch surface. */
 .atlas-grid {
   background-image:
     linear-gradient(to right, hsl(var(--foreground) / 0.05) 1px, transparent 1px),

@@ -112,7 +112,7 @@ export const projects: ProjectDetail[] = [
     title: "GeeGee's Intramural website",
     category: "Personal Project",
     description: [
-      "Built a GeeGees Intramural Sports Hub from scratch using Next.js + TypeScript/Tailwind UI, SSR pages for leagues/teams/schedules, and slick Chart.js visualizations—delivering an accessible, responsive experience for thousands of students.",
+      "Built a GeeGees Intramural Sports Hub from scratch using Next.js + TypeScript/Tailwind UI, SSR pages for leagues/teams/schedules, and slick Chart.js visualizations, delivering an accessible, responsive experience for thousands of students.",
       "Designed a high-throughput Rust + Actix-web API backed by SQLx/PostgreSQL that streams real-time standings, Elo ratings, and predictive match analytics with sub 20ms latency.",
       "Drove concurrency with async/await and strict type-safety to create a modular, fault-tolerant codebase that scales gracefully under heavy traffic.",
     ],

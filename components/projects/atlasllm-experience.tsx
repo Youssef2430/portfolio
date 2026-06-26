@@ -11,14 +11,15 @@ import type { SerializableProject } from "@/components/project-detail";
 import { AtlasWorkflow } from "@/components/projects/atlasllm-workflow";
 import { MacBook, IPad, IPhone } from "@/components/projects/device-frames";
 import { PROVIDERS } from "@/components/projects/provider-icons";
+import { TechStack } from "@/components/projects/tech-stack";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const REPO_URL = "https://github.com/Youssef2430/llmchat";
 
-/* Screenshot slots (drop the real captures here) */
-const SHOT_HOME = "/atlasllm/home.png"; // desktop — "Good evening" + model picker
-const SHOT_RESEARCH = "/atlasllm/research.png"; // tablet — Pro Search conversation
-const SHOT_MOBILE = "/atlasllm/mobile.png"; // phone — Deep Research
+/* Screenshot slots (base paths; -light.png / -dark.png swap with the theme) */
+const SHOT_HOME = "/atlasllm/macbook"; // desktop: "Good evening" + model picker
+const SHOT_RESEARCH = "/atlasllm/ipad"; // tablet: Pro Search conversation
+const SHOT_MOBILE = "/atlasllm/iphone"; // phone: Deep Research
 
 /* ── Primitives ────────────────────────────────────────────────── */
 
@@ -55,13 +56,6 @@ function Reveal({
 /* ── Real project data ─────────────────────────────────────────── */
 
 const MODES = ["Standard", "Web search", "Pro Search", "Deep Research"];
-
-const STACK: Array<{ group: string; items: string[] }> = [
-  { group: "Frontend", items: ["Next.js 14", "TypeScript", "Tailwind CSS", "Shadcn UI", "Framer Motion", "Zustand"] },
-  { group: "Data & auth", items: ["Convex", "Clerk", "Local-first storage"] },
-  { group: "AI", items: ["OpenRouter", "Vercel AI SDK", "MCP", "@repo/orchestrator"] },
-  { group: "Tooling", items: ["Turborepo", "Bun", "Serper / Jina", "Braintrust traces"] },
-];
 
 const FACTS = "9 providers · 30+ models · 4 chat modes · 11 workflow tasks";
 
@@ -108,7 +102,7 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
             transition={{ duration: 0.7, delay: 0.1, ease: EASE }}
             className="mt-6 max-w-2xl text-lg md:text-xl font-light leading-relaxed text-[hsl(var(--foreground-soft))]"
           >
-            A privacy-first, multi-model AI chat platform with agentic research —
+            A privacy-first, multi-model AI chat platform with agentic research.
             Deep Research and Pro Search modes built on a custom workflow engine.
           </motion.p>
 
@@ -141,7 +135,7 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
             </a>
           </motion.div>
 
-          {/* hero — MacBook on the grid */}
+          {/* hero - MacBook on the grid */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -149,7 +143,7 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
             className="atlas-grid mt-14 border border-border p-6 md:p-14"
           >
             <div className="mx-auto max-w-3xl">
-              <MacBook src={SHOT_HOME} alt="AtlasLLM — home screen with model picker" priority />
+              <MacBook src={SHOT_HOME} alt="AtlasLLM home screen with model picker" priority />
             </div>
           </motion.div>
         </div>
@@ -171,7 +165,7 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
             </Reveal>
             <Reveal delay={0.05}>
               <p className="text-base md:text-lg leading-relaxed text-[hsl(var(--foreground-soft))]">
-                It is local-first by default — your data lives on-device, with
+                It is local-first by default; your data lives on-device, with
                 optional real-time Convex sync across devices. Four chat modes,
                 from a quick answer to multi-step Deep Research, all share the
                 same streaming, reasoning-visible interface.
@@ -206,7 +200,7 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
             <Reveal delay={0.1} className="lg:col-span-7">
               <p className="text-base md:text-lg leading-relaxed text-[hsl(var(--foreground-soft))]">
                 A custom, type-safe workflow engine (<span className="font-mono text-sm text-foreground/80">@repo/orchestrator</span>)
-                runs each request as a graph of tasks — with dependencies, retries,
+                runs each request as a graph of tasks, with dependencies, retries,
                 timeouts and parallel fan-out. The router dispatches to one of four
                 modes; Deep Research plans searches, runs them in parallel, and
                 loops the reflector back to the planner until the answer is complete.
@@ -236,18 +230,18 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8 items-end">
             <Reveal className="md:col-span-8">
-              <IPad src={SHOT_RESEARCH} alt="AtlasLLM — Pro Search conversation with sources" />
+              <IPad src={SHOT_RESEARCH} alt="AtlasLLM Pro Search conversation with sources" />
               <p className="mt-5 text-sm text-[hsl(var(--foreground-soft))] leading-relaxed">
-                Reasoning and web-search steps, inline sources and citations — the
+                Reasoning and web-search steps, inline sources and citations: the
                 full research trail behind every answer.
               </p>
             </Reveal>
             <Reveal delay={0.1} className="md:col-span-4">
               <div className="mx-auto max-w-[260px] md:mb-8">
-                <IPhone src={SHOT_MOBILE} alt="AtlasLLM — Deep Research on mobile" />
+                <IPhone src={SHOT_MOBILE} alt="AtlasLLM Deep Research on mobile" />
               </div>
               <p className="mt-5 text-sm text-[hsl(var(--foreground-soft))] leading-relaxed">
-                Deep Research, fully responsive — steps, sources and the streamed
+                Deep Research, fully responsive: steps, sources and the streamed
                 report on a phone.
               </p>
             </Reveal>
@@ -285,27 +279,14 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
       </section>
 
       {/* ── Built with ── */}
-      <section className="px-6 md:px-12 py-24 md:py-32">
+      <section className="px-6 md:px-12 py-20 md:py-24">
         <div className="mx-auto max-w-6xl">
-          <Reveal className="mb-12">
+          <Reveal className="mb-8">
             <Label>Built with</Label>
           </Reveal>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-            {STACK.map((s) => (
-              <Reveal key={s.group}>
-                <span className="block font-mono text-[11px] tracking-[0.2em] uppercase text-[hsl(var(--foreground-subtle))] mb-4">
-                  {s.group}
-                </span>
-                <ul className="space-y-2">
-                  {s.items.map((it) => (
-                    <li key={it} className="text-sm text-[hsl(var(--foreground-soft))]">
-                      {it}
-                    </li>
-                  ))}
-                </ul>
-              </Reveal>
-            ))}
-          </div>
+          <Reveal delay={0.05}>
+            <TechStack />
+          </Reveal>
         </div>
       </section>
 

@@ -377,7 +377,7 @@ export function AskInput() {
 
       if (!isExpanded) setIsExpanded(true);
 
-      // Prior turns only — the current question goes in `message`, the
+      // Prior turns only - the current question goes in `message`, the
       // server appends it itself. Keep the last 10 turns to stay well under
       // URL length limits on the streaming GET endpoint.
       const history: ApiHistoryItem[] = messages
@@ -438,7 +438,7 @@ export function AskInput() {
                 );
               }
             } catch {
-              // Incomplete JSON chunk — wait for the rest
+              // Incomplete JSON chunk - wait for the rest
             }
           }
         }

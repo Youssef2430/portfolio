@@ -16,7 +16,7 @@ const H = 34; // chip height
 type Node = { label: string; x: number; y: number; w: number; purpose: string };
 
 const NODES: Record<string, Node> = {
-  router: { label: "router", x: 150, y: 290, w: 92, purpose: "Entry point — routes each message to the right chat mode." },
+  router: { label: "router", x: 150, y: 290, w: 92, purpose: "Entry point: routes each message to the right chat mode." },
   compA: { label: "completion", x: 360, y: 110, w: 112, purpose: "Standard conversational answer." },
   compB: { label: "completion", x: 360, y: 196, w: 112, purpose: "Conversational answer, grounded with a quick web search." },
   quick: { label: "quickSearch", x: 604, y: 196, w: 116, purpose: "Fast web search for standard chat grounding." },

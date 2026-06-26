@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://youssefchouay.com"),
   title: "Youssef Chouay | يوسف شواي",
   description:
-    "Portfolio of Youssef Chouay — Software Engineer and AI Researcher based in Ottawa, Canada.",
+    "Portfolio of Youssef Chouay, Software Engineer and AI Researcher based in Ottawa, Canada.",
   keywords: [
     "Youssef Chouay",
     "Software Engineer",
