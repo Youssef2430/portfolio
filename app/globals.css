@@ -1,7 +1,3 @@
-/* Import Arabic display font - Aref Ruqaa for elegant Arabic calligraphy */
-/* Added Oswald for condensed headings and Pinyon Script for elegant cursive */
-@import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Amiri:wght@400;700&family=Roboto+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&family=Oswald:wght@400;500;600;700&family=Pinyon+Script&family=Newsreader:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Mono:wght@300;400;500&family=Cormorant+Garamond:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -118,7 +114,7 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
     font-feature-settings: "kern" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -128,15 +124,15 @@
 
 /* Typography */
 .font-arabic {
-  font-family: 'Aref Ruqaa', 'Amiri', serif;
+  font-family: var(--font-aref-ruqaa), var(--font-amiri), serif;
 }
 
 .font-mono {
-  font-family: 'Roboto Mono', ui-monospace, monospace;
+  font-family: var(--font-roboto-mono), ui-monospace, monospace;
 }
 
 .font-display {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
   font-weight: 300;
   letter-spacing: -0.02em;
 }
@@ -165,7 +161,7 @@
 
 /* Arabic text styling */
 .arabic-accent {
-  font-family: 'Aref Ruqaa', serif;
+  font-family: var(--font-aref-ruqaa), serif;
   color: hsl(var(--gold));
   direction: rtl;
 }
@@ -178,7 +174,7 @@
 .arabic-vertical {
   writing-mode: vertical-rl;
   text-orientation: mixed;
-  font-family: 'Aref Ruqaa', serif;
+  font-family: var(--font-aref-ruqaa), serif;
   color: hsl(var(--gold));
 }
 
@@ -207,7 +203,7 @@
 /* Navigation styles */
 .nav-link {
   position: relative;
-  font-family: 'Roboto Mono', monospace;
+  font-family: var(--font-roboto-mono), monospace;
   font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -496,7 +492,7 @@
 }
 
 .blog-code-surface code {
-  font-family: 'Roboto Mono', ui-monospace, monospace;
+  font-family: var(--font-roboto-mono), ui-monospace, monospace;
   font-weight: 400;
   letter-spacing: 0;
 }
@@ -674,7 +670,7 @@
 
 .blog-article,
 .blog-article :where(h1, h2, h3, h4, h5, h6, p, li, blockquote, table, th, td, figcaption) {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .prose p {
@@ -713,7 +709,7 @@
 /* Chat message text - same monospace as the chat input */
 .chat-message-text,
 .chat-message-text * {
-  font-family: 'Roboto Mono', ui-monospace, monospace !important;
+  font-family: var(--font-roboto-mono), ui-monospace, monospace !important;
 }
 
 /* Works Section - Large Typography Style */
@@ -746,14 +742,14 @@
 
 /* Condensed heading font */
 .font-condensed {
-  font-family: 'Oswald', sans-serif;
+  font-family: var(--font-oswald), sans-serif;
   font-weight: 500;
   letter-spacing: 0.05em;
 }
 
 /* Elegant script font */
 .font-script {
-  font-family: 'Pinyon Script', cursive;
+  font-family: var(--font-pinyon-script), cursive;
   font-weight: 400;
 }
 
@@ -822,7 +818,7 @@
 
 /* Works category label */
 .works-category {
-  font-family: 'Roboto Mono', monospace;
+  font-family: var(--font-roboto-mono), monospace;
   font-size: 11px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -838,7 +834,7 @@
 
 /* Square brackets label */
 .bracket-label {
-  font-family: 'Roboto Mono', monospace;
+  font-family: var(--font-roboto-mono), monospace;
   font-size: 11px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -1132,7 +1128,7 @@
 
 /* Editorial serif display - the Clui headline voice (italic = accent). */
 .clui-display {
-  font-family: 'Newsreader', 'Tiempos Headline', Georgia, serif;
+  font-family: var(--font-newsreader), 'Tiempos Headline', Georgia, serif;
   font-weight: 300;
   letter-spacing: -0.03em;
   line-height: 1.04;
@@ -1144,11 +1140,11 @@
 }
 
 .clui-serif {
-  font-family: 'Newsreader', Georgia, serif;
+  font-family: var(--font-newsreader), Georgia, serif;
 }
 
 .clui-mono {
-  font-family: 'DM Mono', 'Roboto Mono', ui-monospace, monospace;
+  font-family: var(--font-dm-mono), var(--font-roboto-mono), ui-monospace, monospace;
 }
 
 /* Faint dotted canvas - echoes the product's launch surface. */
@@ -1256,13 +1252,13 @@
 }
 
 .phish-display {
-  font-family: 'Cormorant Garamond', 'Newsreader', Georgia, serif;
+  font-family: var(--font-cormorant-garamond), var(--font-newsreader), Georgia, serif;
   font-weight: 600;
   letter-spacing: 0;
 }
 
 .phish-mono {
-  font-family: 'IBM Plex Mono', 'DM Mono', 'Roboto Mono', ui-monospace, monospace;
+  font-family: var(--font-ibm-plex-mono), var(--font-dm-mono), var(--font-roboto-mono), ui-monospace, monospace;
   letter-spacing: 0;
 }
 
@@ -1278,7 +1274,7 @@
     linear-gradient(135deg, hsl(var(--gold) / 0.18), transparent 58%),
     hsl(var(--card));
   color: hsl(var(--gold));
-  font-family: 'IBM Plex Mono', 'DM Mono', ui-monospace, monospace;
+  font-family: var(--font-ibm-plex-mono), var(--font-dm-mono), ui-monospace, monospace;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0;

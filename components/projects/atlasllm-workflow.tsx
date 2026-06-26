@@ -176,7 +176,7 @@ export function AtlasWorkflow() {
                     x={(NODES.search.x + NODES.reflector.x) / 2}
                     y={388}
                     textAnchor="middle"
-                    fontFamily="'Roboto Mono', monospace"
+                    fontFamily="var(--font-roboto-mono), monospace"
                     fontSize={11}
                     fill="hsl(var(--foreground))"
                     fillOpacity={0.32}
@@ -216,7 +216,7 @@ export function AtlasWorkflow() {
             x={(NODES.reflector.x + NODES.planner.x) / 2}
             y={236}
             textAnchor="middle"
-            fontFamily="'Roboto Mono', monospace"
+            fontFamily="var(--font-roboto-mono), monospace"
             fontSize={11}
             letterSpacing="0.06em"
             fill="hsl(var(--gold))"
@@ -231,11 +231,11 @@ export function AtlasWorkflow() {
         <g>
           <circle cx={52} cy={290} r={4} fill="hsl(var(--gold))" />
           <line x1={56} y1={290} x2={leftEdge(NODES.router).x} y2={290} stroke="hsl(var(--foreground))" strokeOpacity={0.16} strokeWidth={1.4} />
-          <text x={52} y={314} textAnchor="middle" fontFamily="'Roboto Mono', monospace" fontSize={10} letterSpacing="0.16em" fill="hsl(var(--foreground))" fillOpacity={0.4}>MSG</text>
+          <text x={52} y={314} textAnchor="middle" fontFamily="var(--font-roboto-mono), monospace" fontSize={10} letterSpacing="0.16em" fill="hsl(var(--foreground))" fillOpacity={0.4}>MSG</text>
 
           <line x1={rightEdge(NODES.suggestions).x} y1={290} x2={1356} y2={290} stroke="hsl(var(--foreground))" strokeOpacity={0.16} strokeWidth={1.4} />
           <circle cx={1360} cy={290} r={4} fill="hsl(var(--foreground))" fillOpacity={0.4} />
-          <text x={1356} y={314} textAnchor="middle" fontFamily="'Roboto Mono', monospace" fontSize={10} letterSpacing="0.16em" fill="hsl(var(--foreground))" fillOpacity={0.4}>END</text>
+          <text x={1356} y={314} textAnchor="middle" fontFamily="var(--font-roboto-mono), monospace" fontSize={10} letterSpacing="0.16em" fill="hsl(var(--foreground))" fillOpacity={0.4}>END</text>
         </g>
 
         {/* ── Fan-out lane dots ── */}
@@ -271,7 +271,7 @@ export function AtlasWorkflow() {
                 y={n.y}
                 textAnchor="middle"
                 dominantBaseline="central"
-                fontFamily="'Roboto Mono', monospace"
+                fontFamily="var(--font-roboto-mono), monospace"
                 fontSize={12}
                 fill={on ? "hsl(var(--gold))" : "hsl(var(--foreground-soft))"}
                 style={{ transition: "fill 0.3s ease" }}

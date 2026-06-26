@@ -141,7 +141,7 @@ export function CluiFlow() {
             x={(NODES.perm.x + NODES.cli.x) / 2 - 6}
             y={186}
             textAnchor="middle"
-            fontFamily="'DM Mono', monospace"
+            fontFamily="var(--font-dm-mono), monospace"
             fontSize={10.5}
             fill="hsl(var(--gold))"
             fillOpacity={0.7}
@@ -184,7 +184,7 @@ export function CluiFlow() {
                 y={n.y}
                 textAnchor="middle"
                 dominantBaseline="central"
-                fontFamily="'DM Mono', monospace"
+                fontFamily="var(--font-dm-mono), monospace"
                 fontSize={12}
                 fill={on ? "hsl(var(--gold))" : "hsl(var(--foreground-soft))"}
                 style={{ transition: "fill 0.3s ease" }}
