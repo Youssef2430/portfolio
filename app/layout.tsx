@@ -1,16 +1,134 @@
 import type React from "react";
 import type { Metadata } from "next";
+import {
+  Amiri,
+  Aref_Ruqaa,
+  Cormorant_Garamond,
+  DM_Mono,
+  Fraunces,
+  IBM_Plex_Mono,
+  Inter,
+  Newsreader,
+  Nunito,
+  Oswald,
+  Pinyon_Script,
+  Roboto_Mono,
+} from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PostHogProvider } from "./providers";
 import { CustomCursor } from "@/components/custom-cursor";
+import { ProjectSignatureTransitionProvider } from "@/components/project-signature-transition";
 import { Analytics } from "@vercel/analytics/next";
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const arefRuqaa = Aref_Ruqaa({
+  subsets: ["arabic", "latin"],
+  weight: ["400", "700"],
+  variable: "--font-aref-ruqaa",
+  display: "swap",
+});
+
+const amiri = Amiri({
+  subsets: ["arabic", "latin"],
+  weight: ["400", "700"],
+  variable: "--font-amiri",
+  display: "swap",
+});
+
+const robotoMono = Roboto_Mono({
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  variable: "--font-roboto-mono",
+  display: "swap",
+});
+
+const oswald = Oswald({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-oswald",
+  display: "swap",
+});
+
+const pinyonScript = Pinyon_Script({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-pinyon-script",
+  display: "swap",
+});
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  style: ["normal", "italic"],
+  variable: "--font-newsreader",
+  display: "swap",
+});
+
+const dmMono = DM_Mono({
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  variable: "--font-dm-mono",
+  display: "swap",
+});
+
+const cormorantGaramond = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-cormorant-garamond",
+  display: "swap",
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-ibm-plex-mono",
+  display: "swap",
+});
+
+// Mugshot identity: a soft, warm display serif (its "MUGSHOT" placard voice)
+// paired with a rounded sans that stands in for the app's SF Rounded utility type.
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "900"],
+  style: ["normal", "italic"],
+  variable: "--font-fraunces",
+  display: "swap",
+});
+
+const nunito = Nunito({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-nunito",
+  display: "swap",
+});
+
+const fontVariables = [
+  inter.variable,
+  arefRuqaa.variable,
+  amiri.variable,
+  robotoMono.variable,
+  oswald.variable,
+  pinyonScript.variable,
+  newsreader.variable,
+  dmMono.variable,
+  cormorantGaramond.variable,
+  ibmPlexMono.variable,
+  fraunces.variable,
+  nunito.variable,
+].join(" ");
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://youssefchouay.com"),
   title: "Youssef Chouay | يوسف شواي",
   description:
-    "Portfolio of Youssef Chouay — Software Engineer and AI Researcher based in Ottawa, Canada.",
+    "Portfolio of Youssef Chouay, Software Engineer and AI Researcher based in Ottawa, Canada.",
   keywords: [
     "Youssef Chouay",
     "Software Engineer",
@@ -57,20 +175,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={fontVariables} suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png" />
         <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
         <link rel="apple-touch-icon" href="/favicon-100.png" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className="bg-background text-foreground antialiased">
         <PostHogProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <CustomCursor />
             {children}
+            <ProjectSignatureTransitionProvider />
           </ThemeProvider>
         </PostHogProvider>
         <Analytics />

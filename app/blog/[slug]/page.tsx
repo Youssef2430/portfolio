@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Children, isValidElement, type ReactNode } from "react";
 import { ArrowLeft, Clock, Calendar } from "lucide-react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -26,6 +27,66 @@ import {
   breadcrumbSchema,
   SITE_URL,
 } from "@/lib/seo";
+import { BlogCodeBlock } from "@/components/blog-code-block";
+
+const VIDEO_EXTENSIONS = [".mp4", ".webm", ".ogg", ".mov"];
+
+function normalizeMarkdownMediaSrc(src: unknown): string {
+  const value = typeof src === "string" ? src.trim() : "";
+
+  if (
+    !value ||
+    value.startsWith("/") ||
+    value.startsWith("data:") ||
+    value.startsWith("blob:") ||
+    /^(https?:)?\/\//.test(value)
+  ) {
+    return value;
+  }
+
+  return `/blog/${value.replace(/^\.?\//, "")}`;
+}
+
+function isVideoSrc(src: string): boolean {
+  const pathname = src.split(/[?#]/)[0]?.toLowerCase() ?? "";
+  return VIDEO_EXTENSIONS.some((extension) => pathname.endsWith(extension));
+}
+
+type MarkdownElementProps = {
+  children?: ReactNode;
+  className?: string;
+};
+
+function getTextContent(node: ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") {
+    return String(node);
+  }
+
+  if (Array.isArray(node)) {
+    return node.map(getTextContent).join("");
+  }
+
+  if (isValidElement<MarkdownElementProps>(node)) {
+    return getTextContent(node.props.children);
+  }
+
+  return "";
+}
+
+function getCodeBlockMetadata(children: ReactNode) {
+  const codeElement = Children.toArray(children).find((child) =>
+    isValidElement<MarkdownElementProps>(child)
+  );
+  const className = isValidElement<MarkdownElementProps>(codeElement)
+    ? codeElement.props.className ?? ""
+    : "";
+  const language = className.match(/language-([\w-]+)/)?.[1];
+
+  return {
+    code: getTextContent(children).replace(/\n$/, ""),
+    language,
+  };
+}
 
 // Pre-generate static params for all published posts
 export function generateStaticParams() {
@@ -132,11 +193,15 @@ const MarkdownComponents: Components = {
       </code>
     );
   },
-  pre: ({ children }) => (
-    <pre className="bg-card p-4 overflow-x-auto my-6 text-sm border border-border">
-      {children}
-    </pre>
-  ),
+  pre: ({ children }) => {
+    const { code, language } = getCodeBlockMetadata(children);
+
+    return (
+      <BlogCodeBlock code={code} language={language}>
+        {children}
+      </BlogCodeBlock>
+    );
+  },
   a: ({ href, children, ...props }) => (
     <a
       href={href}
@@ -151,47 +216,57 @@ const MarkdownComponents: Components = {
   strong: ({ children }) => (
     <strong className="font-medium text-foreground">{children}</strong>
   ),
-  img: ({ src, alt }) => (
-    <span className="block my-8">
-      {typeof src === "string" && src.endsWith(".mp4") ? (
-        <video
-          src={src}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full border border-border"
-          aria-label={alt || undefined}
-        />
-      ) : (
-        <Image
-          src={typeof src === "string" ? src : ""}
-          alt={alt || ""}
-          width={800}
-          height={450}
-          className="w-full border border-border"
-        />
-      )}
-      {alt && (
-        <span className="block mt-2 text-center text-sm text-[hsl(var(--foreground-subtle))]">
-          {alt}
-        </span>
-      )}
-    </span>
-  ),
+  img: ({ src, alt }) => {
+    const mediaSrc = normalizeMarkdownMediaSrc(src);
+
+    if (!mediaSrc) {
+      return null;
+    }
+
+    return (
+      <span className="block my-8">
+        {isVideoSrc(mediaSrc) ? (
+          <video
+            src={mediaSrc}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full border border-border"
+            aria-label={alt || undefined}
+          />
+        ) : (
+          <Image
+            src={mediaSrc}
+            alt={alt || ""}
+            width={800}
+            height={450}
+            className="w-full border border-border"
+          />
+        )}
+        {alt && (
+          <span className="block mt-2 text-center text-sm text-[hsl(var(--foreground-subtle))]">
+            {alt}
+          </span>
+        )}
+      </span>
+    );
+  },
   hr: () => <hr className="my-12 border-t border-border" />,
   table: ({ children }) => (
-    <div className="overflow-x-auto my-6">
-      <table className="w-full border border-border">{children}</table>
+    <div className="blog-data-table-wrap my-8 overflow-x-auto border border-border/80 bg-[hsl(var(--card)/0.62)] shadow-[0_18px_55px_hsl(var(--foreground)/0.06)]">
+      <table className="blog-data-table !my-0 w-full table-fixed border-collapse text-sm">
+        {children}
+      </table>
     </div>
   ),
   th: ({ children }) => (
-    <th className="border border-border px-4 py-2 text-left font-medium text-foreground bg-muted">
+    <th className="border-b border-border/80 bg-[hsl(var(--wash)/0.55)] px-4 py-3 text-left text-xs font-medium text-[hsl(var(--foreground-muted))]">
       {children}
     </th>
   ),
   td: ({ children }) => (
-    <td className="border border-border px-4 py-2 text-[hsl(var(--foreground-soft))]">
+    <td className="border-b border-border/50 px-4 py-3 align-top text-[hsl(var(--foreground-soft))]">
       {children}
     </td>
   ),
@@ -319,7 +394,7 @@ export default async function BlogPostPage({
           )}
 
           {/* Article Content */}
-          <article className="prose max-w-none">
+          <article className="blog-article prose max-w-none">
             <ReactMarkdown
               components={MarkdownComponents}
               remarkPlugins={[remarkGfm, remarkMath]}

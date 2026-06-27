@@ -63,7 +63,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
-          "Inter",
+          "var(--font-inter)",
           "-apple-system",
           "BlinkMacSystemFont",
           "Segoe UI",
@@ -73,7 +73,7 @@ const config: Config = {
           "sans-serif",
         ],
         mono: [
-          "Roboto Mono",
+          "var(--font-roboto-mono)",
           "ui-monospace",
           "SFMono-Regular",
           "Menlo",
@@ -84,12 +84,12 @@ const config: Config = {
           "monospace",
         ],
         arabic: [
-          "Aref Ruqaa",
-          "Amiri",
+          "var(--font-aref-ruqaa)",
+          "var(--font-amiri)",
           "serif",
         ],
         display: [
-          "Inter",
+          "var(--font-inter)",
           "sans-serif",
         ],
       },

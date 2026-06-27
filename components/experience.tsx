@@ -27,8 +27,9 @@ const experiences: ExperienceItem[] = [
     location: "Ottawa, ON",
     period: "Jan 2026 – Present",
     details: [
-      "Owned end-to-end delivery of a backend service for the CRQ service to fetch company profiles and stock data via MCP-based integrations, including research, orchestration design, implementation, testing, and production deployment on AWS.",
-      "Led migration of an MLOps codebase to a Lakehouse architecture by rewriting data pipelines in PySpark, helping enable scalable processing and improved maintainability of analytics workflows.",
+      "Worked with the AI Security team to migrate a prompt-scan engine to state-of-the-art detection models for LLM threat analysis, including implementation, testing, debugging, and rollout support.",
+      "Implemented chunking behavior for an inference engine in Rust and Go, improving support for long prompts and document-style inputs in AI security workflows.",
+      "Owned design, implementation, testing, and AWS deployment of a backend service that retrieves company profiles and market data through MCP-based integrations for cybersecurity research workflows.",
     ],
   },
   {

@@ -482,7 +482,7 @@ export function CurrentListen() {
                   {/* Shadow cast by the disc */}
                   <div className="absolute -bottom-4 left-[12%] right-[8%] h-5 rounded-[50%] bg-black/30 blur-lg pointer-events-none" />
 
-                  {/* Rotating disc — spins under the static sheen */}
+                  {/* Rotating disc - spins under the static sheen */}
                   <motion.div
                     animate={{ rotate: isPlaying ? 360 : 0 }}
                     transition={
@@ -534,7 +534,7 @@ export function CurrentListen() {
                           "0 0 0 2px hsl(0 0% 6%), inset 0 1px 4px rgba(0,0,0,0.25)",
                       }}
                     >
-                      {/* Label type — fades out when the play control appears */}
+                      {/* Label type - fades out when the play control appears */}
                       <div
                         className="absolute inset-0 flex flex-col items-center justify-center text-center select-none pointer-events-none"
                         style={{
@@ -583,7 +583,7 @@ export function CurrentListen() {
                     }}
                   />
 
-                  {/* Play control — static overlay, never rotates with the disc */}
+                  {/* Play control - static overlay, never rotates with the disc */}
                   <AnimatePresence>
                     {isExpanded && (
                       <motion.div
