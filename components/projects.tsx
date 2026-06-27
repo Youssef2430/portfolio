@@ -4,7 +4,7 @@ import { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { motion, useInView, AnimatePresence, useAnimationFrame } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { projects } from "@/lib/project-data";
+import { projects, type ProjectDetail } from "@/lib/project-data";
 import {
   hasProjectSignatureTransition,
   startProjectSignatureTransition,
@@ -14,6 +14,15 @@ import {
 const seededRandom = (seed: number) => {
   const x = Math.sin(seed * 9999) * 10000;
   return x - Math.floor(x);
+};
+
+const getAspectRatioValue = (ratio?: string) => {
+  if (!ratio) return 742 / 273;
+
+  const [width, height] = ratio.split("/").map((part) => Number(part.trim()));
+  if (!width || !height) return 742 / 273;
+
+  return width / height;
 };
 
 interface NodePosition {
@@ -41,6 +50,114 @@ interface ShootingStar {
   angle: number;
   speed: number;
   length: number;
+}
+
+type HoverPreview = NonNullable<ProjectDetail["hoverPreview"]>;
+
+function HoverPreviewShot({
+  preview,
+  title,
+  sizes,
+}: {
+  preview: HoverPreview;
+  title: string;
+  sizes: string;
+}) {
+  const fitClass = preview.fit === "contain" ? "object-contain" : "object-cover";
+  const deviceShotClass = preview.device === "browser" ? "" : "device-shot";
+  const className = `${deviceShotClass} ${fitClass}`.trim();
+  const style = preview.objectPosition
+    ? { objectPosition: preview.objectPosition }
+    : undefined;
+
+  return (
+    <>
+      <Image
+        src={preview.src}
+        alt={`${title} app screenshot`}
+        fill
+        sizes={sizes}
+        className={preview.darkSrc ? `${className} dark:hidden` : className}
+        style={style}
+      />
+      {preview.darkSrc && (
+        <Image
+          src={preview.darkSrc}
+          alt=""
+          aria-hidden
+          fill
+          sizes={sizes}
+          className={`${className} hidden dark:block`}
+          style={style}
+        />
+      )}
+    </>
+  );
+}
+
+function HoverProjectPreview({ project }: { project: ProjectDetail }) {
+  const preview = project.hoverPreview ?? {
+    device: "mac",
+    src: project.image,
+    fit: "cover",
+  } satisfies HoverPreview;
+
+  if (preview.device === "iphone") {
+    return (
+      <div className="w-[150px] md:w-[174px] drop-shadow-[0_34px_60px_rgba(18,22,31,0.28)] dark:drop-shadow-[0_34px_70px_rgba(0,0,0,0.6)]">
+        <div className="device-frame device-frame-phone relative rounded-[34px] p-[5px] md:rounded-[40px] md:p-[6px]">
+          <span
+            className="absolute left-1/2 top-[11px] z-20 h-[16px] w-[56px] -translate-x-1/2 rounded-full bg-[#050505] shadow-[0_1px_0_rgba(255,255,255,0.10)] md:top-[13px] md:h-[19px] md:w-[66px]"
+            aria-hidden
+          />
+          <div className="device-screen relative aspect-[383/818] overflow-hidden rounded-[29px] md:rounded-[34px]">
+            <HoverPreviewShot preview={preview} title={project.title} sizes="174px" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (preview.device === "browser") {
+    return (
+      <div className="w-[340px] overflow-hidden rounded-[13px] border border-[hsl(var(--border))] bg-card shadow-[0_34px_72px_-34px_rgba(18,22,31,0.38)] md:w-[430px] dark:shadow-[0_34px_76px_-30px_rgba(0,0,0,0.72)]">
+        <div className="flex h-8 items-center gap-2 border-b border-[hsl(var(--border))] bg-[hsl(var(--background))] px-3">
+          <span className="h-2.5 w-2.5 rounded-full bg-[#fc625d]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#fdbc40]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#35cd4b]" />
+          <div className="ml-2 h-4 flex-1 rounded-full border border-[hsl(var(--border))] bg-foreground/[0.03]" />
+          <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-[hsl(var(--foreground-subtle))]">
+            Gmail
+          </span>
+        </div>
+        <div
+          className="relative bg-white dark:bg-[#111112]"
+          style={{ aspectRatio: preview.aspectRatio ?? "742 / 273" }}
+        >
+          <HoverPreviewShot preview={preview} title={project.title} sizes="430px" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-[310px] md:w-[380px] drop-shadow-[0_34px_60px_rgba(18,22,31,0.25)] dark:drop-shadow-[0_34px_70px_rgba(0,0,0,0.62)]">
+      <div className="device-frame device-frame-mac relative rounded-[16px] p-[6px] md:rounded-[20px] md:p-[8px]">
+        <div className="device-screen relative aspect-[294/183] overflow-hidden rounded-[10px] md:rounded-[13px]">
+          <HoverPreviewShot preview={preview} title={project.title} sizes="380px" />
+          <div
+            className="absolute left-1/2 top-0 z-20 h-[10px] w-[15%] min-w-[58px] max-w-[92px] -translate-x-1/2 rounded-b-[8px] bg-[#09090a] shadow-[inset_0_-1px_0_rgba(255,255,255,0.08)] md:h-[13px]"
+            aria-hidden
+          >
+            <span className="absolute left-1/2 top-[4px] h-[2px] w-[2px] -translate-x-1/2 rounded-full bg-white/25 md:top-[5px]" />
+          </div>
+        </div>
+      </div>
+      <div className="macbook-base relative mx-auto -mt-px h-[10px] w-full rounded-b-[12px] md:h-[12px] md:rounded-b-[14px]">
+        <div className="macbook-base-indent absolute left-1/2 top-0 h-[4px] w-[18%] max-w-[104px] -translate-x-1/2 rounded-b-[7px] md:h-[5px]" />
+      </div>
+    </div>
+  );
 }
 
 export function Projects() {
@@ -227,6 +344,24 @@ export function Projects() {
   }, []);
 
   const activeProject = projects.find((p) => p.id === hoveredProject);
+  const activePreviewDevice = activeProject?.hoverPreview?.device ?? "mac";
+  const browserPreviewWidth = 430;
+  const browserPreviewHeight =
+    32 +
+    Math.round(
+      browserPreviewWidth /
+        getAspectRatioValue(activeProject?.hoverPreview?.aspectRatio)
+    );
+  const previewOffset = activePreviewDevice === "iphone"
+    ? { x: 112, y: -180 }
+    : activePreviewDevice === "browser"
+      ? { x: 96, y: -92 }
+    : { x: 120, y: -118 };
+  const previewBounds = activePreviewDevice === "iphone"
+    ? { width: 174, height: 358 }
+    : activePreviewDevice === "browser"
+      ? { width: browserPreviewWidth, height: browserPreviewHeight }
+    : { width: 380, height: 254 };
 
   // Get color value
   const getColorValue = (color: "gold" | "white" | "cream") => {
@@ -280,20 +415,13 @@ export function Projects() {
             exit={{ opacity: 0, y: -30 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="fixed pointer-events-none z-50"
+            data-project-hover-preview={activeProject.id}
             style={{
-              left: mousePosition.x + 120,
-              top: mousePosition.y - 100,
+              left: `clamp(24px, ${mousePosition.x + previewOffset.x}px, calc(100vw - ${previewBounds.width}px - 24px))`,
+              top: `clamp(24px, ${mousePosition.y + previewOffset.y}px, calc(100vh - ${previewBounds.height}px - 24px))`,
             }}
           >
-            <div className="relative w-[240px] md:w-[280px] aspect-[4/3] overflow-hidden shadow-2xl">
-              <Image
-                src={activeProject.image}
-                alt={activeProject.title}
-                fill
-                className="object-cover"
-                sizes="280px"
-              />
-            </div>
+            <HoverProjectPreview project={activeProject} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -663,7 +791,10 @@ export function Projects() {
                     onClick={(e) => handleProjectClick(e, project.id)}
                     onMouseEnter={() => setHoveredProject(project.id)}
                     onMouseLeave={() => setHoveredProject(null)}
-                    onMouseMove={handleMouseMove}
+                    onMouseMove={(e) => {
+                      setHoveredProject(project.id);
+                      handleMouseMove(e);
+                    }}
                   >
                     <div className="overflow-hidden relative">
                       <h3 className="works-title-xs works-title-outline transition-transform duration-300 ease-out group-hover/title:-translate-y-full">

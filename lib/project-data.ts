@@ -6,6 +6,14 @@ export type ProjectDetail = {
   description: string[];
   image: string;
   imageLink?: string;
+  hoverPreview?: {
+    device: "mac" | "iphone" | "browser";
+    src: string;
+    darkSrc?: string;
+    fit?: "cover" | "contain";
+    objectPosition?: string;
+    aspectRatio?: string;
+  };
   technologies: string[];
   timeline?: string;
   contributors?: string[];
@@ -26,6 +34,12 @@ export const projects: ProjectDetail[] = [
     ],
     image: "/clui_tasks_audio.jpeg",
     imageLink: "/clui_context_usage.jpeg",
+    hoverPreview: {
+      device: "mac",
+      src: "/clui/home-light.jpeg",
+      darkSrc: "/clui/home-dark.jpeg",
+      objectPosition: "center",
+    },
     technologies: [
       "Electron 35",
       "React 19",
@@ -58,6 +72,12 @@ export const projects: ProjectDetail[] = [
     ],
     image: "/atlasllm-welcome.png",
     imageLink: "/atlasllm-conv.png",
+    hoverPreview: {
+      device: "mac",
+      src: "/atlasllm/macbook-light.png",
+      darkSrc: "/atlasllm/macbook-dark.png",
+      objectPosition: "center top",
+    },
     technologies: [
       "Next.js 14",
       "TypeScript",
@@ -108,28 +128,33 @@ export const projects: ProjectDetail[] = [
   //   size: "large",
   // },
   {
-    id: "geegees-intramural",
-    title: "GeeGee's Intramural website",
+    id: "mugshot",
+    title: "Mugshot",
     category: "Personal Project",
     description: [
-      "Built a GeeGees Intramural Sports Hub from scratch using Next.js + TypeScript/Tailwind UI, SSR pages for leagues/teams/schedules, and slick Chart.js visualizations, delivering an accessible, responsive experience for thousands of students.",
-      "Designed a high-throughput Rust + Actix-web API backed by SQLx/PostgreSQL that streams real-time standings, Elo ratings, and predictive match analytics with sub 20ms latency.",
-      "Drove concurrency with async/await and strict type-safety to create a modular, fault-tolerant codebase that scales gracefully under heavy traffic.",
+      "Built a SwiftUI iOS coffee journal where the core loop is take a photo, let the app cut it into a die-cut sticker, then drop that sticker onto a calendar day: a warm cafe-scrapbook take on caffeine tracking.",
+      "Wrote an on-device sticker pipeline: Vision foreground lift on iOS 17+, a classical flood-fill background remover, and a rounded-crop fallback, plus an Apple Intelligence Foundation Model that names the drink and estimates its caffeine.",
+      "Persisted everything locally as JSON and image files with an atomic backup manifest, refreshed WidgetKit snapshots after each save, and added optional HealthKit caffeine sync, a daily-limit meter, and a shareable monthly Wrapped recap.",
     ],
-    image: "/geegeeshub.png",
-    imageLink: "/geegeeshub-roadmap.jpeg",
+    image: "/mugshot/icon.png",
+    imageLink: "/mugshot/wrapped-light.PNG",
+    hoverPreview: {
+      device: "iphone",
+      src: "/mugshot/home-light.PNG",
+      darkSrc: "/mugshot/home-dark.PNG",
+      objectPosition: "center top",
+    },
     technologies: [
-      "Next.js",
-      "TypeScript",
-      "Tailwind CSS",
-      "Rust",
-      "Actix-web",
-      "PostgreSQL",
-      "Chart.js",
+      "Swift",
+      "SwiftUI",
+      "Vision",
+      "Core Image",
+      "Apple Intelligence",
+      "WidgetKit",
+      "HealthKit",
     ],
-    timeline: "May 2023 - Present",
+    timeline: "Jun 2026",
     contributors: ["Youssef Chouay"],
-    link: "https://www.geegeeshub.com/",
     size: "small",
   },
   // {
@@ -151,7 +176,7 @@ export const projects: ProjectDetail[] = [
   //     "Charts",
   //     "macOS",
   //   ],
-  //   timeline: "Jul 2025 – Present",
+  //   timeline: "Jul 2025 - Present",
   //   contributors: ["Youssef Chouay"],
   //   link: "https://github.com/Youssef2430/ledgerUI",
   //   size: "small",
@@ -165,8 +190,16 @@ export const projects: ProjectDetail[] = [
       "Shipped a Flask API that preloads the models at startup, exposes GET /detect_phishing, and was containerized with Docker for deployment on a Hetzner VPS behind Nginx and Let's Encrypt SSL.",
       "Connected the backend to a Manifest V3 Chrome extension that reads the open Gmail message, sends the cleaned email body to the detector, and injects a Safe or Caution badge directly into the inbox UI.",
     ],
-    image: "/capstone-example.png",
-    imageLink: "/capstone-activity.jpeg",
+    image: "/NLP-phishing/capstone-light.png",
+    imageLink: "/NLP-phishing/capstone-phishing-light.png",
+    hoverPreview: {
+      device: "browser",
+      src: "/NLP-phishing/capstone-light.png",
+      darkSrc: "/NLP-phishing/capstone-dark.png",
+      fit: "contain",
+      objectPosition: "center top",
+      aspectRatio: "16 / 9",
+    },
     technologies: [
       "Python",
       "Transformers",

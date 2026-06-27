@@ -948,6 +948,16 @@
     radial-gradient(circle at 85% 88%, hsl(var(--phish-clay) / 0.14) 0%, transparent 50%);
 }
 
+/* Mugshot - warm ceramic canvas, a butter/gold morning bloom and a sage
+   whisper, the way the home screen feels with the sun on it. */
+.sig-aura-mugshot {
+  background:
+    radial-gradient(circle at 50% 40%, hsl(var(--mug-butter) / 0.26) 0%, transparent 50%),
+    radial-gradient(circle at 18% 16%, hsl(var(--gold) / 0.10) 0%, transparent 46%),
+    radial-gradient(circle at 84% 86%, hsl(var(--mug-sage) / 0.12) 0%, transparent 48%),
+    linear-gradient(155deg, hsl(var(--background)) 0%, hsl(var(--card) / 0.92) 100%);
+}
+
 /* AtlasLLM device mockups. The shell colors track Apple-like silver in light
    mode and space gray in dark mode, while the screen surface masks screenshot
    edge pixels that were captured outside the app viewport. */
@@ -1210,11 +1220,33 @@
 
 /* ─────────────────────────────────────────────────────────────
    NLP phishing detector identity.
-   Dark navy security surface, copper signal color, restrained green/red
-   verdicts, and a high-contrast editorial serif inspired by brand-protection
-   campaigns.
+   Security-lab light mode with a dark navy counterpart, copper signal color,
+   restrained green/red verdicts, and a high-contrast editorial serif inspired
+   by brand-protection campaigns.
    ───────────────────────────────────────────────────────────── */
 .phish-theme {
+  color-scheme: light;
+  --background: 218 35% 97%;
+  --card: 0 0% 100%;
+  --card-foreground: 221 32% 10%;
+  --border: 218 21% 82%;
+  --foreground: 221 32% 10%;
+  --foreground-soft: 220 17% 34%;
+  --foreground-muted: 220 11% 45%;
+  --foreground-subtle: 220 10% 56%;
+  --foreground-faint: 220 17% 78%;
+  --muted-foreground: 220 11% 45%;
+  --gold: 20 86% 45%;
+  --ring: 20 86% 45%;
+  --phish-ink: 218 35% 97%;
+  --phish-ink-soft: 216 32% 92%;
+  --phish-copper: 20 86% 45%;
+  --phish-clay: 216 12% 55%;
+  --phish-safe: 147 58% 34%;
+  --phish-danger: 4 72% 50%;
+}
+
+.dark .phish-theme {
   color-scheme: dark;
   --background: 218 52% 9%;
   --card: 218 43% 12%;
@@ -1234,21 +1266,6 @@
   --phish-clay: 29 22% 53%;
   --phish-safe: 145 58% 45%;
   --phish-danger: 3 82% 60%;
-}
-
-.dark .phish-theme {
-  --background: 218 52% 9%;
-  --card: 218 43% 12%;
-  --card-foreground: 38 48% 92%;
-  --border: 216 28% 24%;
-  --foreground: 38 48% 94%;
-  --foreground-soft: 36 28% 76%;
-  --foreground-muted: 34 17% 58%;
-  --foreground-subtle: 35 12% 48%;
-  --foreground-faint: 218 18% 31%;
-  --muted-foreground: 34 17% 58%;
-  --gold: 24 94% 64%;
-  --ring: 24 94% 64%;
 }
 
 .phish-display {
@@ -1427,4 +1444,160 @@
   .phish-map-packet {
     display: none;
   }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Mugshot identity.
+   Warm cafe-scrapbook meets calm wellness tracker: soft ceramic
+   surfaces, coffee browns, a heavy display serif (the "MUGSHOT"
+   placard voice) and rounded utility type standing in for SF Rounded.
+   Dark mode is near-black coffee with butter/gold hero numerals.
+   Tokens mirror MugshotTheme.swift. Overriding the shared ramp here
+   re-skins the generic primitives in-scope.
+   ───────────────────────────────────────────────────────────── */
+.mugshot-theme {
+  /* mocha (#7E6346) is the primary warm accent and reuses every --gold ref */
+  --gold: 31 29% 38%;
+  --ring: 31 29% 38%;
+
+  /* warm ceramic neutrals (canvas #F5F2ED / surface #FFFEFD / cream hairline) */
+  --background: 40 26% 95%;
+  --card: 40 55% 99%;
+  --card-foreground: 28 27% 11%;
+  --border: 38 28% 88%;
+  --foreground: 28 27% 11%;
+  --foreground-soft: 30 17% 31%;
+  --foreground-muted: 32 13% 44%;
+  --foreground-subtle: 33 15% 55%;
+  --foreground-faint: 37 30% 80%;
+  --muted-foreground: 33 15% 55%;
+
+  /* brand palette (espresso #231B14 → coral #C6604A) for bespoke accents */
+  --mug-canvas: 40 26% 95%;
+  --mug-card: 40 55% 99%;
+  --mug-soft: 38 41% 93%;
+  --mug-cream: 38 38% 86%;
+  --mug-espresso: 28 27% 11%;
+  --mug-roast: 27 33% 26%;
+  --mug-mocha: 31 29% 38%;
+  --mug-latte: 32 33% 56%;
+  --mug-sage: 141 15% 47%;
+  --mug-sage-deep: 161 27% 25%;
+  --mug-ceramic: 200 41% 40%;
+  --mug-butter: 42 69% 63%;
+  --mug-coral: 11 53% 53%;
+}
+
+.dark .mugshot-theme {
+  /* butter/gold (#E2BB61) takes over as the hero numeral + accent at night */
+  --gold: 42 64% 62%;
+  --ring: 42 64% 62%;
+
+  /* near-black coffee surfaces (night #18130F / nightCard #261F18) */
+  --background: 31 23% 8%;
+  --card: 30 23% 12%;
+  --card-foreground: 36 55% 96%;
+  --border: 32 14% 20%;
+  --foreground: 36 50% 96%;
+  --foreground-soft: 35 17% 72%;
+  --foreground-muted: 35 14% 60%;
+  --foreground-subtle: 35 12% 48%;
+  --foreground-faint: 32 14% 28%;
+  --muted-foreground: 35 12% 48%;
+
+  --mug-canvas: 31 23% 8%;
+  --mug-card: 30 23% 12%;
+  --mug-soft: 32 21% 16%;
+  --mug-cream: 32 14% 22%;
+  --mug-espresso: 36 50% 96%;
+  --mug-roast: 36 40% 80%;
+  --mug-mocha: 33 30% 62%;
+  --mug-latte: 32 36% 64%;
+  --mug-sage: 141 22% 58%;
+  --mug-sage-deep: 150 24% 48%;
+  --mug-ceramic: 200 45% 60%;
+  --mug-butter: 42 69% 63%;
+  --mug-coral: 11 62% 64%;
+}
+
+/* Heavy, warm display serif: the placard wordmark voice. */
+.mug-display {
+  font-family: var(--font-fraunces), 'Iowan Old Style', Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.02;
+  font-optical-sizing: auto;
+}
+.mug-display em {
+  font-style: italic;
+  font-weight: 600;
+  color: hsl(var(--gold));
+}
+
+/* Rounded utility type: stands in for the app's SF Rounded labels. */
+.mug-rounded {
+  font-family: var(--font-nunito), ui-rounded, 'SF Pro Rounded', system-ui, sans-serif;
+}
+
+/* Hero numerals: big, heavy, tabular: treated like objects. */
+.mug-numeral {
+  font-family: var(--font-nunito), ui-rounded, system-ui, sans-serif;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Faint warm dot-grid: the calendar/scrapbook backdrop. */
+.mug-dots {
+  background-image: radial-gradient(hsl(var(--mug-latte) / 0.16) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Soft paper wash behind hero sections. */
+.mug-paper {
+  background:
+    radial-gradient(60% 50% at 50% 0%, hsl(var(--mug-butter) / 0.12), transparent 70%),
+    radial-gradient(40% 40% at 14% 8%, hsl(var(--mug-sage) / 0.08), transparent 72%);
+}
+
+/* Die-cut sticker drop: the warm, slightly-lifted feel of a real sticker. */
+.mug-sticker {
+  filter: drop-shadow(0 8px 14px rgba(35, 27, 20, 0.18));
+}
+
+/* Ceramic phone bezel for the product screenshots. */
+.mug-phone {
+  background: linear-gradient(150deg, #fffefd 0%, #efe7d9 46%, #d9c8ad 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -2px 5px rgba(90, 65, 45, 0.18),
+    0 36px 80px -44px rgba(35, 27, 20, 0.5);
+}
+.dark .mug-phone {
+  background: linear-gradient(150deg, #3a2f25 0%, #251d16 50%, #14100c 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.5),
+    0 36px 80px -42px rgba(0, 0, 0, 0.8);
+}
+
+/* Caffeine meter fill: gentle springy grow. */
+@keyframes mug-meter-fill {
+  from { width: 0%; }
+}
+.mug-meter-bar {
+  animation: mug-meter-fill 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Steam drift above the brewing cup in the loop. */
+@keyframes mug-steam {
+  0% { opacity: 0; transform: translateY(6px) scaleY(0.8); }
+  40% { opacity: 0.7; }
+  100% { opacity: 0; transform: translateY(-16px) scaleY(1.2); }
+}
+.mug-steam { animation: mug-steam 2.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mug-meter-bar,
+  .mug-steam { animation: none; }
 }

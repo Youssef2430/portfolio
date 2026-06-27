@@ -5,9 +5,11 @@ import {
   Aref_Ruqaa,
   Cormorant_Garamond,
   DM_Mono,
+  Fraunces,
   IBM_Plex_Mono,
   Inter,
   Newsreader,
+  Nunito,
   Oswald,
   Pinyon_Script,
   Roboto_Mono,
@@ -90,6 +92,23 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
+// Mugshot identity: a soft, warm display serif (its "MUGSHOT" placard voice)
+// paired with a rounded sans that stands in for the app's SF Rounded utility type.
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "900"],
+  style: ["normal", "italic"],
+  variable: "--font-fraunces",
+  display: "swap",
+});
+
+const nunito = Nunito({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-nunito",
+  display: "swap",
+});
+
 const fontVariables = [
   inter.variable,
   arefRuqaa.variable,
@@ -101,6 +120,8 @@ const fontVariables = [
   dmMono.variable,
   cormorantGaramond.variable,
   ibmPlexMono.variable,
+  fraunces.variable,
+  nunito.variable,
 ].join(" ");
 
 export const metadata: Metadata = {

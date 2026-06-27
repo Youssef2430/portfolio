@@ -29,6 +29,8 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 const REPO_URL =
   "https://github.com/capstone-2024-T91/Image-Processing-and-NLP-for-Brand-Protection";
 const EXTENSION_REPO_URL = "https://github.com/capstone-2024-T91/Frontend-Backend";
+const SAFE_SHOT = "/NLP-phishing/capstone";
+const PHISHING_SHOT = "/NLP-phishing/capstone-phishing";
 
 type IconItem = {
   Icon: LucideIcon;
@@ -392,17 +394,13 @@ export function NLPPhishingExperience({
           >
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-center">
               <div className="lg:col-span-7">
-                <div className="overflow-hidden border border-border bg-card">
-                  <Image
-                    src="/capstone-example.png"
-                    alt="Gmail message with a phishing risk button and Safe result badge"
-                    width={1490}
-                    height={551}
-                    priority
-                    sizes="(max-width: 768px) 100vw, 45rem"
-                    className="h-auto w-full"
-                  />
-                </div>
+                <ThemedScreenshot
+                  baseSrc={SAFE_SHOT}
+                  alt="Gmail message with a phishing risk button and Safe result badge"
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 45rem"
+                  className="aspect-[16/9]"
+                />
               </div>
               <div className="lg:col-span-5">
                 <HeroReadout />
@@ -447,6 +445,10 @@ export function NLPPhishingExperience({
             </Reveal>
           </div>
         </div>
+
+        <Reveal delay={0.14} className="mx-auto mt-14 max-w-6xl">
+          <ScreenshotGallery />
+        </Reveal>
       </section>
 
       <section className="border-y border-border px-6 py-16 md:px-12">
@@ -701,6 +703,76 @@ function HeroReadout() {
           Chrome content script
         </p>
       </div>
+    </div>
+  );
+}
+
+function ThemedScreenshot({
+  baseSrc,
+  alt,
+  priority = false,
+  sizes,
+  className = "",
+}: {
+  baseSrc: string;
+  alt: string;
+  priority?: boolean;
+  sizes: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`relative overflow-hidden border border-border bg-[hsl(var(--background))] ${className}`}
+    >
+      <Image
+        src={`${baseSrc}-light.png`}
+        alt={alt}
+        fill
+        priority={priority}
+        sizes={sizes}
+        className="object-contain dark:hidden"
+      />
+      <Image
+        src={`${baseSrc}-dark.png`}
+        alt=""
+        aria-hidden
+        fill
+        priority={priority}
+        sizes={sizes}
+        className="hidden object-contain dark:block"
+      />
+    </div>
+  );
+}
+
+function ScreenshotGallery() {
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <figure className="border border-border bg-card p-3">
+        <ThemedScreenshot
+          baseSrc={SAFE_SHOT}
+          alt="Legitimate Gmail message marked Safe by the phishing detector"
+          sizes="(max-width: 768px) 100vw, 34rem"
+          className="aspect-[16/9]"
+        />
+        <figcaption className="phish-mono mt-3 flex items-center justify-between gap-4 text-[11px] uppercase text-[hsl(var(--foreground-subtle))]">
+          <span>Legitimate message</span>
+          <span className="text-[hsl(var(--phish-safe))]">Safe badge</span>
+        </figcaption>
+      </figure>
+
+      <figure className="border border-border bg-card p-3">
+        <ThemedScreenshot
+          baseSrc={PHISHING_SHOT}
+          alt="Suspicious Gmail message marked Unsafe and Dangerous by the phishing detector"
+          sizes="(max-width: 768px) 100vw, 34rem"
+          className="aspect-[16/9]"
+        />
+        <figcaption className="phish-mono mt-3 flex items-center justify-between gap-4 text-[11px] uppercase text-[hsl(var(--foreground-subtle))]">
+          <span>Phishing attempt</span>
+          <span className="text-[hsl(var(--phish-danger))]">Unsafe badge</span>
+        </figcaption>
+      </figure>
     </div>
   );
 }

@@ -7,7 +7,11 @@ import { usePathname, useRouter } from "next/navigation";
 const PROJECT_SIGNATURE_EVENT = "portfolio:project-signature-transition";
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-type SignatureProjectId = "atlasllm" | "clui" | "nlp-phishing-detection";
+type SignatureProjectId =
+  | "atlasllm"
+  | "clui"
+  | "nlp-phishing-detection"
+  | "mugshot";
 
 type SignatureConfig = {
   id: SignatureProjectId;
@@ -85,6 +89,22 @@ const SIGNATURE_PROJECTS: Record<SignatureProjectId, SignatureConfig> = {
     strokeWidth: 15,
     drawDuration: 1.7,
   },
+  mugshot: {
+    id: "mugshot",
+    href: "/projects/mugshot",
+    title: "Mugshot",
+    kicker: "Mugshot",
+    status: "brewing",
+    themeClassName: "mugshot-theme",
+    backgroundClassName: "mug-dots",
+    auraClassName: "sig-aura-mugshot",
+    viewBox: "0 0 980 260",
+    // A loose cursive "Mugshot": each letter a separate pen stroke.
+    signaturePath:
+      "M66 192 C74 124 88 80 102 80 C116 80 126 132 136 172 C146 132 158 82 174 80 C190 82 198 132 206 192 M250 116 C242 156 240 182 262 184 C286 186 300 158 308 120 C304 158 306 184 330 182 M392 118 C360 108 342 136 358 156 C376 174 406 160 406 130 C404 164 398 218 370 230 C350 238 326 228 326 210 M470 124 C444 118 430 142 454 150 C474 156 488 172 464 184 C446 192 428 184 428 170 M520 70 C506 122 490 162 486 190 C500 142 520 114 544 114 C566 114 558 156 552 190 M610 156 C594 138 618 110 642 126 C664 140 652 184 624 184 C604 185 600 170 610 156 M712 84 C702 126 690 164 692 184 C694 200 714 198 732 184 M676 126 C700 124 726 122 750 120",
+    strokeWidth: 14,
+    drawDuration: 1.95,
+  },
 };
 
 function getSignatureConfig(projectId: string): SignatureConfig | undefined {
@@ -107,7 +127,7 @@ function splitStrokes(d: string): string[] {
 
 const clamp01 = (n: number) => (n < 0 ? 0 : n > 1 ? 1 : n);
 
-/** Smootherstep — gentle acceleration in, gentle settle out, for a fluid stroke. */
+/** Smootherstep: gentle acceleration in, gentle settle out, for a fluid stroke. */
 function penEase(t: number) {
   const c = clamp01(t);
   return c * c * c * (c * (c * 6 - 15) + 10);
@@ -116,7 +136,7 @@ function penEase(t: number) {
 /** Deterministic per-stroke jitter so the rhythm feels human but renders identically every run. */
 function strokeJitter(i: number) {
   const f = Math.sin((i + 1) * 12.9898) * 43758.5453;
-  return 0.86 + (f - Math.floor(f)) * 0.28; // 0.86 – 1.14
+  return 0.86 + (f - Math.floor(f)) * 0.28; // 0.86 to 1.14
 }
 
 export function hasProjectSignatureTransition(
@@ -258,7 +278,7 @@ function Signature({
           </filter>
         </defs>
 
-        {/* signing line — drawn first, like a line on a form */}
+        {/* signing line: drawn first, like a line on a form */}
         {!reduceMotion && (
           <motion.line
             x1={56}
