@@ -515,8 +515,7 @@ export function MugshotExperience({ project }: { project: SerializableProject })
       {/* ── 03 Widgets ── */}
       <section className="border-t border-border px-6 py-20 md:px-12 md:py-28">
         <div className="relative mx-auto max-w-6xl">
-          <div className="relative min-h-[740px] overflow-hidden rounded-[28px] border border-border bg-[hsl(var(--mug-card))] px-5 py-10 md:min-h-[760px] md:px-10 md:py-12 lg:min-h-[520px]">
-            <div className="mug-dots absolute inset-0 opacity-45" />
+          <div className="relative min-h-[740px] px-5 py-10 md:min-h-[760px] md:px-10 md:py-12 lg:min-h-[520px]">
             <ImageSticker
               src="/mugshot/widgets/today-caffeine.png"
               width={1062}
@@ -711,8 +710,10 @@ function Caption({ children }: { children: ReactNode }) {
 }
 
 function HeroStickerField() {
+  // -z-[1] keeps the scattered stickers behind the hero copy (they'd otherwise
+  // paint over the headline at wide viewports) while staying above the paper wash.
   return (
-    <div className="pointer-events-none absolute inset-0 hidden md:block" aria-hidden>
+    <div className="pointer-events-none absolute inset-0 -z-[1] hidden md:block" aria-hidden>
       <Sticker
         src="/mugshot/stickers/berry.png"
         width={120}
@@ -767,8 +768,7 @@ function HeroStickerField() {
 
 function ShareCardCollage() {
   return (
-    <div className="relative min-h-[860px] overflow-hidden rounded-[28px] border border-border bg-[hsl(var(--mug-card))] p-5 md:min-h-[720px] md:p-8 lg:min-h-[620px]">
-      <div className="mug-dots absolute inset-0 opacity-40" />
+    <div className="relative min-h-[860px] p-5 md:min-h-[720px] md:p-8 lg:min-h-[620px]">
       <ImageSticker
         src="/mugshot/recaps/daily-card.png"
         width={656}
@@ -910,19 +910,18 @@ function FlowDiagram() {
   ];
 
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-border bg-[hsl(var(--mug-card))] p-5 shadow-[0_28px_64px_-44px_rgba(35,27,20,0.42)] md:p-8">
-      <div className="mug-dots absolute inset-0 opacity-45" />
+    <div className="relative p-5 md:p-8">
       <Sticker
         src="/mugshot/stickers/boba.png"
         width={120}
         rotate={-12}
-        className="right-5 top-5 w-[52px] md:w-[70px]"
+        className="-right-3 -top-3 w-[56px] md:w-[74px]"
       />
       <Sticker
         src="/mugshot/stickers/latte-top.png"
         width={120}
         rotate={11}
-        className="bottom-5 left-5 w-[58px] md:w-[78px]"
+        className="-bottom-5 -left-3 w-[64px] md:w-[84px]"
       />
 
       <div className="relative grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">

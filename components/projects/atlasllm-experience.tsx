@@ -53,6 +53,29 @@ function Reveal({
   );
 }
 
+/* The sparkle mark, swapped for its dark-mode variant with the site theme. */
+function AtlasLogo({ className = "" }: { className?: string }) {
+  return (
+    <>
+      <Image
+        src="/atlasllm/logo-light.png"
+        alt="AtlasLLM logo"
+        width={96}
+        height={96}
+        className={`${className} dark:hidden`}
+      />
+      <Image
+        src="/atlasllm/logo-dark.png"
+        alt=""
+        aria-hidden
+        width={96}
+        height={96}
+        className={`hidden ${className} dark:block`}
+      />
+    </>
+  );
+}
+
 /* ── Real project data ─────────────────────────────────────────── */
 
 const MODES = ["Standard", "Web search", "Pro Search", "Deep Research"];
@@ -82,24 +105,29 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: EASE }}
-            className="mt-12 flex items-center gap-4"
+            className="mt-12 flex items-center gap-3.5"
           >
-            <Image
-              src="/atlasllm/logo-dark.png"
-              alt="AtlasLLM logo"
-              width={96}
-              height={96}
-              className="h-9 w-9 md:h-11 md:w-11"
-            />
-            <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-foreground">
+            <AtlasLogo className="h-9 w-9 md:h-11 md:w-11" />
+            <span className="text-2xl md:text-3xl font-semibold tracking-tight text-foreground">
               AtlasLLM
-            </h1>
+            </span>
           </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
+            className="mt-8 max-w-3xl text-5xl md:text-7xl font-light tracking-tight leading-[1.04] text-foreground"
+          >
+            Thirty models.
+            <br />
+            <span className="text-[hsl(var(--gold))]">One conversation.</span>
+          </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1, ease: EASE }}
+            transition={{ duration: 0.7, delay: 0.2, ease: EASE }}
             className="mt-6 max-w-2xl text-lg md:text-xl font-light leading-relaxed text-[hsl(var(--foreground-soft))]"
           >
             A privacy-first, multi-model AI chat platform with agentic research.
@@ -110,10 +138,10 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.25 }}
+            transition={{ duration: 0.7, delay: 0.35 }}
             className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-border pt-6 font-mono text-[11px] tracking-[0.12em] uppercase text-[hsl(var(--foreground-subtle))]"
           >
-            <span>Solo build · {project.timeline ?? "Recent"}</span>
+            <span>Solo build</span>
             <span>Turborepo monorepo</span>
             <a
               href={project.link}
@@ -139,7 +167,7 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.3, ease: EASE }}
+            transition={{ duration: 0.9, delay: 0.4, ease: EASE }}
             className="atlas-grid mt-14 border border-border p-6 md:p-14"
           >
             <div className="mx-auto max-w-3xl">
@@ -295,7 +323,7 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
         <div className="mx-auto max-w-6xl border-t border-border pt-14">
           <div className="flex flex-col gap-10 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
-              <Image src="/atlasllm/logo-dark.png" alt="AtlasLLM" width={96} height={96} className="h-7 w-7" />
+              <AtlasLogo className="h-7 w-7" />
               <span className="text-lg font-semibold tracking-tight">AtlasLLM</span>
             </div>
 

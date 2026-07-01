@@ -89,7 +89,7 @@ const FEATURES = [
 
 /* ── The presentation ──────────────────────────────────────────── */
 
-export function CluiExperience({ project }: { project: SerializableProject }) {
+export function CluiExperience(_props: { project: SerializableProject }) {
   return (
     <main className="clui-theme min-h-screen overflow-clip bg-background text-foreground">
       <div className="grain-overlay" />
@@ -143,7 +143,7 @@ export function CluiExperience({ project }: { project: SerializableProject }) {
             className="clui-mono mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-border pt-6 text-[11px] uppercase tracking-[0.12em] text-[hsl(var(--foreground-subtle))]"
           >
             <span>macOS · Free &amp; open source</span>
-            <span>Solo build · {project.timeline ?? "Recent"}</span>
+            <span>Solo build</span>
             <a href={SITE_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[hsl(var(--gold))] transition-colors hover:text-foreground">
               clui.app
               <ArrowUpRight className="h-3.5 w-3.5" />

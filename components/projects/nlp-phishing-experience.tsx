@@ -64,9 +64,9 @@ const METRICS = [
     detail: "train and test splits across four datasets",
   },
   {
-    value: "100%",
-    label: "Badge Confidence Output",
-    detail: "extension maps each verdict to Safe or Caution",
+    value: "MV3",
+    label: "Chrome Extension Surface",
+    detail: "the verdict badge lands beside the open Gmail message",
   },
 ];
 
@@ -344,7 +344,7 @@ export function NLPPhishingExperience({
             transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
             className="phish-display mt-8 max-w-4xl text-5xl leading-none text-foreground md:text-7xl"
           >
-            Email phishing detection system.
+            Safe or Caution, right in the inbox.
           </motion.h2>
 
           <motion.p
@@ -355,7 +355,7 @@ export function NLPPhishingExperience({
           >
             A capstone system that turns an open email into a security signal:
             clean the text, route it through fine-tuned classifiers or LLM
-            adapters, then return a visible Safe or Caution badge in Gmail.
+            adapters, and badge the verdict directly in Gmail.
           </motion.p>
 
           <motion.div

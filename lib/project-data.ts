@@ -130,7 +130,7 @@ export const projects: ProjectDetail[] = [
   {
     id: "mugshot",
     title: "Mugshot",
-    category: "Personal Project",
+    category: "iOS Application",
     description: [
       "Built a SwiftUI iOS coffee journal where the core loop is take a photo, let the app cut it into a die-cut sticker, then drop that sticker onto a calendar day: a warm cafe-scrapbook take on caffeine tracking.",
       "Wrote an on-device sticker pipeline: Vision foreground lift on iOS 17+, a classical flood-fill background remover, and a rounded-crop fallback, plus an Apple Intelligence Foundation Model that names the drink and estimates its caffeine.",
