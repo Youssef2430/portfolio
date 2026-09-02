@@ -258,6 +258,18 @@
   transform: translateY(-4px);
 }
 
+/* Interactive WebGPU prism */
+.prism-stage {
+  isolation: isolate;
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prism-stage canvas {
+    transition-duration: 0.01ms !important;
+  }
+}
+
 .project-card::before {
   content: '';
   position: absolute;

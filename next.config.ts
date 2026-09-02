@@ -6,6 +6,12 @@ const nextConfig: NextConfig = {
   // makes Next.js guess the wrong root
   turbopack: {
     root: path.join(__dirname),
+    rules: {
+      "*.wgsl": {
+        loaders: ["@vgpu/wgsl/loader-webpack"],
+        as: "*.js",
+      },
+    },
   },
   async rewrites() {
     return [

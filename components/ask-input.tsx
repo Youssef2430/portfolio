@@ -7,40 +7,94 @@ import { X, Send, Trash2 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import ReactMarkdown from "react-markdown";
+import { ThinkingOrb } from "thinking-orbs";
 
 // Utility function for combining class names
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// --- Loading Cube Component (Conductor style) ---
-const LoadingCube = () => {
-  // 3x3 grid of dots
-  const dots = Array.from({ length: 9 });
+// --- Thinking loader, based on Jakub Antalik's thinking-orbs pill ---
+const ThinkingLoader = () => {
+  const label = "Thinking….";
 
   return (
-    <div className="flex items-center gap-3 py-1">
-      <div className="grid grid-cols-3 gap-[3px] w-[18px] h-[18px]">
-        {dots.map((_, i) => (
-          <motion.div
-            key={i}
-            className="w-[4px] h-[4px] rounded-[1px] bg-[hsl(var(--gold))]"
-            animate={{
-              opacity: [0.2, 1, 0.2],
-              scale: [0.8, 1, 0.8],
-            }}
-            transition={{
-              duration: 1.2,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "easeInOut",
-              delay: i * 0.1,
-            }}
-          />
-        ))}
-      </div>
-      <span className="text-xs font-mono text-[hsl(var(--muted-foreground))]">
-        thinking...
+    <div
+      className="inline-flex h-[74px] w-[270px] max-w-full cursor-default items-center gap-3 overflow-hidden rounded-full bg-white pl-[9px] pr-8 text-[#121212] shadow-[0_1px_2px_rgba(0,0,0,0.024),0_0_0_1px_rgba(0,0,0,0.036)] dark:bg-[rgba(29,29,29,0.42)] dark:text-[#f8f8f8] dark:shadow-[inset_0_0_0_1px_rgba(44,47,54,0.31),inset_0_0_50px_0_rgba(255,255,255,0.012)]"
+      role="status"
+      aria-live="polite"
+    >
+      <ThinkingOrb
+        state="composing"
+        size={64}
+        speed={1}
+        aria-hidden="true"
+        style={{ width: 56, height: 56, flex: "0 0 auto" }}
+      />
+      <span
+        className="thinking-loader-label relative inline-block text-lg font-normal leading-6"
+        data-text={label}
+      >
+        {label}
       </span>
+
+      <style jsx>{`
+        .thinking-loader-label {
+          color: rgba(7, 7, 7, 0.45);
+        }
+
+        .thinking-loader-label::before {
+          content: attr(data-text);
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          color: transparent;
+          background-image: linear-gradient(
+            90deg,
+            transparent 0%,
+            transparent 40%,
+            #0d0d0d 50%,
+            transparent 60%,
+            transparent 100%
+          );
+          background-size: 400% 100%;
+          background-repeat: no-repeat;
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: thinking-label-shimmer 2s linear infinite;
+        }
+
+        :global(.dark) .thinking-loader-label {
+          color: rgba(251, 251, 251, 0.5);
+        }
+
+        :global(.dark) .thinking-loader-label::before {
+          background-image: linear-gradient(
+            90deg,
+            transparent 0%,
+            transparent 40%,
+            #ffffff 50%,
+            transparent 60%,
+            transparent 100%
+          );
+        }
+
+        @keyframes thinking-label-shimmer {
+          from {
+            background-position: 100% 0;
+          }
+          to {
+            background-position: 0 0;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .thinking-loader-label::before {
+            animation: none;
+          }
+        }
+      `}</style>
     </div>
   );
 };
@@ -564,48 +618,58 @@ export function AskInput() {
                 </motion.div>
               )}
               <AnimatePresence initial={false}>
-                {messages.map((message, index) => (
-                  <motion.div
-                    key={message.id}
-                    layout
-                    className={`flex ${message.type === "question" ? "justify-end" : "justify-start"}`}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{
-                      type: "spring",
-                      damping: 25,
-                      stiffness: 300,
-                    }}
-                  >
-                    <div
-                      className={cn(
-                        "relative max-w-[92%] sm:max-w-[80%] px-3 py-2.5 sm:px-4 sm:py-3 text-[13px] sm:text-sm whitespace-pre-wrap break-words leading-relaxed",
-                        message.type === "question"
-                          ? "bg-[hsl(var(--gold))] text-[hsl(var(--accent-foreground))] rounded-[16px] rounded-br-[4px] sm:rounded-[20px] sm:rounded-br-[4px]"
-                          : "bg-[hsl(var(--card))] text-card-foreground border border-[hsl(var(--border))] rounded-[16px] rounded-bl-[4px] sm:rounded-[20px] sm:rounded-bl-[4px]",
-                      )}
+                {messages.map((message, index) => {
+                  const isLoadingAnswer =
+                    message.type === "answer" &&
+                    index === messages.length - 1 &&
+                    isTyping &&
+                    !message.text;
+
+                  return (
+                    <motion.div
+                      key={message.id}
+                      layout
+                      className={`flex ${message.type === "question" ? "justify-end" : "justify-start"}`}
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{
+                        type: "spring",
+                        damping: 25,
+                        stiffness: 300,
+                      }}
                     >
-                      {message.type === "answer" && (
-                        <span className="block text-[10px] text-[hsl(var(--gold))] uppercase tracking-widest mb-1.5 font-mono">
-                          Youssef&apos;s AI
-                        </span>
-                      )}
-                      {message.type === "answer" &&
-                        index === messages.length - 1 &&
-                        isTyping &&
-                        !message.text ? (
-                        <LoadingCube />
-                      ) : message.type === "answer" ? (
-                        <div className="chat-message-text text-[13px] sm:text-sm leading-relaxed [&_*]:break-words [&_strong]:font-semibold [&_code]:bg-foreground/10 [&_code]:px-1 [&_code]:rounded [&_code]:text-[hsl(var(--gold))] [&_a]:text-[hsl(var(--gold))] [&_a]:underline [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:ml-0 [&_p+p]:mt-2">
-                          <ReactMarkdown>{message.text}</ReactMarkdown>
-                        </div>
-                      ) : (
-                        <p className="chat-message-text text-[13px] sm:text-sm">{message.text}</p>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
+                      <div
+                        className={cn(
+                          isLoadingAnswer
+                            ? "relative max-w-full"
+                            : "relative max-w-[92%] whitespace-pre-wrap break-words px-3 py-2.5 text-[13px] leading-relaxed sm:max-w-[80%] sm:px-4 sm:py-3 sm:text-sm",
+                          !isLoadingAnswer &&
+                            (message.type === "question"
+                              ? "rounded-[16px] rounded-br-[4px] bg-[hsl(var(--gold))] text-[hsl(var(--accent-foreground))] sm:rounded-[20px] sm:rounded-br-[4px]"
+                              : "rounded-[16px] rounded-bl-[4px] border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-card-foreground sm:rounded-[20px] sm:rounded-bl-[4px]"),
+                        )}
+                      >
+                        {message.type === "answer" && !isLoadingAnswer && (
+                          <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest text-[hsl(var(--gold))]">
+                            Youssef&apos;s AI
+                          </span>
+                        )}
+                        {isLoadingAnswer ? (
+                          <ThinkingLoader />
+                        ) : message.type === "answer" ? (
+                          <div className="chat-message-text text-[13px] leading-relaxed [&_*]:break-words [&_strong]:font-semibold [&_code]:rounded [&_code]:bg-foreground/10 [&_code]:px-1 [&_code]:text-[hsl(var(--gold))] [&_a]:text-[hsl(var(--gold))] [&_a]:underline [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:ml-0 [&_p+p]:mt-2 sm:text-sm">
+                            <ReactMarkdown>{message.text}</ReactMarkdown>
+                          </div>
+                        ) : (
+                          <p className="chat-message-text text-[13px] sm:text-sm">
+                            {message.text}
+                          </p>
+                        )}
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
               <div ref={messagesEndRef} />
             </div>
