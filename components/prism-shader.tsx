@@ -31,8 +31,9 @@ type RenderTargets = {
 
 const HDR_FORMAT = "rgba16float" as const;
 const CLEAR: readonly [number, number, number, number] = [0, 0, 0, 0];
-// 32 wavelengths, one PathSample each: entry, waypoint, exit, landing, tint.
-const SPECTRUM_BYTES = 32 * 5 * 16;
+// 32 wavelengths, one PathSample each: entry, waypoint, exit, landing, tint,
+// entry reflection.
+const SPECTRUM_BYTES = 32 * 6 * 16;
 
 function destroyTargets(targets: RenderTargets | undefined) {
   if (!targets) return;
@@ -381,11 +382,15 @@ export function PrismShader() {
             }
             const targets = renderTargets!;
 
+            // Frame-rate independent, and quick enough that the spectrum feels
+            // attached to the cursor rather than dragged along behind it.
+            const step = Math.min(gpuClock.deltaTime, 0.1);
+            const pointerBlend = 1 - Math.exp(-11 * step);
             pointer = [
-              pointer[0] + (pointerTarget[0] - pointer[0]) * 0.14,
-              pointer[1] + (pointerTarget[1] - pointer[1]) * 0.14,
+              pointer[0] + (pointerTarget[0] - pointer[0]) * pointerBlend,
+              pointer[1] + (pointerTarget[1] - pointer[1]) * pointerBlend,
             ];
-            const orbitBlend = 1 - Math.exp(-13 * Math.min(gpuClock.deltaTime, 0.1));
+            const orbitBlend = 1 - Math.exp(-13 * step);
             orbit.yaw += (orbitTarget.yaw - orbit.yaw) * orbitBlend;
             orbit.pitch += (orbitTarget.pitch - orbit.pitch) * orbitBlend;
             energy += (1 - energy) * 0.055;
@@ -393,8 +398,19 @@ export function PrismShader() {
             const reveal = reduceMotion ? 1 : Math.min(1, sceneTime / 1.4);
             const smoothReveal = reveal * reveal * (3 - 2 * reveal);
 
-            // Hover aims the beam. Drag adds a persistent incidence offset with
-            // enough range to cross the critical angle and expose a TIR path.
+            // The two axes are the two things you can do to a prism with a lamp.
+            //
+            // Across: the angle of incidence, normalised to [-1, 1] and mapped
+            // in the shader onto a real sweep from 14 to 76 degrees. The left
+            // third of the panel sits inside the critical-angle regime, where
+            // the exit face reflects and the beam takes an extra leg through
+            // the solid; the middle is minimum deviation, the widest spectrum;
+            // the right is grazing, where most of the light bounces off the
+            // face instead of entering.
+            //
+            // Down: where on that face the beam strikes, which changes the path
+            // length through the body and eventually which face it leaves by.
+            const clampUnit = (value: number) => Math.max(-1, Math.min(1, value));
             const frameParams = {
               time: sceneTime,
               pointer,
@@ -402,11 +418,8 @@ export function PrismShader() {
               pitch: orbit.pitch,
               energy,
               reveal: smoothReveal,
-              beam_aim: (0.5 - pointer[1]) * 1.7 + lightDrag.aim,
-              beam_height:
-                (pointer[0] - 0.5) * 3.0 +
-                (0.5 - pointer[1]) * 0.45 +
-                lightDrag.incidence,
+              beam_aim: (0.5 - pointer[1]) * 1.9 + lightDrag.aim,
+              beam_height: clampUnit((pointer[0] - 0.5) * 2.15 + lightDrag.incidence),
             };
             scene.set({ params: frameParams });
             spectrum.set({ params: frameParams });

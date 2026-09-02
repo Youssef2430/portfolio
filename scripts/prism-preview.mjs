@@ -108,15 +108,20 @@ function paramsFor(shot) {
   };
 }
 
-// 32 wavelengths x one PathSample (5 * vec4f).
-const paths = storage(gpu, 32 * 80, "read-write");
+// 32 wavelengths x one PathSample (6 * vec4f).
+const paths = storage(gpu, 32 * 96, "read-write");
 const spectrumPass = compute(gpu, spectrum, { set: { params: paramsFor({}), paths } });
 const sceneEffect = effect(gpu, prism, { set: { params: paramsFor({}), paths } });
 const brightEffect = effect(gpu, bright, { set: { samp, src: scene } });
 const blurHEffect = effect(gpu, blur, { set: { samp, src: bloomA, blur: { texelSize: bloomA.texelSize, direction: [1, 0] } } });
 const blurVEffect = effect(gpu, blur, { set: { samp, src: bloomB, blur: { texelSize: bloomB.texelSize, direction: [0, 1] } } });
 const compositeEffect = effect(gpu, composite, {
-  set: { samp, scene, bloom: bloomA, composite: { bloom_strength: 0.9, theme: 0 } },
+  set: {
+    samp,
+    scene,
+    bloom: bloomA,
+    composite: { bloom_strength: 0.9, theme: 0, background: paramsFor({}).background },
+  },
 });
 
 for (const shot of shots) {
@@ -125,7 +130,9 @@ for (const shot of shots) {
   sceneEffect.set({ params });
   spectrumPass.set({ params });
   spectrumPass.dispatch(1);
-  compositeEffect.set({ composite: { bloom_strength: 0.9, theme } });
+  compositeEffect.set({
+    composite: { bloom_strength: 0.9, theme, background: params.background },
+  });
 
   frame(gpu, (f) => {
     f.pass({ target: scene, clear: CLEAR }, (p) => p.draw(sceneEffect));
@@ -138,12 +145,13 @@ for (const shot of shots) {
   if (process.env.PRISM_DUMP) {
     const raw = new Float32Array(await paths.read());
     for (let i = 0; i < 32; i += 4) {
-      const o = i * 20;
+      const o = i * 24;
       const f = (n) => raw[o + n].toFixed(2);
       console.log(
         `nm=${raw[o + 19].toFixed(0)} valid=${f(3)} bounces=${f(7)} thr=${f(11)}` +
         ` entry=(${f(0)},${f(1)},${f(2)}) exit=(${f(8)},${f(9)},${f(10)})` +
-        ` land=(${f(12)},${f(13)},${f(14)}) reach=${f(15)} tint=(${f(16)},${f(17)},${f(18)})`,
+        ` land=(${f(12)},${f(13)},${f(14)}) reach=${f(15)}` +
+        ` refl=${f(23)} refldir=(${f(20)},${f(21)},${f(22)})`,
       );
     }
   }

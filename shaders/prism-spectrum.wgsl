@@ -32,7 +32,7 @@ import {
 @group(0) @binding(1) var<storage, read_write> paths: array<PathSample>;
 
 const MISS = PathSample(
-  vec4f(0.0), vec4f(0.0), vec4f(0.0), vec4f(0.0), vec4f(0.0),
+  vec4f(0.0), vec4f(0.0), vec4f(0.0), vec4f(0.0), vec4f(0.0), vec4f(0.0),
 );
 
 @compute @workgroup_size(32)
@@ -75,14 +75,12 @@ fn cs_main(@builtin(global_invocation_id) id: vec3u) {
   // Through the solid, reflecting internally for as long as the exit angle
   // stays past the critical angle.
   let inside = normalize(refracted);
-  let path = transport_inside(entry + inside * 0.0015, inside, ior, 4);
-  if (path.escaped < 0.5) {
-    paths[index] = MISS;
-    return;
-  }
+  // Six legs: at the shallow end of the sweep the exit face is past its
+  // critical angle and the ray needs several before it finds a way out.
+  let path = transport_inside(entry + inside * 0.0015, inside, ior, 6);
 
   let absorption = exp(-path.path_length * dot(glass_extinction(), vec3f(0.3333)));
-  let throughput = (1.0 - entry_reflectance) * path.throughput * absorption;
+  let throughput = (1.0 - entry_reflectance) * path.throughput * absorption * path.escaped;
 
   let world_entry = to_world_point(params, entry);
   let world_waypoint = to_world_point(params, path.waypoint);
@@ -95,6 +93,15 @@ fn cs_main(@builtin(global_invocation_id) id: vec3u) {
   if (outgoing.z < -0.0001) {
     reach = clamp((WALL_Z - world_exit.z) / outgoing.z, 0.0, 14.0);
   }
+  // A ray still trapped after six legs keeps its path drawn but throws nothing:
+  // dropping the whole sample would make the incoming beam blink out instead.
+  if (path.escaped < 0.5) {
+    reach = 0.0;
+  }
+
+  // The other side of the same Fresnel split: whatever did not refract in
+  // bounced off the entry face, and near grazing that is the larger share.
+  let turned_away = normalize(to_world_dir(params, reflect(direction, entry_normal)));
 
   paths[index] = PathSample(
     vec4f(world_entry, 1.0),
@@ -102,5 +109,6 @@ fn cs_main(@builtin(global_invocation_id) id: vec3u) {
     vec4f(world_exit, throughput),
     vec4f(world_exit + outgoing * reach, reach),
     vec4f(tint, wavelength),
+    vec4f(turned_away, entry_reflectance),
   );
 }

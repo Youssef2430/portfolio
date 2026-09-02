@@ -96,19 +96,21 @@ fn softbox(rd: vec3f) -> vec3f {
   let fill = smoothstep(0.930, 0.9994, dot(rd, normalize(vec3f(-0.16, -0.62, 0.77))));
   // Long studio flags are what create recognisable bands across clear glass.
   // They are only visible through reflection/refraction, never on the page.
-  let strip_a = exp(-pow((rd.y - rd.x * 0.17 - 0.10) * 31.0, 2.0)) *
+  let strip_a = exp(-pow((rd.y - rd.x * 0.17 - 0.10) * 46.0, 2.0)) *
     smoothstep(-0.96, -0.18, rd.x) * smoothstep(0.94, 0.16, rd.x);
   let strip_b = exp(-pow((rd.x + rd.y * 0.14 + 0.34) * 24.0, 2.0)) *
     smoothstep(-0.65, 0.38, rd.y) * smoothstep(0.92, 0.18, rd.y);
   let warm = vec3f(1.0);
   let cool = mix(vec3f(0.88, 0.93, 1.00), vec3f(0.62, 0.78, 1.0), params.theme);
-  // The wide lobe fills the faces; the three cores are what draw the bright
+  // The wide lobes fill the faces; the tight cores are what draw the bright
   // lines down the fillets that make a glass edge look like a glass edge.
-  let sources = warm * (spread * 0.26 + core * 15.0 + strip_a * 3.8) +
-    cool * (kicker * 5.0 + fill * 3.2 + strip_b * 2.6);
-  // On white, the full dark-scene source intensity turns broad face
-  // reflections into an opaque patch. Edge Fresnel remains independently hot.
-  return sources * mix(0.10, 1.0, params.theme);
+  let broad = warm * (spread * 0.26 + strip_a * 2.5) + cool * strip_b * 2.6;
+  let cores = warm * core * 15.0 + cool * (kicker * 5.0 + fill * 3.2);
+  // On white, broad face reflections at full dark-scene intensity turn the
+  // solid into an opaque patch, so they are dimmed hard. The cores are only a
+  // few pixels wide wherever they land, so they can stay much closer to full
+  // strength and keep the edges reading as polished glass rather than resin.
+  return broad * mix(0.10, 1.0, params.theme) + cores * mix(0.42, 1.0, params.theme);
 }
 
 // Motes of dust hanging in front of the backdrop, picked out by the beam. They
@@ -222,26 +224,59 @@ fn march(ro: vec3f, rd: vec3f) -> March {
   return March(t, 0.0, clamp(1.0 - closest, 0.0, 1.0));
 }
 
+// Fine marks left by the last lap of the polishing wheel: long in the
+// direction of travel, fine across it. That anisotropy is what makes them read
+// as polish rather than as noise, and it is also what keeps them from
+// aliasing, since only one axis has to be resolved.
+//
+// All of it is evaluated in the prism's own frame, so the marks stay fixed to
+// the glass while it turns instead of swimming across it.
+fn polish_normal(local_p: vec3f, local_n: vec3f, footprint: f32) -> vec3f {
+  // Once the marks are finer than a pixel they cannot be resolved, and a noise
+  // field sampled past its Nyquist limit is the blocky sparkle that reads as
+  // dirt. Fade them out instead.
+  let spacing = 1.0 / 95.0;
+  let lod = 1.0 - smoothstep(spacing * 0.55, spacing * 2.1, footprint);
+  if (lod <= 0.002) {
+    return local_n;
+  }
+
+  let axis = select(vec3f(0.0, 1.0, 0.0), vec3f(1.0, 0.0, 0.0), abs(local_n.y) > 0.82);
+  let tangent = normalize(cross(axis, local_n));
+  let bitangent = cross(local_n, tangent);
+  let uv = vec2f(dot(local_p, tangent), dot(local_p, bitangent));
+
+  // Two passes at different angles, the way a real lap leaves crossed marks.
+  let pass_a = value_noise(uv * vec2f(95.0, 7.9)) - 0.5;
+  let pass_b = value_noise(uv * vec2f(8.8, 71.0) + vec2f(13.7, 2.9)) - 0.5;
+  // Optical polish is measured in fractions of a wavelength. The amplitude here
+  // only has to be enough to stop a perfect mirror from looking like moulded
+  // plastic; any more and the studio's hot strip gets smeared into streaks.
+  let amplitude = 0.0045 * lod;
+  return normalize(local_n + tangent * pass_b * amplitude + bitangent * pass_a * amplitude);
+}
+
 // Reflection plus spectrally resolved transmission. Each band is refracted at
 // the entry face with its own index, carried through the solid by
 // transport_inside (which handles total internal reflection), attenuated by
 // Beer-Lambert, and finally resolved against the room.
-fn shade_glass(world_p: vec3f, rd: vec3f, normal: vec3f) -> vec3f {
+fn shade_glass(world_p: vec3f, rd: vec3f, normal: vec3f, footprint: f32) -> vec3f {
   let cos_i = clamp(dot(-rd, normal), 0.0, 1.0);
   let reference_ior = glass_ior(550.0);
   let reflectance = fresnel(cos_i, reference_ior);
   let material_reflectance = mix(min(0.34, reflectance * 2.35 + 0.012), reflectance, params.theme);
 
-  // The body stays optically smooth; a very low-amplitude micro-normal only
-  // breaks up the reflected studio strips. This is closer to polished cast
-  // glass than applying visible grain or noise to the transmitted image.
+  let local_p = local_point(world_p);
+  let local_d = local_dir(rd);
+  let local_n = local_dir(normal);
+
+  // The body stays optically smooth; the micro-normal only perturbs what the
+  // surface reflects, never what it transmits, because polish scatters a
+  // mirror image far more visibly than it does an image seen through the slab.
+  let micro_normal = world_dir(polish_normal(local_p, local_n, footprint));
   let frame_axis = select(vec3f(0.0, 1.0, 0.0), vec3f(1.0, 0.0, 0.0), abs(normal.y) > 0.82);
   let tangent = normalize(cross(frame_axis, normal));
   let bitangent = normalize(cross(normal, tangent));
-  let detail_uv = world_p.xy * 47.0 + vec2f(world_p.z * 31.0, -world_p.z * 23.0);
-  let micro_x = (value_noise(detail_uv) - 0.5) * 2.0;
-  let micro_y = (value_noise(detail_uv * 1.73 + vec2f(17.4, 3.1)) - 0.5) * 2.0;
-  let micro_normal = normalize(normal + tangent * micro_x * 0.014 + bitangent * micro_y * 0.010);
   let reflected_direction = normalize(reflect(rd, micro_normal));
   let sharp_reflection = environment(world_p, reflected_direction);
   let soft_reflection = (
@@ -250,10 +285,6 @@ fn shade_glass(world_p: vec3f, rd: vec3f, normal: vec3f) -> vec3f {
     environment(world_p, normalize(reflected_direction - bitangent * 0.038))
   ) / 3.0;
   let reflection = mix(sharp_reflection, soft_reflection, 0.20) * material_reflectance;
-
-  let local_p = local_point(world_p);
-  let local_d = local_dir(rd);
-  let local_n = local_dir(normal);
 
   var transmitted = vec3f(0.0);
   var band_total = vec3f(0.0);
@@ -269,7 +300,14 @@ fn shade_glass(world_p: vec3f, rd: vec3f, normal: vec3f) -> vec3f {
     }
     let entry_transmittance = 1.0 - fresnel(cos_i, ior);
     let path = transport_inside(local_p + normalize(inside) * 0.0012, inside, ior, 4);
-    let absorption = exp(-path.path_length * glass_extinction());
+    // Cast glass is never perfectly homogeneous. Faint striae left by the pour
+    // vary how much the body drinks along the path, which is what stops thick
+    // glass from reading as a uniformly tinted gel.
+    let midpoint = (local_p + path.position) * 0.5;
+    let striae = 1.0 + (value_noise(
+      midpoint.xy * 2.4 + vec2f(midpoint.z * 1.9, -midpoint.z * 2.6)
+    ) - 0.5) * 0.55;
+    let absorption = exp(-path.path_length * glass_extinction() * striae);
     let radiance = environment(world_point(path.position), world_dir(path.direction));
     transmitted += band * radiance * absorption * entry_transmittance * path.throughput;
   }
@@ -355,6 +393,38 @@ fn beam_glow(ro: vec3f, rd: vec3f, a: vec3f, b: vec3f, radius: f32) -> f32 {
   return core + scatter * 0.017;
 }
 
+// As beam_glow, but the pencil widens along its length, and dims as it widens.
+// A real beam is not a line: it leaves the prism with a finite width and keeps
+// diverging. That matters here because dispersion goes as 1/lambda^2, so the
+// violet samples fan apart several times faster than the red ones, and a fixed
+// radius leaves them as separate stripes at the blue end while the red end is
+// still a solid band.
+fn beam_glow_spread(
+  ro: vec3f,
+  rd: vec3f,
+  a: vec3f,
+  b: vec3f,
+  near_radius: f32,
+  far_radius: f32,
+) -> f32 {
+  let ba = b - a;
+  let oa = ro - a;
+  let baba = dot(ba, ba);
+  let bard = dot(ba, rd);
+  let baoa = dot(ba, oa);
+  let rdoa = dot(rd, oa);
+  let denominator = max(baba - bard * bard, 1.0e-5);
+  let along = clamp((baoa - bard * rdoa) / denominator, 0.0, 1.0);
+  let ray_t = max(0.0, bard * along - rdoa);
+  let d = length((a + ba * along) - (ro + rd * ray_t));
+  let radius = mix(near_radius, far_radius, along);
+  let core = exp(-(d * d) / (radius * radius));
+  let scatter = exp(-d / (radius * 4.0));
+  // Spreading the same energy over a wider pencil makes it proportionally
+  // dimmer, so the far end does not brighten as it grows.
+  return (core + scatter * 0.017) * (near_radius / radius);
+}
+
 // Every wavelength the compute pass resolved, drawn as the polyline it actually
 // travelled: white into the glass, split inside it, fanned out on the way to
 // the backdrop, and pooling where it lands.
@@ -371,6 +441,13 @@ fn spectral_light(ro: vec3f, rd: vec3f, wall_point: vec3f) -> vec3f {
 
   if (centre.entry.w > 0.5) {
     light += white * beam_glow(ro, rd, source, centre.entry.xyz, 0.0125) * incoming_strength;
+    // The other half of the Fresnel split at the entry face. It is invisible
+    // head-on and becomes the brightest thing in the frame near grazing, which
+    // is what makes a change in the angle of incidence legible.
+    let turned_away = centre.entry_reflection;
+    light += white *
+      beam_glow(ro, rd, centre.entry.xyz, centre.entry.xyz + turned_away.xyz * 8.0, 0.0125) *
+      incoming_strength * turned_away.w;
   } else {
     // Nothing to disperse: the beam simply crosses the frame.
     light += white * beam_glow(ro, rd, source, source + beam_direction(params) * 12.0, 0.0125) * incoming_strength;
@@ -394,7 +471,10 @@ fn spectral_light(ro: vec3f, rd: vec3f, wall_point: vec3f) -> vec3f {
     }
 
     // Out into the room. This is the leg that fans.
-    light += tint * beam_glow(ro, rd, sample.exit.xyz, sample.landing.xyz, fan_radius) * fan_strength;
+    light += tint * beam_glow_spread(
+      ro, rd, sample.exit.xyz, sample.landing.xyz,
+      fan_radius, fan_radius * mix(2.1, 3.2, params.theme),
+    ) * fan_strength;
 
     // ...and the light it actually deposits on the backdrop.
     let offset = wall_point - sample.landing.xyz;
@@ -431,7 +511,10 @@ fn fs_main(@location(0) uv: vec2f) -> @location(0) vec4f {
   if (coverage > 0.001) {
     let p = ro + rd * hit.distance;
     let normal = world_dir(prism_normal(local_point(p)));
-    color = mix(color, shade_glass(p, rd, normal), coverage);
+    // World-space width of one pixel at the surface, used to fade surface
+    // detail out before it can alias.
+    let footprint = hit.distance * LENS * 2.0 / max(params.resolution.y, 1.0);
+    color = mix(color, shade_glass(p, rd, normal, footprint), coverage);
   }
 
   let structure = prism_structure(ro, rd);

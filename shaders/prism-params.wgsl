@@ -60,6 +60,9 @@ export struct PathSample {
   landing: vec4f,
   // rgb: this wavelength's colour. a: the wavelength in nanometres.
   tint: vec4f,
+  // xyz: the direction the entry face turns away, w: the fraction it turns
+  // away. Near grazing incidence that fraction is most of the beam.
+  entry_reflection: vec4f,
 }
 
 fn rotate_x(p: vec3f, angle: f32) -> vec3f {
@@ -115,13 +118,38 @@ export fn beam_target(params: Params) -> vec3f {
   return to_world_point(params, vec3f(face_x, y, -0.04));
 }
 
+// The right-hand entry face, in the prism's own frame: outward normal, and the
+// in-plane tangent running up it towards the apex.
+const ENTRY_NORMAL: vec3f = vec3f(0.8660254, 0.5, 0.0);
+const ENTRY_TANGENT: vec3f = vec3f(-0.5, 0.8660254, 0.0);
+
+// The sweep `beam_height` drives, as a real angle of incidence measured from
+// the entry face normal. The ends are chosen for what the optics do there, not
+// for how they look:
+//
+//   14 deg  the refracted ray meets the exit face well past its critical
+//           angle, so the exit face reflects instead of transmitting and the
+//           beam takes an extra leg inside the solid;
+//   ~30 deg the critical angle itself, where that second leg appears;
+//   ~49 deg minimum deviation, the widest and cleanest spectrum a prism throws;
+//   76 deg  grazing, where Fresnel turns most of the beam away at the surface
+//           and only a dim, heavily deviated remainder gets through.
+const INCIDENCE_MIN: f32 = 0.244;
+const INCIDENCE_MAX: f32 = 1.326;
+
+export fn beam_incidence(params: Params) -> f32 {
+  let sweep = clamp(params.beam_height, -1.0, 1.0) * 0.5 + 0.5;
+  return mix(INCIDENCE_MIN, INCIDENCE_MAX, sweep);
+}
+
+// Built in the prism's own frame so the pointer maps to the angle of incidence
+// exactly, whatever the solid's orientation, then handed back in world space.
 export fn beam_direction(params: Params) -> vec3f {
-  // `beam_height` is also the interactive incidence control. Its z component
-  // changes with the vertical component so a horizontal drag explores both
-  // ordinary transmission and the critical-angle/TIR regime.
-  let incidence = clamp(params.beam_height, -4.0, 4.0);
-  let depth = clamp(-0.175 + incidence * 0.038, -0.36, -0.045);
-  return normalize(vec3f(-0.795, 0.585 + incidence * 0.155, depth));
+  let theta = beam_incidence(params);
+  let in_plane = ENTRY_TANGENT * sin(theta) - ENTRY_NORMAL * cos(theta);
+  // A slight tilt out of the cross-section so the fan drifts back onto the
+  // backdrop rather than running parallel to it forever.
+  return to_world_dir(params, normalize(in_plane + vec3f(0.0, 0.0, -0.175)));
 }
 
 export fn beam_origin(params: Params) -> vec3f {

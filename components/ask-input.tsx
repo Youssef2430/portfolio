@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { X, Send, Trash2 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -14,88 +14,52 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// --- Thinking loader, based on Jakub Antalik's thinking-orbs pill ---
-const ThinkingLoader = () => {
-  const label = "Thinking….";
-
+// --- Assistant loading state, powered by Jakub Antalik's thinking orb ---
+const ThinkingLoader = ({ messageId }: { messageId: number }) => {
   return (
-    <div
-      className="inline-flex h-[74px] w-[270px] max-w-full cursor-default items-center gap-3 overflow-hidden rounded-full bg-white pl-[9px] pr-8 text-[#121212] shadow-[0_1px_2px_rgba(0,0,0,0.024),0_0_0_1px_rgba(0,0,0,0.036)] dark:bg-[rgba(29,29,29,0.42)] dark:text-[#f8f8f8] dark:shadow-[inset_0_0_0_1px_rgba(44,47,54,0.31),inset_0_0_50px_0_rgba(255,255,255,0.012)]"
+    <motion.div
+      layoutId={`assistant-shell-${messageId}`}
+      className="relative flex min-h-[52px] w-[92%] origin-top-left cursor-default items-center overflow-hidden rounded-[16px] rounded-bl-[4px] border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 py-2.5 text-card-foreground will-change-transform sm:w-[80%] sm:rounded-[20px] sm:rounded-bl-[4px] sm:px-4 sm:py-3"
+      style={{ transformOrigin: "left top" }}
       role="status"
       aria-live="polite"
+      exit={{ opacity: 0 }}
+      transition={{
+        layout: {
+          type: "spring",
+          stiffness: 260,
+          damping: 28,
+          mass: 0.75,
+        },
+        opacity: { duration: 0.18 },
+      }}
     >
-      <ThinkingOrb
-        state="composing"
-        size={64}
-        speed={1}
-        aria-hidden="true"
-        style={{ width: 56, height: 56, flex: "0 0 auto" }}
-      />
-      <span
-        className="thinking-loader-label relative inline-block text-lg font-normal leading-6"
-        data-text={label}
+      <motion.span
+        layout="position"
+        className="flex min-h-5 items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[hsl(var(--gold))]"
       >
-        {label}
-      </span>
-
-      <style jsx>{`
-        .thinking-loader-label {
-          color: rgba(7, 7, 7, 0.45);
-        }
-
-        .thinking-loader-label::before {
-          content: attr(data-text);
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          color: transparent;
-          background-image: linear-gradient(
-            90deg,
-            transparent 0%,
-            transparent 40%,
-            #0d0d0d 50%,
-            transparent 60%,
-            transparent 100%
-          );
-          background-size: 400% 100%;
-          background-repeat: no-repeat;
-          background-clip: text;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          animation: thinking-label-shimmer 2s linear infinite;
-        }
-
-        :global(.dark) .thinking-loader-label {
-          color: rgba(251, 251, 251, 0.5);
-        }
-
-        :global(.dark) .thinking-loader-label::before {
-          background-image: linear-gradient(
-            90deg,
-            transparent 0%,
-            transparent 40%,
-            #ffffff 50%,
-            transparent 60%,
-            transparent 100%
-          );
-        }
-
-        @keyframes thinking-label-shimmer {
-          from {
-            background-position: 100% 0;
-          }
-          to {
-            background-position: 0 0;
-          }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .thinking-loader-label::before {
-            animation: none;
-          }
-        }
-      `}</style>
-    </div>
+        <motion.span
+          layoutId={`assistant-orb-${messageId}`}
+          className="block h-5 w-5 shrink-0 overflow-hidden rounded-full"
+          transition={{
+            layout: {
+              type: "spring",
+              stiffness: 300,
+              damping: 26,
+              mass: 0.65,
+            },
+          }}
+        >
+          <ThinkingOrb
+            state="composing"
+            size={20}
+            speed={1}
+            aria-hidden="true"
+          />
+        </motion.span>
+        <motion.span layout="position">Youssef&apos;s AI</motion.span>
+      </motion.span>
+    </motion.div>
   );
 };
 
@@ -563,243 +527,328 @@ export function AskInput() {
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className="w-full max-w-lg">
-      {/* Messages container */}
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            ref={chatContainerRef}
-            className="relative mb-2.5 max-h-[calc(100dvh-8.5rem)] overflow-hidden bg-card text-card-foreground border border-[hsl(var(--border))] rounded-lg pointer-events-auto shadow-lg sm:mb-4 sm:max-h-[400px]"
-            initial={{ opacity: 0, y: 40, height: 0 }}
-            animate={{ opacity: 1, y: 0, height: "auto" }}
-            exit={{ opacity: 0, y: 40, height: 0 }}
-            transition={{
-              type: "spring",
-              damping: 20,
-              stiffness: 200,
-            }}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between gap-3 p-3 border-b border-[hsl(var(--border))] sm:p-4">
-              <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-                <span className="truncate font-mono text-[11px] text-[hsl(var(--muted-foreground))] uppercase tracking-wider sm:text-xs">
-                  Conversation
-                </span>
-                <span className="hidden text-[hsl(var(--gold))] opacity-50 min-[360px]:inline">「</span>
-                <span className="hidden text-[hsl(var(--gold))] font-arabic text-sm min-[360px]:inline sm:text-base">محادثة</span>
-                <span className="hidden text-[hsl(var(--gold))] opacity-50 min-[360px]:inline">」</span>
+        {/* Messages container */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              ref={chatContainerRef}
+              className="relative mb-2.5 max-h-[calc(100dvh-8.5rem)] overflow-hidden bg-card text-card-foreground border border-[hsl(var(--border))] rounded-lg pointer-events-auto shadow-lg sm:mb-4 sm:max-h-[400px]"
+              initial={{ opacity: 0, y: 40, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: "auto" }}
+              exit={{ opacity: 0, y: 40, height: 0 }}
+              transition={{
+                type: "spring",
+                damping: 20,
+                stiffness: 200,
+              }}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between gap-3 p-3 border-b border-[hsl(var(--border))] sm:p-4">
+                <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                  <span className="truncate font-mono text-[11px] text-[hsl(var(--muted-foreground))] uppercase tracking-wider sm:text-xs">
+                    Conversation
+                  </span>
+                  <span className="hidden text-[hsl(var(--gold))] opacity-50 min-[360px]:inline">
+                    「
+                  </span>
+                  <span className="hidden text-[hsl(var(--gold))] font-arabic text-sm min-[360px]:inline sm:text-base">
+                    محادثة
+                  </span>
+                  <span className="hidden text-[hsl(var(--gold))] opacity-50 min-[360px]:inline">
+                    」
+                  </span>
+                </div>
+                <div className="flex shrink-0 gap-1 sm:gap-2">
+                  <button
+                    onClick={clearMessages}
+                    className="flex h-9 w-9 items-center justify-center text-[hsl(var(--muted-foreground))] hover:text-foreground hover:bg-[hsl(var(--muted))] transition-all duration-300 active:scale-95"
+                    aria-label="Clear conversation"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setIsExpanded(false)}
+                    className="flex h-9 w-9 items-center justify-center text-[hsl(var(--muted-foreground))] hover:text-foreground hover:bg-[hsl(var(--muted))] transition-all duration-300 active:scale-95"
+                    aria-label="Close conversation"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-              <div className="flex shrink-0 gap-1 sm:gap-2">
-                <button
-                  onClick={clearMessages}
-                  className="flex h-9 w-9 items-center justify-center text-[hsl(var(--muted-foreground))] hover:text-foreground hover:bg-[hsl(var(--muted))] transition-all duration-300 active:scale-95"
-                  aria-label="Clear conversation"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => setIsExpanded(false)}
-                  className="flex h-9 w-9 items-center justify-center text-[hsl(var(--muted-foreground))] hover:text-foreground hover:bg-[hsl(var(--muted))] transition-all duration-300 active:scale-95"
-                  aria-label="Close conversation"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
 
-            {/* Messages Area */}
-            <div className="overflow-y-auto max-h-[calc(100dvh-14rem)] sm:max-h-[300px] p-3 sm:p-4 space-y-3 sm:space-y-4 scrollbar-thin">
-              {apiError && (
-                <motion.div
-                  className="text-center text-red-400 text-xs font-mono p-3 bg-red-900/20 border border-red-900/50"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  {apiError}
-                </motion.div>
-              )}
-              <AnimatePresence initial={false}>
-                {messages.map((message, index) => {
-                  const isLoadingAnswer =
-                    message.type === "answer" &&
-                    index === messages.length - 1 &&
-                    isTyping &&
-                    !message.text;
+              {/* Messages Area */}
+              <div className="overflow-y-auto max-h-[calc(100dvh-14rem)] sm:max-h-[300px] p-3 sm:p-4 space-y-3 sm:space-y-4 scrollbar-thin">
+                {apiError && (
+                  <motion.div
+                    className="text-center text-red-400 text-xs font-mono p-3 bg-red-900/20 border border-red-900/50"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    {apiError}
+                  </motion.div>
+                )}
+                <AnimatePresence initial={false}>
+                  {messages.map((message, index) => {
+                    const isLoadingAnswer =
+                      message.type === "answer" &&
+                      index === messages.length - 1 &&
+                      isTyping &&
+                      !message.text;
 
-                  return (
-                    <motion.div
-                      key={message.id}
-                      layout
-                      className={`flex ${message.type === "question" ? "justify-end" : "justify-start"}`}
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{
-                        type: "spring",
-                        damping: 25,
-                        stiffness: 300,
-                      }}
-                    >
-                      <div
-                        className={cn(
-                          isLoadingAnswer
-                            ? "relative max-w-full"
-                            : "relative max-w-[92%] whitespace-pre-wrap break-words px-3 py-2.5 text-[13px] leading-relaxed sm:max-w-[80%] sm:px-4 sm:py-3 sm:text-sm",
-                          !isLoadingAnswer &&
-                            (message.type === "question"
-                              ? "rounded-[16px] rounded-br-[4px] bg-[hsl(var(--gold))] text-[hsl(var(--accent-foreground))] sm:rounded-[20px] sm:rounded-br-[4px]"
-                              : "rounded-[16px] rounded-bl-[4px] border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-card-foreground sm:rounded-[20px] sm:rounded-bl-[4px]"),
-                        )}
+                    return (
+                      <motion.div
+                        key={message.id}
+                        layout="position"
+                        className={`flex ${message.type === "question" ? "justify-end" : "justify-start"}`}
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{
+                          type: "spring",
+                          damping: 25,
+                          stiffness: 300,
+                        }}
                       >
-                        {message.type === "answer" && !isLoadingAnswer && (
-                          <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest text-[hsl(var(--gold))]">
-                            Youssef&apos;s AI
-                          </span>
-                        )}
-                        {isLoadingAnswer ? (
-                          <ThinkingLoader />
-                        ) : message.type === "answer" ? (
-                          <div className="chat-message-text text-[13px] leading-relaxed [&_*]:break-words [&_strong]:font-semibold [&_code]:rounded [&_code]:bg-foreground/10 [&_code]:px-1 [&_code]:text-[hsl(var(--gold))] [&_a]:text-[hsl(var(--gold))] [&_a]:underline [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:ml-0 [&_p+p]:mt-2 sm:text-sm">
-                            <ReactMarkdown>{message.text}</ReactMarkdown>
+                        {message.type === "question" ? (
+                          <div className="relative max-w-[92%] whitespace-pre-wrap break-words rounded-[16px] rounded-br-[4px] bg-[hsl(var(--gold))] px-3 py-2.5 text-[13px] leading-relaxed text-[hsl(var(--accent-foreground))] sm:max-w-[80%] sm:rounded-[20px] sm:rounded-br-[4px] sm:px-4 sm:py-3 sm:text-sm">
+                            <p className="chat-message-text text-[13px] sm:text-sm">
+                              {message.text}
+                            </p>
                           </div>
                         ) : (
-                          <p className="chat-message-text text-[13px] sm:text-sm">
-                            {message.text}
-                          </p>
+                          <div className="relative w-full">
+                            <LayoutGroup
+                              id={`assistant-response-${message.id}`}
+                            >
+                              <AnimatePresence initial={false}>
+                                {isLoadingAnswer ? (
+                                  <ThinkingLoader
+                                    key="thinking"
+                                    messageId={message.id}
+                                  />
+                                ) : (
+                                  <motion.div
+                                    key="answer"
+                                    layoutId={`assistant-shell-${message.id}`}
+                                    className={cn(
+                                      "relative w-[92%] origin-top-left overflow-hidden whitespace-pre-wrap break-words rounded-[16px] rounded-bl-[4px] border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 py-2.5 text-[13px] leading-relaxed text-card-foreground will-change-transform sm:w-[80%] sm:rounded-[20px] sm:rounded-bl-[4px] sm:px-4 sm:py-3 sm:text-sm",
+                                      isTyping && "min-h-[74px]",
+                                    )}
+                                    style={{ transformOrigin: "left top" }}
+                                    initial={{ opacity: 0.72 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{
+                                      layout: {
+                                        type: "spring",
+                                        stiffness: 260,
+                                        damping: 28,
+                                        mass: 0.75,
+                                      },
+                                      opacity: { duration: 0.2 },
+                                    }}
+                                  >
+                                    <motion.span
+                                      layout="position"
+                                      className="mb-1.5 flex min-h-5 items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[hsl(var(--gold))]"
+                                    >
+                                      <AnimatePresence initial={false}>
+                                        {isTyping && (
+                                          <motion.span
+                                            key="streaming-orb"
+                                            layoutId={`assistant-orb-${message.id}`}
+                                            className="block h-5 w-5 shrink-0 overflow-hidden rounded-full"
+                                            exit={{
+                                              opacity: 0,
+                                              scale: 0.6,
+                                              filter: "blur(3px)",
+                                            }}
+                                            transition={{
+                                              layout: {
+                                                type: "spring",
+                                                stiffness: 300,
+                                                damping: 26,
+                                                mass: 0.65,
+                                              },
+                                              opacity: { duration: 0.16 },
+                                              scale: { duration: 0.18 },
+                                              filter: { duration: 0.18 },
+                                            }}
+                                          >
+                                            <ThinkingOrb
+                                              state="composing"
+                                              size={20}
+                                              speed={1}
+                                              aria-hidden="true"
+                                            />
+                                          </motion.span>
+                                        )}
+                                      </AnimatePresence>
+                                      <motion.span layout="position">
+                                        Youssef&apos;s AI
+                                      </motion.span>
+                                    </motion.span>
+
+                                    <motion.div
+                                      className="chat-message-text text-[13px] leading-relaxed [&_*]:break-words [&_strong]:font-semibold [&_code]:rounded [&_code]:bg-foreground/10 [&_code]:px-1 [&_code]:text-[hsl(var(--gold))] [&_a]:text-[hsl(var(--gold))] [&_a]:underline [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:ml-0 [&_p+p]:mt-2 sm:text-sm"
+                                      initial={{
+                                        opacity: 0,
+                                        y: 4,
+                                        filter: "blur(6px)",
+                                      }}
+                                      animate={{
+                                        opacity: 1,
+                                        y: 0,
+                                        filter: "blur(0px)",
+                                      }}
+                                      transition={{
+                                        duration: 0.28,
+                                        delay: 0.1,
+                                        ease: [0.16, 1, 0.3, 1],
+                                      }}
+                                    >
+                                      <ReactMarkdown>
+                                        {message.text}
+                                      </ReactMarkdown>
+                                    </motion.div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </LayoutGroup>
+                          </div>
                         )}
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-              <div ref={messagesEndRef} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Input form */}
-      <form
-        onSubmit={handleSubmit}
-        className="relative h-14 w-full min-w-0 overflow-hidden bg-card text-card-foreground border border-[hsl(var(--border))] rounded-lg flex items-center pointer-events-auto transition-all duration-300 shadow-lg hover:border-[hsl(var(--gold))/0.3]"
-      >
-        {/* Canvas for vanishing effect */}
-        <canvas
-          ref={canvasRef}
-          className={cn(
-            "absolute inset-0 w-full h-full pointer-events-none z-[5]",
-            animating ? "opacity-100" : "opacity-0",
-            "transition-opacity duration-100 ease-out",
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+                <div ref={messagesEndRef} />
+              </div>
+            </motion.div>
           )}
-          aria-hidden="true"
-        />
+        </AnimatePresence>
 
-        {/* Arabic decoration */}
-        <div className="absolute left-3 sm:left-4 text-[hsl(var(--gold))] opacity-40 font-arabic text-sm pointer-events-none">
-          「
-        </div>
-
-        {/* Input Field */}
-        <input
-          ref={inputRef}
-          type="text"
-          value={inputValue}
-          onChange={(e) => {
-            if (!animating) setInputValue(e.target.value);
-          }}
-          onFocus={(e) => {
-            if (!isExpanded) setIsExpanded(true);
-            e.preventDefault();
-            e.currentTarget.focus({ preventScroll: true });
-          }}
-          placeholder="Ask me anything..."
-          className={cn(
-            "relative z-10 w-full min-w-0 h-full pl-7 pr-12 sm:pl-8 sm:pr-14",
-            "bg-transparent border-none focus:outline-none focus:ring-0",
-            "text-[16px] sm:text-sm font-mono placeholder:text-[hsl(var(--muted-foreground))] placeholder:font-mono placeholder:text-[11px] sm:placeholder:text-xs placeholder:uppercase placeholder:tracking-wider",
-            animating && newDataRef.current.length > 0
-              ? "text-transparent caret-transparent"
-              : "text-card-foreground",
-            "transition-colors duration-100",
-          )}
-          disabled={isStreamingRef.current}
-          autoComplete="off"
-          enterKeyHint="send"
-          spellCheck="true"
-        />
-
-        {/* Arabic decoration */}
-        <div className="absolute right-12 sm:right-14 text-[hsl(var(--gold))] opacity-40 font-arabic text-sm pointer-events-none">
-          」
-        </div>
-
-        {/* Submit Button */}
-        <button
-          ref={submitButtonRef}
-          type="submit"
-          disabled={!inputValue.trim() || isStreamingRef.current || animating}
-          className={cn(
-            "absolute right-0 top-0 bottom-0 z-20",
-            "w-12 sm:w-14 border-l border-[hsl(var(--border))]",
-            "bg-transparent hover:bg-[hsl(var(--gold))]",
-            "transition-all duration-300 flex items-center justify-center group",
-            "active:scale-95",
-            "disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent",
-          )}
-          aria-label="Send message"
+        {/* Input form */}
+        <form
+          onSubmit={handleSubmit}
+          className="relative h-14 w-full min-w-0 overflow-hidden bg-card text-card-foreground border border-[hsl(var(--border))] rounded-lg flex items-center pointer-events-auto transition-all duration-300 shadow-lg hover:border-[hsl(var(--gold))/0.3]"
         >
-          <Send className="h-4 w-4 text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--accent-foreground))] transition-colors duration-300" />
-        </button>
-      </form>
+          {/* Canvas for vanishing effect */}
+          <canvas
+            ref={canvasRef}
+            className={cn(
+              "absolute inset-0 w-full h-full pointer-events-none z-[5]",
+              animating ? "opacity-100" : "opacity-0",
+              "transition-opacity duration-100 ease-out",
+            )}
+            aria-hidden="true"
+          />
 
-      {/* Hint text */}
-      <motion.p
-        className="text-center mt-2 px-2 text-[9px] sm:text-[10px] leading-tight font-mono text-[hsl(var(--muted-foreground))] uppercase tracking-widest sm:mt-3"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-      >
-        Ask Youssef&apos;s AI anything
-      </motion.p>
+          {/* Arabic decoration */}
+          <div className="absolute left-3 sm:left-4 text-[hsl(var(--gold))] opacity-40 font-arabic text-sm pointer-events-none">
+            「
+          </div>
 
-      {/* CSS for scrollbar styling */}
-      <style jsx>{`
-        .scrollbar-thin::-webkit-scrollbar {
-          width: 4px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb {
-          background-color: hsl(var(--muted));
-          border-radius: 0;
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-          background-color: hsl(var(--gold));
-        }
-        .scrollbar-thin {
-          scrollbar-width: thin;
-          scrollbar-color: hsl(var(--muted)) transparent;
-        }
-        .break-words {
-          word-break: break-word;
-          overflow-wrap: break-word;
-        }
+          {/* Input Field */}
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputValue}
+            onChange={(e) => {
+              if (!animating) setInputValue(e.target.value);
+            }}
+            onFocus={(e) => {
+              if (!isExpanded) setIsExpanded(true);
+              e.preventDefault();
+              e.currentTarget.focus({ preventScroll: true });
+            }}
+            placeholder="Ask me anything..."
+            className={cn(
+              "relative z-10 w-full min-w-0 h-full pl-7 pr-12 sm:pl-8 sm:pr-14",
+              "bg-transparent border-none focus:outline-none focus:ring-0",
+              "text-[16px] sm:text-sm font-mono placeholder:text-[hsl(var(--muted-foreground))] placeholder:font-mono placeholder:text-[11px] sm:placeholder:text-xs placeholder:uppercase placeholder:tracking-wider",
+              animating && newDataRef.current.length > 0
+                ? "text-transparent caret-transparent"
+                : "text-card-foreground",
+              "transition-colors duration-100",
+            )}
+            disabled={isStreamingRef.current}
+            autoComplete="off"
+            enterKeyHint="send"
+            spellCheck="true"
+          />
 
-        /* iOS-specific fixes */
-        @supports (-webkit-touch-callout: none) {
-          input[type="text"],
-          input,
-          textarea,
-          select {
-            font-size: 16px;
-            -webkit-user-select: text;
-            user-select: text;
+          {/* Arabic decoration */}
+          <div className="absolute right-12 sm:right-14 text-[hsl(var(--gold))] opacity-40 font-arabic text-sm pointer-events-none">
+            」
+          </div>
+
+          {/* Submit Button */}
+          <button
+            ref={submitButtonRef}
+            type="submit"
+            disabled={!inputValue.trim() || isStreamingRef.current || animating}
+            className={cn(
+              "absolute right-0 top-0 bottom-0 z-20",
+              "w-12 sm:w-14 border-l border-[hsl(var(--border))]",
+              "bg-transparent hover:bg-[hsl(var(--gold))]",
+              "transition-all duration-300 flex items-center justify-center group",
+              "active:scale-95",
+              "disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent",
+            )}
+            aria-label="Send message"
+          >
+            <Send className="h-4 w-4 text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--accent-foreground))] transition-colors duration-300" />
+          </button>
+        </form>
+
+        {/* Hint text */}
+        <motion.p
+          className="text-center mt-2 px-2 text-[9px] sm:text-[10px] leading-tight font-mono text-[hsl(var(--muted-foreground))] uppercase tracking-widest sm:mt-3"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          Ask Youssef&apos;s AI anything
+        </motion.p>
+
+        {/* CSS for scrollbar styling */}
+        <style jsx>{`
+          .scrollbar-thin::-webkit-scrollbar {
+            width: 4px;
           }
-          * {
-            overflow-anchor: none;
+          .scrollbar-thin::-webkit-scrollbar-track {
+            background: transparent;
           }
-        }
-      `}</style>
+          .scrollbar-thin::-webkit-scrollbar-thumb {
+            background-color: hsl(var(--muted));
+            border-radius: 0;
+          }
+          .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background-color: hsl(var(--gold));
+          }
+          .scrollbar-thin {
+            scrollbar-width: thin;
+            scrollbar-color: hsl(var(--muted)) transparent;
+          }
+          .break-words {
+            word-break: break-word;
+            overflow-wrap: break-word;
+          }
+
+          /* iOS-specific fixes */
+          @supports (-webkit-touch-callout: none) {
+            input[type="text"],
+            input,
+            textarea,
+            select {
+              font-size: 16px;
+              -webkit-user-select: text;
+              user-select: text;
+            }
+            * {
+              overflow-anchor: none;
+            }
+          }
+        `}</style>
       </div>
     </motion.div>
   );
