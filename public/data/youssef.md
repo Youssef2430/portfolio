@@ -47,7 +47,7 @@ Sept 2023 - Present, Ottawa, ON
 
 ## Projects
 
-- AtlasLLM: Built and monetized a multi-model AI chat platform supporting 30+ LLMs across 9 providers with Next.js, Convex, Redis, Cloudflare R2, and OpenRouter.
+- Ramelli (previously AtlasLLM, https://ramelli.chat/chat): Built and monetized a multi-model AI chat platform supporting 30+ LLMs across 9 providers with Next.js, Convex, Redis, Cloudflare R2, and OpenRouter.
 - CLUI: Built a macOS floating overlay for the Claude Code CLI using Electron, React, TypeScript, Zustand, and node-pty, with multi-tab sessions, global hotkeys, slash commands, attachments, and auto-updates.
 - NLP Phishing Detection: Built a phishing detection system using NLP and computer vision CNNs for website classification and clustering, achieving 98.4% accuracy; shipped a Chrome extension and AWS S3 retraining pipeline.
 

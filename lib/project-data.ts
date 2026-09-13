@@ -62,8 +62,8 @@ export const projects: ProjectDetail[] = [
     size: "large",
   },
   {
-    id: "atlasllm",
-    title: "AtlasLLM",
+    id: "ramelli",
+    title: "Ramelli",
     category: "Full-Stack SaaS Platform",
     description: [
       "Built a multi-model AI chat platform with a Turborepo monorepo using Next.js 14, Convex, Cloudflare R2 and Redis, supporting 30+ LLMs across 9 providers through a unified OpenRouter abstraction, generating over $3,000 in profit.",
@@ -97,7 +97,7 @@ export const projects: ProjectDetail[] = [
     ],
     timeline: "Recent",
     contributors: ["Youssef Chouay"],
-    link: "https://atlasllm.chat/",
+    link: "https://ramelli.chat/chat",
     size: "large",
   },
   // {

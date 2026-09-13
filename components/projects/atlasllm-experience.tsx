@@ -56,19 +56,19 @@ function Reveal({
   );
 }
 
-/* The sparkle mark, swapped for its dark-mode variant with the site theme. */
-function AtlasLogo({ className = "" }: { className?: string }) {
+/* Official Ramelli mark, matched to the site theme. */
+function RamelliLogo({ className = "" }: { className?: string }) {
   return (
     <>
       <Image
-        src="/atlasllm/logo-light.png"
-        alt="AtlasLLM logo"
+        src="/ramelli/logo-light.svg"
+        alt="Ramelli logo"
         width={96}
         height={96}
         className={`${className} dark:hidden`}
       />
       <Image
-        src="/atlasllm/logo-dark.png"
+        src="/ramelli/logo-dark.svg"
         alt=""
         aria-hidden
         width={96}
@@ -87,7 +87,7 @@ const FACTS = "9 providers · 30+ models · 4 chat modes · 11 workflow tasks";
 
 /* ── The presentation ──────────────────────────────────────────── */
 
-export function AtlasLLMExperience({ project }: { project: SerializableProject }) {
+export function RamelliExperience({ project }: { project: SerializableProject }) {
   return (
     <MotionConfig reducedMotion="user"><main className="atlas-theme study-page atlas-study min-h-screen bg-background text-foreground overflow-clip">
       <div className="grain-overlay" />
@@ -98,14 +98,14 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
           <Link href="/#work" className="study-back"><ArrowLeft size={14} />Back to work</Link>
           <div className="atlas-hero-grid">
             <div className="atlas-hero-copy">
-              <div className="atlas-wordmark"><AtlasLogo className="h-9 w-9" /><span>AtlasLLM</span><span className="study-eyebrow">Independent AI workspace</span></div>
+              <div className="atlas-wordmark"><RamelliLogo className="h-9 w-9" /><span>Ramelli<small className="ramelli-former-name">Previously AtlasLLM</small></span><span className="study-eyebrow">Independent AI workspace</span></div>
               <h1>One space.<br /><span>Every model.</span></h1>
               <p>Go from a quick question to a deep investigation. Thirty-plus models, a shared conversation, and a research engine that shows its work.</p>
-              <div className="study-actions"><a href={project.link} target="_blank" rel="noopener noreferrer" className="study-primary">Explore AtlasLLM<ArrowUpRight size={16} /></a><a href="#workflow" className="study-text-link">Follow the research<ArrowDown size={14} /></a></div>
+              <div className="study-actions"><a href={project.link} target="_blank" rel="noopener noreferrer" className="study-primary">Explore Ramelli<ArrowUpRight size={16} /></a><a href="#workflow" className="study-text-link">Follow the research<ArrowDown size={14} /></a></div>
             </div>
             <div className="atlas-hero-stage">
               <div className="atlas-stage-top"><span className="study-eyebrow">Your workspace, without the walls</span><span className="atlas-status-dot" /></div>
-              <div className="atlas-hero-device"><MacBook src={SHOT_HOME} alt="AtlasLLM workspace with its multi-model picker" priority /></div>
+              <div className="atlas-hero-device"><MacBook src={SHOT_HOME} alt="Ramelli workspace with its multi-model picker" priority /></div>
               <div className="atlas-model-dock">{PROVIDERS.slice(0, 5).map(({name, Icon, mono}) => <span key={name} title={name}><Icon size={23} className={mono ? "text-foreground" : undefined} /></span>)}<span className="atlas-model-more">+4</span></div>
               <div className="atlas-stage-note"><span>Switch models.<br /><strong>Keep the context.</strong></span><span>01 — 04<br /><strong>Standard → Deep Research</strong></span></div>
             </div>
@@ -113,7 +113,7 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
           <div className="atlas-hero-stats">{[["30+", "Models, one conversation"], ["9", "Providers, one interface"], ["4", "Ways to find your answer"]].map(([value, label]) => <div key={value}><strong>{value}</strong><span>{label}</span></div>)}</div>
         </div>
       </section>
-      <StudyNav name="AtlasLLM" chapters={CHAPTERS} />
+      <StudyNav name="Ramelli" chapters={CHAPTERS} />
 
       {/* ── Overview ── */}
       <section id="overview" className="px-6 md:px-12 py-24 md:py-32">
@@ -124,7 +124,7 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
           <div className="lg:col-span-8 space-y-6">
             <Reveal>
               <p className="text-lg md:text-xl leading-relaxed text-foreground/90">
-                AtlasLLM puts thirty-plus models from nine providers behind one
+                Ramelli puts thirty-plus models from nine providers behind one
                 conversation, routed through a single OpenRouter abstraction.
                 Switch models mid-thread without losing context.
               </p>
@@ -196,7 +196,7 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
 
           <div className="atlas-device-gallery grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8 items-end">
             <Reveal className="md:col-span-8">
-              <IPad src={SHOT_RESEARCH} alt="AtlasLLM Pro Search conversation with sources" />
+              <IPad src={SHOT_RESEARCH} alt="Ramelli Pro Search conversation with sources" />
               <p className="mt-5 text-sm text-[hsl(var(--foreground-soft))] leading-relaxed">
                 Reasoning and web-search steps, inline sources and citations: the
                 full research trail behind every answer.
@@ -204,7 +204,7 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
             </Reveal>
             <Reveal delay={0.1} className="md:col-span-4">
               <div className="mx-auto max-w-[260px] md:mb-8">
-                <IPhone src={SHOT_MOBILE} alt="AtlasLLM Deep Research on mobile" />
+                <IPhone src={SHOT_MOBILE} alt="Ramelli Deep Research on mobile" />
               </div>
               <p className="mt-5 text-sm text-[hsl(var(--foreground-soft))] leading-relaxed">
                 Deep Research, fully responsive: steps, sources and the streamed
@@ -256,7 +256,7 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
         </div>
       </section>
 
-      <NextStudy current="atlasllm" />
+      <NextStudy current="ramelli" />
       <Footer />
     </main></MotionConfig>
   );

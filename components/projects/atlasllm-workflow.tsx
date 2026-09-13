@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useInView, useReducedMotion } from "framer-motion";
 
 /**
- * AtlasLLM's real workflow orchestration (`@repo/orchestrator`), drawn as the
+ * Ramelli's real workflow orchestration (`@repo/orchestrator`), drawn as the
  * full task graph. `router` dispatches each message to one of four modes;
  * Deep Research fans out parallel web searches and loops the reflector back to
  * the planner until the answer is complete. A token tours a different mode each
@@ -143,7 +143,7 @@ export function AtlasWorkflow() {
         viewBox="0 0 1380 560"
         className="hidden md:block w-full h-auto"
         role="img"
-        aria-label="AtlasLLM workflow graph: router branches into Standard, Web, Pro Search and Deep Research; Deep Research fans out parallel searches and loops the reflector back to the planner before analysis and the writer."
+        aria-label="Ramelli workflow graph: router branches into Standard, Web, Pro Search and Deep Research; Deep Research fans out parallel searches and loops the reflector back to the planner before analysis and the writer."
       >
         {/* ── Edges ── */}
         <g fill="none" strokeLinecap="round">

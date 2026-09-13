@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 // Preserve the public event API used by project cards and AI answer links.
 const PROJECT_SIGNATURE_EVENT = "portfolio:project-signature-transition";
-type ProjectId = "atlasllm" | "clui" | "mugshot" | "nlp-phishing-detection";
+type ProjectId = "ramelli" | "clui" | "mugshot" | "nlp-phishing-detection";
 type ProjectConfig = {
   id: ProjectId;
   title: string;
@@ -17,10 +17,10 @@ type ProjectConfig = {
   stages: [string, string, string];
 };
 const PROJECTS: Record<ProjectId, ProjectConfig> = {
-  atlasllm: {
-    id: "atlasllm", title: "AtlasLLM", category: "AI workspace", index: "02", theme: "atlas-theme",
+  ramelli: {
+    id: "ramelli", title: "Ramelli", category: "AI workspace", index: "02", theme: "atlas-theme",
     description: "A little space for big ideas.",
-    stages: ["Finding our bearings", "A world of possibilities", "Welcome to Atlas"],
+    stages: ["Finding our bearings", "A world of possibilities", "Welcome to Ramelli"],
   },
   clui: {
     id: "clui", title: "Clui", category: "Desktop companion", index: "01", theme: "clui-theme",
@@ -42,13 +42,14 @@ type Transition = { key: number; config: ProjectConfig; href: string };
 type TransitionDetail = { projectId: string; href?: string };
 
 function getConfig(projectId: string): ProjectConfig | undefined {
+  if (projectId === "atlasllm") projectId = "ramelli";
   return Object.hasOwn(PROJECTS, projectId) ? PROJECTS[projectId as ProjectId] : undefined;
 }
 function getPathname(href: string) {
-  try { return new URL(href, window.location.origin).pathname; }
+  try { const path = new URL(href, window.location.origin).pathname; return path === "/projects/atlasllm" ? "/projects/ramelli" : path; }
   catch { return href.split("?")[0].split("#")[0]; }
 }
-export function hasProjectSignatureTransition(projectId: string): projectId is ProjectId {
+export function hasProjectSignatureTransition(projectId: string): projectId is ProjectId | "atlasllm" {
   return Boolean(getConfig(projectId));
 }
 export function startProjectSignatureTransition(projectId: string, href?: string) {
@@ -62,12 +63,9 @@ function ProjectPixels({ id, progress, still }: { id: ProjectId; progress: numbe
   const step = Math.floor(progress / 12);
   return (
     <svg viewBox="0 0 32 32" className="project-loader-sprite" shapeRendering="crispEdges" fill="currentColor" aria-hidden="true">
-      {id === "atlasllm" && <>
-        <path d="M12 5h8v1h3v2h2v3h1v10h-1v3h-2v2h-3v1h-8v-1H9v-2H7v-3H6V11h1V8h2V6h3z" fill="currentColor" opacity=".08" />
-        <path d="M12 5h8v1h3v2h2v3h1v10h-1v3h-2v2h-3v1h-8v-1H9v-2H7v-3H6V11h1V8h2V6h3z M7 12h18 M7 20h18 M6 16h20 M15 5h2v3h2v5h1v6h-1v5h-2v3h-2v-3h-2v-5h-1v-6h1V8h2z" fill="none" stroke="currentColor" strokeWidth="1" />
-        {[[10, 10], [19, 14], [11, 21], [21, 20]].map(([x, y], i) => <rect key={i} x={x} y={y} width="2" height="2" className="project-loader-secondary" opacity={progress > (i + 1) * 18 ? 1 : 0.12} />)}
-        <g transform={`rotate(${still ? 0 : step * 45} 16 16)`}><path d="M27 4h1v2h2v1h-2v2h-1V7h-2V6h2z" /></g>
-        <path d="M3 25h1v1h1v1H4v1H3v-1H2v-1h1z" opacity=".5" />
+      {id === "ramelli" && <>
+        <image href="/ramelli/logo-light.svg" width="32" height="32" className="dark:hidden" />
+        <image href="/ramelli/logo-dark.svg" width="32" height="32" className="hidden dark:block" />
       </>}
       {id === "clui" && <>
         <path d="M4 6h24v1h1v19h-1v1H4v-1H3V7h1z" opacity=".08" />

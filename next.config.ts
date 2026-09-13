@@ -13,6 +13,9 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  async redirects() {
+    return [{ source: "/projects/atlasllm", destination: "/projects/ramelli", permanent: true }];
+  },
   async rewrites() {
     return [
       {
