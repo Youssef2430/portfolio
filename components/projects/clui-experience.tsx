@@ -110,7 +110,6 @@ export function CluiExperience({ project }: { project: SerializableProject }) {
               <div className="clui-hero-footnote"><span>Free & open source</span><span>macOS 13+</span><span>Built solo</span></div>
             </div>
             <div className="clui-desktop-stage">
-              <div className="clui-desktop-menubar"><span>Clui <span>File　Edit　View</span></span><span>⌥ Space</span></div>
               <span className="clui-desktop-type" aria-hidden="true">less friction.<br /><em>more flow.</em></span>
               <div className="clui-desktop-overlay"><Image src="/clui/overlay-light.png" width={1040} height={720} priority alt="Clui’s floating desktop companion" className="dark:hidden" sizes="(max-width:768px) 90vw, 650px" /><Image src="/clui/overlay-dark.png" width={1040} height={720} priority alt="" aria-hidden className="hidden dark:block" sizes="(max-width:768px) 90vw, 650px" /></div>
               <span className="clui-desktop-note">Your desktop. With a little superpower.</span>
