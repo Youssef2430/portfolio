@@ -102,12 +102,14 @@ export function AtlasWorkflow() {
   const inView = useInView(ref, { once: false, margin: "-20%" });
   const reduced = useReducedMotion();
   const [frameIdx, setFrameIdx] = useState(0);
+  const [mode, setMode] = useState(3);
+  const [playing, setPlaying] = useState(true);
   const [hovered, setHovered] = useState<string | null>(null);
 
   // Flatten runs into a single sequence of frames the token steps through.
   const frames = useMemo(() => {
     const out: Array<{ mode: string; node: string; from: string | null; visited: Set<string> }> = [];
-    for (const run of RUNS) {
+    for (const run of [RUNS[mode]]) {
       const visited = new Set<string>();
       run.path.forEach((node, i) => {
         visited.add(node);
@@ -115,16 +117,15 @@ export function AtlasWorkflow() {
       });
     }
     return out;
-  }, []);
+  }, [mode]);
 
   useEffect(() => {
-    if (reduced || !inView) return;
+    if (reduced || !inView || !playing) return;
     const id = setInterval(() => setFrameIdx((i) => (i + 1) % frames.length), 720);
     return () => clearInterval(id);
-  }, [reduced, inView, frames.length]);
+  }, [reduced, inView, playing, frames.length]);
 
-  const frame = reduced ? null : frames[frameIdx];
-  const activeMode = frame?.mode ?? "Deep Research";
+  const frame = frames[frameIdx % frames.length];
 
   const isVisited = (id: string) => !hovered && frame?.visited.has(id);
   const isCurrent = (id: string) => (hovered ? hovered === id : frame?.node === id);
@@ -134,18 +135,13 @@ export function AtlasWorkflow() {
   const caption = hovered ? NODES[hovered] : frame ? NODES[frame.node] : NODES.writer;
 
   return (
-    <div ref={ref}>
+    <div ref={ref} className="study-flow" style={{ animationPlayState: playing && inView ? "running" : "paused" }}>
       {/* active mode */}
-      <div className="mb-6 flex items-center gap-3">
-        <span className="font-mono text-[11px] tracking-[0.22em] uppercase text-[hsl(var(--foreground-subtle))]">
-          Active flow
-        </span>
-        <span className="font-mono text-xs tracking-wide text-[hsl(var(--gold))]">{activeMode}</span>
-      </div>
+      <div className="study-flow-controls"><div aria-label="Workflow mode">{RUNS.map((run, index) => <button type="button" key={run.mode} aria-pressed={mode === index} onClick={() => { setMode(index); setFrameIdx(0); setHovered(null); }}>{run.mode}</button>)}</div>{!reduced && <button type="button" aria-label={playing ? "Pause workflow animation" : "Play workflow animation"} onClick={() => setPlaying(value => !value)}>{playing ? "Pause" : "Play"}<span aria-hidden="true">{playing ? "Ⅱ" : "▷"}</span></button>}</div>
 
       <svg
         viewBox="0 0 1380 560"
-        className="w-full h-auto"
+        className="hidden md:block w-full h-auto"
         role="img"
         aria-label="AtlasLLM workflow graph: router branches into Standard, Web, Pro Search and Deep Research; Deep Research fans out parallel searches and loops the reflector back to the planner before analysis and the writer."
       >
@@ -167,7 +163,7 @@ export function AtlasWorkflow() {
                           strokeWidth={2}
                           strokeOpacity={active ? 0.9 : 0}
                           className="atlas-flow"
-                          style={{ transition: "stroke-opacity 0.3s ease" }}
+                          style={{ transition: "stroke-opacity 0.3s ease", animationPlayState: playing && inView ? "running" : "paused" }}
                         />
                       )}
                     </g>
@@ -204,7 +200,7 @@ export function AtlasWorkflow() {
                     strokeWidth={2.2}
                     strokeOpacity={active ? 0.95 : 0}
                     className="atlas-flow"
-                    style={{ transition: "stroke-opacity 0.3s ease" }}
+                    style={{ transition: "stroke-opacity 0.3s ease", animationPlayState: playing && inView ? "running" : "paused" }}
                   />
                 )}
               </g>
@@ -283,8 +279,9 @@ export function AtlasWorkflow() {
         })}
       </svg>
 
+      <ol className="study-flow-mobile">{Array.from(new Set(RUNS[mode].path)).map((id, index) => <li key={id} data-active={isCurrent(id)}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{NODES[id].label}</strong><p>{NODES[id].purpose}</p></div></li>)}</ol>
       {/* caption */}
-      <div className="mt-6 flex items-baseline gap-3 min-h-[1.5rem]">
+      <div className="study-flow-caption">
         <span className="font-mono text-xs text-[hsl(var(--gold))]">{caption.label}</span>
         <span className="text-sm text-[hsl(var(--foreground-soft))]">{caption.purpose}</span>
       </div>

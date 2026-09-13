@@ -1,11 +1,4 @@
-/**
- * Mugshot "built with" strip: mirrors the AtlasLLM / Clui tech tooltip: a row
- * of overlapping rounded marks that lift and reveal a name + role pill on hover.
- *
- * Apple's frameworks don't ship public brand logos, so each mark is a clean
- * representative glyph (Swift uses its own logo path; the rest use lucide icons)
- * rendered in currentColor so they inherit the strip's hover state.
- */
+/** Mugshot technology grid. Names and roles remain visible on every screen size. */
 
 import {
   type LucideIcon,
@@ -43,13 +36,13 @@ const TECHS: Tech[] = [
 
 export function MugshotTechStack() {
   return (
-    <div className="flex pl-2">
+    <div className="study-tech-list" role="list">
       {TECHS.map((t) => (
         <div
           key={t.name}
-          className="group relative -ml-3 transition-[z-index] duration-0 first:ml-0 hover:z-30"
+          className="study-tech-item" role="listitem"
         >
-          <div className="flex h-14 w-14 items-center justify-center rounded-[16px] border border-border bg-[hsl(var(--mug-card))] text-foreground/70 shadow-[0_4px_14px_-6px_rgba(35,27,20,0.35)] transition-all duration-300 ease-out group-hover:-translate-y-2.5 group-hover:border-[hsl(var(--gold))]/50 group-hover:text-[hsl(var(--gold))] group-hover:shadow-[0_16px_30px_-12px_rgba(35,27,20,0.45)]">
+          <div className="study-tech-icon">
             {t.path ? (
               <svg viewBox="0 0 24 24" width={24} height={24} fill="currentColor" aria-hidden>
                 <path d={t.path} />
@@ -58,10 +51,10 @@ export function MugshotTechStack() {
               <t.Icon className="h-6 w-6" strokeWidth={1.8} aria-hidden />
             ) : null}
           </div>
-          {/* tooltip: left-anchored so it never clips at the row's edge */}
-          <div className="pointer-events-none absolute bottom-full left-0 z-20 mb-2.5 flex translate-y-1 items-center gap-2 whitespace-nowrap rounded-full bg-foreground py-1.5 pl-4 pr-1.5 text-background opacity-0 shadow-lg transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
-            <span className="mug-rounded text-xs font-bold">{t.name}</span>
-            <span className="mug-rounded rounded-full bg-background/15 px-2 py-0.5 text-[10px] font-bold tracking-wide text-background/70">
+          {/* Visible name and role. */}
+          <div className="study-tech-label">
+            <span>{t.name}</span>
+            <span>
               {t.tag}
             </span>
           </div>

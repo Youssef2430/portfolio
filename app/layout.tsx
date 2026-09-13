@@ -15,6 +15,7 @@ import {
   Roboto_Mono,
 } from "next/font/google";
 import "./globals.css";
+import "./project-studies.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PostHogProvider } from "./providers";
 import { CustomCursor } from "@/components/custom-cursor";

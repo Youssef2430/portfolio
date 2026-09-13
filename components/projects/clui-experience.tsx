@@ -3,8 +3,8 @@
 import { type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight, Layers, Palette, Zap, SlashSquare, ImagePlus, KeyRound } from "lucide-react";
-import { motion } from "framer-motion";
+import { ArrowLeft, ArrowUpRight, ArrowDown, Layers, Palette, Zap, SlashSquare, ImagePlus, KeyRound } from "lucide-react";
+import { motion, MotionConfig } from "framer-motion";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import type { SerializableProject } from "@/components/project-detail";
@@ -12,6 +12,9 @@ import { CluiSummon } from "@/components/projects/clui-summon";
 import { CluiFlow } from "@/components/projects/clui-flow";
 import { CluiTechStack } from "@/components/projects/clui-tech-stack";
 
+import { StudyNav, NextStudy, CopyCommand } from "@/components/projects/case-study-chrome";
+
+const CHAPTERS = [{id:"overlay",label:"The shortcut"},{id:"in-motion",label:"In motion"},{id:"architecture",label:"The craft"},{id:"get-started",label:"Get Clui"}];
 const EASE = [0.16, 1, 0.3, 1] as const;
 const SITE_URL = "https://clui.app";
 const REPO_URL = "https://github.com/Youssef2430/clui";
@@ -36,7 +39,7 @@ function Label({ index, children }: { index?: string; children: ReactNode }) {
 function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; delay?: number; className?: string }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
+      initial={false}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-12%" }}
       transition={{ duration: 0.7, delay, ease: EASE }}
@@ -89,106 +92,40 @@ const FEATURES = [
 
 /* ── The presentation ──────────────────────────────────────────── */
 
-export function CluiExperience(_props: { project: SerializableProject }) {
+export function CluiExperience({ project }: { project: SerializableProject }) {
   return (
-    <main className="clui-theme min-h-screen overflow-clip bg-background text-foreground">
+    <MotionConfig reducedMotion="user"><main className="clui-theme study-page clui-study min-h-screen overflow-clip bg-background text-foreground">
       <div className="grain-overlay" />
       <Navbar />
 
-      {/* ── Opener ── */}
-      <section className="clui-aurora px-6 pt-32 md:px-12 md:pt-40">
-        <div className="relative z-[1] mx-auto max-w-6xl">
-          <Link
-            href="/#work"
-            className="group clui-mono inline-flex items-center text-xs uppercase tracking-[0.15em] text-[hsl(var(--foreground-muted))] transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-            Back to Work
-          </Link>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: EASE }}
-            className="mt-12 flex items-center gap-3.5"
-          >
-            <Image src="/clui/logo.png" alt="Clui logo" width={96} height={96} className="h-9 w-9 md:h-11 md:w-11" />
-            <span className="text-2xl font-semibold tracking-tight md:text-3xl">Clui</span>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
-            className="clui-display mt-8 max-w-3xl text-5xl md:text-7xl"
-          >
-            The better UI for <em>Claude&nbsp;Code</em>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2, ease: EASE }}
-            className="clui-serif mt-6 max-w-xl text-lg font-light leading-relaxed text-[hsl(var(--foreground-soft))] md:text-xl"
-          >
-            A calm, transparent overlay that floats above every window and stays out of
-            your way until you summon it. No API key. No friction. No trace.
-          </motion.p>
-
-          {/* meta strip */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.35 }}
-            className="clui-mono mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-border pt-6 text-[11px] uppercase tracking-[0.12em] text-[hsl(var(--foreground-subtle))]"
-          >
-            <span>macOS · Free &amp; open source</span>
-            <span>Solo build</span>
-            <a href={SITE_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[hsl(var(--gold))] transition-colors hover:text-foreground">
-              clui.app
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </a>
-            <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[hsl(var(--foreground-muted))] transition-colors hover:text-foreground">
-              Source
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </a>
-          </motion.div>
-
-          {/* hero: the floating overlay on its dotted canvas */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.4, ease: EASE }}
-            className="clui-dots mt-14 flex items-center justify-center rounded-2xl border border-border px-4 py-10 md:py-16"
-          >
-            <div className="relative w-full max-w-3xl">
-              <Image
-                src="/clui/overlay-light.png"
-                alt="Clui's floating overlay, a transparent input pill above the desktop"
-                width={1040}
-                height={720}
-                priority
-                className="h-auto w-full drop-shadow-[0_30px_60px_rgba(0,0,0,0.18)] dark:hidden"
-              />
-              <Image
-                src="/clui/overlay-dark.png"
-                alt=""
-                aria-hidden
-                width={1040}
-                height={720}
-                priority
-                className="hidden h-auto w-full drop-shadow-[0_30px_60px_rgba(0,0,0,0.5)] dark:block"
-              />
+      <section id="project-top" className="clui-editorial-hero">
+        <div className="study-width">
+          <Link href="/#work" className="study-back"><ArrowLeft size={14} />Back to work</Link>
+          <div className="clui-hero-grid">
+            <div className="clui-hero-copy">
+              <div className="clui-wordmark"><Image src="/clui/logo.png" width={44} height={44} alt="" /><span>{project.title}</span><span className="study-eyebrow">Made for macOS</span></div>
+              <h1 className="clui-display">A little window.<br /><em>A lot of possibility.</em></h1>
+              <p>Claude Code, a shortcut away. A floating desktop companion that’s there when you need it, and gone when you don’t.</p>
+              <div className="study-actions"><a href={SITE_URL} target="_blank" rel="noopener noreferrer" className="study-primary">Get Clui<ArrowUpRight size={16} /></a><a href="#overlay" className="study-text-link">Try the shortcut<ArrowDown size={14} /></a></div>
+              <div className="clui-hero-footnote"><span>Free & open source</span><span>macOS 13+</span><span>Built solo</span></div>
             </div>
-          </motion.div>
+            <div className="clui-desktop-stage">
+              <div className="clui-desktop-menubar"><span>Clui <span>File　Edit　View</span></span><span>⌥ Space</span></div>
+              <span className="clui-desktop-type" aria-hidden="true">less friction.<br /><em>more flow.</em></span>
+              <div className="clui-desktop-overlay"><Image src="/clui/overlay-light.png" width={1040} height={720} priority alt="Clui’s floating desktop companion" className="dark:hidden" sizes="(max-width:768px) 90vw, 650px" /><Image src="/clui/overlay-dark.png" width={1040} height={720} priority alt="" aria-hidden className="hidden dark:block" sizes="(max-width:768px) 90vw, 650px" /></div>
+              <span className="clui-desktop-note">Your desktop. With a little superpower.</span>
+              <div className="clui-desktop-dock" aria-hidden="true"><span>⌘</span><span>⌥</span><Image src="/clui/logo.png" alt="" width={34} height={34} /><span>↗</span></div>
+            </div>
+          </div>
         </div>
       </section>
+      <StudyNav name="Clui" chapters={CHAPTERS} />
 
       {/* ── Overview ── */}
-      <section className="px-6 py-24 md:px-12 md:py-32">
+      <section id="overview" className="px-6 py-24 md:px-12 md:py-32">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
           <Reveal className="lg:col-span-4">
-            <Label>Overview</Label>
+            <Label>Overview</Label><h2 className="clui-display study-section-title">A quieter way<br />to work.</h2>
           </Reveal>
           <div className="space-y-6 lg:col-span-8">
             <Reveal>
@@ -219,7 +156,7 @@ export function CluiExperience(_props: { project: SerializableProject }) {
       </section>
 
       {/* ── 01 The Overlay (signature) ── */}
-      <section className="px-6 pb-24 md:px-12 md:pb-32">
+      <section id="overlay" className="px-6 pb-24 md:px-12 md:pb-32">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-16">
             <Reveal className="lg:col-span-5">
@@ -247,18 +184,19 @@ export function CluiExperience(_props: { project: SerializableProject }) {
       </section>
 
       {/* ── In motion (demo video) ── */}
-      <section className="border-t border-border px-6 py-20 md:px-12 md:py-24">
+      <section id="in-motion" className="border-t border-border px-6 py-20 md:px-12 md:py-24">
         <div className="mx-auto max-w-6xl">
           <Reveal className="mb-10">
-            <Label index="02">In motion</Label>
+            <Label index="02">In motion</Label><h2 className="clui-display study-section-title">A place for your next <em>good idea.</em></h2>
           </Reveal>
           <Reveal delay={0.05}>
             <MacWindow title="Clui">
               <video
                 src="/clui/demo.mp4"
-                autoPlay
                 muted
-                loop
+                controls
+                preload="none"
+                poster="/clui/demo-light.png"
                 playsInline
                 className="block w-full"
               />
@@ -268,11 +206,11 @@ export function CluiExperience(_props: { project: SerializableProject }) {
       </section>
 
       {/* ── 03 Under the hood (flow) ── */}
-      <section className="border-t border-border px-6 py-20 md:px-12 md:py-28">
+      <section id="architecture" className="border-t border-border px-6 py-20 md:px-12 md:py-28">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-16">
             <Reveal className="lg:col-span-5">
-              <Label index="03">Under the hood</Label>
+              <Label index="03">Under the hood</Label><h2 className="clui-display study-section-title">You stay<br /><em>in control.</em></h2>
             </Reveal>
             <Reveal delay={0.1} className="lg:col-span-7">
               <p className="text-base leading-relaxed text-[hsl(var(--foreground-soft))] md:text-lg">
@@ -287,7 +225,7 @@ export function CluiExperience(_props: { project: SerializableProject }) {
 
           <Reveal delay={0.05}>
             <div className="clui-dots overflow-x-auto rounded-2xl border border-border p-4 md:p-8">
-              <div className="min-w-[680px]">
+              <div className="min-w-0">
                 <CluiFlow />
               </div>
             </div>
@@ -296,10 +234,10 @@ export function CluiExperience(_props: { project: SerializableProject }) {
       </section>
 
       {/* ── 04 On screen (gallery) ── */}
-      <section className="border-t border-border px-6 py-20 md:px-12 md:py-24">
+      <section id="gallery" className="border-t border-border px-6 py-20 md:px-12 md:py-24">
         <div className="mx-auto max-w-6xl">
           <Reveal className="mb-12">
-            <Label index="04">On screen</Label>
+            <Label index="04">On screen</Label><h2 className="clui-display study-section-title">Quietly <em>capable.</em></h2>
           </Reveal>
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
@@ -320,7 +258,7 @@ export function CluiExperience(_props: { project: SerializableProject }) {
       </section>
 
       {/* ── 05 Capabilities ── */}
-      <section className="border-t border-border px-6 py-20 md:px-12 md:py-24">
+      <section id="capabilities" className="border-t border-border px-6 py-20 md:px-12 md:py-24">
         <div className="mx-auto max-w-6xl">
           <Reveal className="mb-10">
             <Label index="05">Capabilities</Label>
@@ -345,7 +283,7 @@ export function CluiExperience(_props: { project: SerializableProject }) {
       </section>
 
       {/* ── Built with ── */}
-      <section className="border-t border-border px-6 py-20 md:px-12 md:py-24">
+      <section id="stack" className="border-t border-border px-6 py-20 md:px-12 md:py-24">
         <div className="mx-auto max-w-6xl">
           <Reveal className="mb-10">
             <Label>Built with</Label>
@@ -359,16 +297,14 @@ export function CluiExperience(_props: { project: SerializableProject }) {
       </section>
 
       {/* ── Get started ── */}
-      <section className="px-6 py-20 md:px-12 md:py-24">
+      <section id="get-started" className="px-6 py-20 md:px-12 md:py-24">
         <div className="mx-auto max-w-6xl">
           <Reveal className="mb-8 max-w-xl">
-            <Label index="06">Get started</Label>
+            <Label index="06">Get started</Label><h2 className="clui-display study-section-title">A little space for<br /><em>your next idea.</em></h2>
           </Reveal>
           <Reveal delay={0.05}>
             <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 md:flex-row md:items-center md:justify-between md:p-8">
-              <code className="clui-mono select-all rounded-lg bg-[hsl(var(--background))] px-4 py-3 text-sm text-foreground">
-                <span className="text-[hsl(var(--gold))]">$ </span>{BREW}
-              </code>
+              <CopyCommand command={BREW} />
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                 <a href={SITE_URL} target="_blank" rel="noopener noreferrer" className="clui-mono inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.1em] text-[hsl(var(--gold))] transition-colors hover:text-foreground">
                   Download .dmg
@@ -389,42 +325,9 @@ export function CluiExperience(_props: { project: SerializableProject }) {
         </div>
       </section>
 
-      {/* ── Outro ── */}
-      <section className="px-6 pb-28 md:px-12">
-        <div className="mx-auto max-w-6xl border-t border-border pt-14">
-          <div className="flex flex-col gap-10 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3">
-              <Image src="/clui/logo.png" alt="Clui" width={96} height={96} className="h-7 w-7" />
-              <span className="text-lg font-semibold tracking-tight">Clui</span>
-            </div>
-
-            <div className="clui-mono flex flex-wrap items-center gap-x-8 gap-y-3 text-xs uppercase tracking-[0.12em]">
-              <a href={SITE_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[hsl(var(--gold))] transition-colors hover:text-foreground">
-                Visit clui.app
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </a>
-              <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[hsl(var(--foreground-muted))] transition-colors hover:text-foreground">
-                Source
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </a>
-            </div>
-          </div>
-
-          <div className="mt-12 flex items-center justify-between">
-            <Link
-              href="/#work"
-              className="group clui-mono inline-flex items-center text-sm uppercase tracking-[0.1em] text-[hsl(var(--foreground-muted))] transition-colors hover:text-foreground"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-              All Projects
-            </Link>
-            <span className="font-arabic text-sm text-[hsl(var(--gold))] opacity-60">「مشروع」</span>
-          </div>
-        </div>
-      </section>
-
+      <NextStudy current="clui" />
       <Footer />
-    </main>
+    </main></MotionConfig>
   );
 }
 

@@ -1,18 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import {
-  clock,
   compute,
   effect,
-  frameLoop,
+  frame,
   init,
   sampler,
   storage,
   surface,
   target,
 } from "vgpu";
-import type { FrameLoopHandle, Target } from "vgpu";
+import type { Target } from "vgpu";
+import { PrismFallback } from "@/components/prism-fallback";
 import prismShader from "@/shaders/prism.wgsl";
 import spectrumShader from "@/shaders/prism-spectrum.wgsl";
 import brightPassShader from "@/shaders/prism-bright-pass.wgsl";
@@ -20,6 +20,7 @@ import blurShader from "@/shaders/prism-blur.wgsl";
 import compositeShader from "@/shaders/prism-composite.wgsl";
 
 type PrismController = {
+  reset: () => void;
   setTheme: (theme: number, background: readonly [number, number, number]) => void;
 };
 
@@ -89,6 +90,7 @@ function readThemeMode(): number {
 }
 
 export function PrismShader() {
+  const instructionsId = useId();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const controllerRef = useRef<PrismController | null>(null);
   const [ready, setReady] = useState(false);
@@ -100,7 +102,21 @@ export function PrismShader() {
 
     let disposed = false;
     let gpu: Awaited<ReturnType<typeof init>> | undefined;
-    let loop: FrameLoopHandle | undefined;
+    let animationFrame: number | undefined;
+    let invalidate = () => {};
+    let resizeObserver: ResizeObserver | undefined;
+    let removeEnvironmentListeners: (() => void) | undefined;
+    let removeErrorListener: (() => void) | undefined;
+    let broken = false;
+    const fail = (error: unknown) => {
+      if (disposed || broken) return;
+      broken = true;
+      if (animationFrame !== undefined) cancelAnimationFrame(animationFrame);
+      console.warn("Unable to render the prism", error);
+      setReady(false);
+      setFailed(true);
+      gpu?.dispose();
+    };
     let removePointerListeners: (() => void) | undefined;
     let observer: IntersectionObserver | undefined;
     let themeObserver: MutationObserver | undefined;
@@ -113,6 +129,11 @@ export function PrismShader() {
           gpu.dispose();
           return;
         }
+
+        removeErrorListener = gpu.onError(fail);
+        void gpu.gpu.lost.then((info: { reason: string; message: string }) => {
+          if (info.reason !== "destroyed") fail(info.message);
+        });
 
         const canvasSurface = surface(gpu, canvas, {
           dpr: [1, 1.5],
@@ -215,10 +236,12 @@ export function PrismShader() {
           blurV.compile(initialTargets.bloomA),
           composite.compile({ colors: [canvasSurface.format] }),
         ]);
-        if (disposed) return;
+        if (disposed || broken) return;
 
         controllerRef.current = {
+          reset: () => handleDoubleClick(),
           setTheme(theme, page) {
+            invalidate();
             const value = { theme, background: [...page, 1] as const };
             scene.set({ params: value });
             spectrum.set({ params: value });
@@ -238,7 +261,6 @@ export function PrismShader() {
         const syncTheme = () => {
           controllerRef.current?.setTheme(readThemeMode(), readPageBackground());
         };
-        syncTheme();
         themeObserver = new MutationObserver(syncTheme);
         themeObserver.observe(document.documentElement, {
           attributes: true,
@@ -281,9 +303,10 @@ export function PrismShader() {
             Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height)),
           ];
           updateOrbitTarget();
+          invalidate();
         };
         const handlePointerDown = (event: PointerEvent) => {
-          if (!event.isPrimary || activePointer !== undefined) return;
+          if (!event.isPrimary || event.button !== 0 || activePointer !== undefined) return;
           activePointer = event.pointerId;
           lastPointer = [event.clientX, event.clientY];
           energy = 1.4;
@@ -295,6 +318,7 @@ export function PrismShader() {
           updatePointerTarget(event);
         };
         const handlePointerMove = (event: PointerEvent) => {
+          if (event.pointerType === "touch" && activePointer === undefined) return;
           updatePointerTarget(event);
           energy = Math.max(energy, 1.18);
           if (event.pointerId !== activePointer) return;
@@ -325,11 +349,13 @@ export function PrismShader() {
             canvas.releasePointerCapture(event.pointerId);
           }
           activePointer = undefined;
+          handlePointerLeave();
         };
         const handlePointerLeave = () => {
           if (activePointer === undefined) {
             pointerTarget = [0.5, 0.5];
             updateOrbitTarget();
+            invalidate();
           }
         };
         const handleDoubleClick = () => {
@@ -340,8 +366,26 @@ export function PrismShader() {
           pointerTarget = [0.5, 0.5];
           updateOrbitTarget();
           energy = 1.4;
+          invalidate();
+        };
+        const handleKeyDown = (event: KeyboardEvent) => {
+          if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "Escape"].includes(event.key)) return;
+          event.preventDefault();
+          if (event.key === "Home" || event.key === "Escape") {
+            handleDoubleClick();
+            return;
+          }
+          const amount = event.shiftKey ? 0.1 : 0.035;
+          pointerTarget = [
+            Math.max(0, Math.min(1, pointerTarget[0] + (event.key === "ArrowRight" ? amount : event.key === "ArrowLeft" ? -amount : 0))),
+            Math.max(0, Math.min(1, pointerTarget[1] + (event.key === "ArrowDown" ? amount : event.key === "ArrowUp" ? -amount : 0))),
+          ];
+          updateOrbitTarget();
+          invalidate();
         };
 
+        canvas.addEventListener("keydown", handleKeyDown);
+        canvas.addEventListener("lostpointercapture", handlePointerEnd);
         canvas.addEventListener("pointerdown", handlePointerDown);
         canvas.addEventListener("pointermove", handlePointerMove);
         canvas.addEventListener("pointerup", handlePointerEnd);
@@ -349,6 +393,8 @@ export function PrismShader() {
         canvas.addEventListener("pointerleave", handlePointerLeave);
         canvas.addEventListener("dblclick", handleDoubleClick);
         removePointerListeners = () => {
+          canvas.removeEventListener("keydown", handleKeyDown);
+          canvas.removeEventListener("lostpointercapture", handlePointerEnd);
           canvas.removeEventListener("pointerdown", handlePointerDown);
           canvas.removeEventListener("pointermove", handlePointerMove);
           canvas.removeEventListener("pointerup", handlePointerEnd);
@@ -357,90 +403,131 @@ export function PrismShader() {
           canvas.removeEventListener("dblclick", handleDoubleClick);
         };
 
-        const gpuClock = clock(gpu);
-        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
         let visible = false;
         let sceneTime = 0;
-        observer = new IntersectionObserver(
-          ([entry]) => {
-            visible = entry.isIntersecting;
-          },
-          { rootMargin: "120px 0px", threshold: 0.01 },
-        );
-        observer.observe(canvas);
+        let previousTime = 0;
+        let hasRendered = false;
 
-        loop = frameLoop(
-          gpu,
-          (frame) => {
-            if (!visible || !renderTargets) return;
+        // The optics are static once input settles. Schedule only the frames
+        // needed for an interaction, reveal, resize or theme change.
+        const render = (now: number) => {
+          animationFrame = undefined;
+          if (disposed || broken || !visible || document.hidden || !renderTargets) return;
+          const reduceMotion = motionPreference.matches;
+          if (!reduceMotion && previousTime && now - previousTime < 1000 / 60 - 0.5) {
+            invalidate();
+            return;
+          }
+          const step = previousTime ? Math.min((now - previousTime) / 1000, 1 / 30) : 1 / 60;
+          previousTime = now;
+          try {
+            frame(gpu!, (frame) => {
+              if (!renderTargets) return;
+              if (
+                renderTargets.scene.size[0] !== canvasSurface.size[0] ||
+                renderTargets.scene.size[1] !== canvasSurface.size[1]
+              ) {
+                replaceTargets(canvasSurface.size);
+              }
+              const targets = renderTargets!;
 
-            if (
-              renderTargets.scene.size[0] !== canvasSurface.size[0] ||
-              renderTargets.scene.size[1] !== canvasSurface.size[1]
-            ) {
-              replaceTargets(canvasSurface.size);
+              // Frame-rate independent, and quick enough that the spectrum feels
+              // attached to the cursor rather than dragged along behind it.
+              const pointerBlend = reduceMotion ? 1 : 1 - Math.exp(-11 * step);
+              pointer = [
+                pointer[0] + (pointerTarget[0] - pointer[0]) * pointerBlend,
+                pointer[1] + (pointerTarget[1] - pointer[1]) * pointerBlend,
+              ];
+              const orbitBlend = reduceMotion ? 1 : 1 - Math.exp(-13 * step);
+              orbit.yaw += (orbitTarget.yaw - orbit.yaw) * orbitBlend;
+              orbit.pitch += (orbitTarget.pitch - orbit.pitch) * orbitBlend;
+              energy += (1 - energy) * (reduceMotion ? 1 : 1 - Math.exp(-3.4 * step));
+              sceneTime = reduceMotion ? 1.4 : sceneTime + step;
+              const reveal = reduceMotion ? 1 : Math.min(1, sceneTime / 1.4);
+              const smoothReveal = reveal * reveal * (3 - 2 * reveal);
+
+              // The two axes are the two things you can do to a prism with a lamp.
+              //
+              // Across: the angle of incidence, normalised to [-1, 1] and mapped
+              // in the shader onto a real sweep from 14 to 76 degrees. The left
+              // third of the panel sits inside the critical-angle regime, where
+              // the exit face reflects and the beam takes an extra leg through
+              // the solid; the middle is minimum deviation, the widest spectrum;
+              // the right is grazing, where most of the light bounces off the
+              // face instead of entering.
+              //
+              // Down: where on that face the beam strikes, which changes the path
+              // length through the body and eventually which face it leaves by.
+              const clampUnit = (value: number) => Math.max(-1, Math.min(1, value));
+              const frameParams = {
+                time: sceneTime,
+                pointer,
+                yaw: orbit.yaw,
+                pitch: orbit.pitch,
+                energy,
+                reveal: smoothReveal,
+                beam_aim: (0.5 - pointer[1]) * 1.9 + lightDrag.aim,
+                beam_height: clampUnit((pointer[0] - 0.5) * 2.15 + lightDrag.incidence),
+              };
+              scene.set({ params: frameParams });
+              spectrum.set({ params: frameParams });
+
+              // Submits ahead of this frame's render pass, so the fragment shader
+              // reads paths traced for the pointer position it is drawing.
+              spectrum.dispatch(1);
+
+              frame.pass({ target: targets.scene, clear: CLEAR }, (pass) => pass.draw(scene));
+              frame.pass({ target: targets.bloomA, clear: CLEAR }, (pass) => pass.draw(brightPass));
+              frame.pass({ target: targets.bloomB, clear: CLEAR }, (pass) => pass.draw(blurH));
+              frame.pass({ target: targets.bloomA, clear: CLEAR }, (pass) => pass.draw(blurV));
+              frame.pass({ target: canvasSurface, clear: CLEAR }, (pass) => pass.draw(composite));
+            });
+            if (!hasRendered) {
+              hasRendered = true;
+              setReady(true);
             }
-            const targets = renderTargets!;
-
-            // Frame-rate independent, and quick enough that the spectrum feels
-            // attached to the cursor rather than dragged along behind it.
-            const step = Math.min(gpuClock.deltaTime, 0.1);
-            const pointerBlend = 1 - Math.exp(-11 * step);
-            pointer = [
-              pointer[0] + (pointerTarget[0] - pointer[0]) * pointerBlend,
-              pointer[1] + (pointerTarget[1] - pointer[1]) * pointerBlend,
-            ];
-            const orbitBlend = 1 - Math.exp(-13 * step);
-            orbit.yaw += (orbitTarget.yaw - orbit.yaw) * orbitBlend;
-            orbit.pitch += (orbitTarget.pitch - orbit.pitch) * orbitBlend;
-            energy += (1 - energy) * 0.055;
-            sceneTime += reduceMotion ? 0 : gpuClock.deltaTime;
-            const reveal = reduceMotion ? 1 : Math.min(1, sceneTime / 1.4);
-            const smoothReveal = reveal * reveal * (3 - 2 * reveal);
-
-            // The two axes are the two things you can do to a prism with a lamp.
-            //
-            // Across: the angle of incidence, normalised to [-1, 1] and mapped
-            // in the shader onto a real sweep from 14 to 76 degrees. The left
-            // third of the panel sits inside the critical-angle regime, where
-            // the exit face reflects and the beam takes an extra leg through
-            // the solid; the middle is minimum deviation, the widest spectrum;
-            // the right is grazing, where most of the light bounces off the
-            // face instead of entering.
-            //
-            // Down: where on that face the beam strikes, which changes the path
-            // length through the body and eventually which face it leaves by.
-            const clampUnit = (value: number) => Math.max(-1, Math.min(1, value));
-            const frameParams = {
-              time: sceneTime,
-              pointer,
-              yaw: orbit.yaw,
-              pitch: orbit.pitch,
-              energy,
-              reveal: smoothReveal,
-              beam_aim: (0.5 - pointer[1]) * 1.9 + lightDrag.aim,
-              beam_height: clampUnit((pointer[0] - 0.5) * 2.15 + lightDrag.incidence),
-            };
-            scene.set({ params: frameParams });
-            spectrum.set({ params: frameParams });
-
-            // Submits ahead of this frame's render pass, so the fragment shader
-            // reads paths traced for the pointer position it is drawing.
-            spectrum.dispatch(1);
-
-            frame.pass({ target: targets.scene, clear: CLEAR }, (pass) => pass.draw(scene));
-            frame.pass({ target: targets.bloomA, clear: CLEAR }, (pass) => pass.draw(brightPass));
-            frame.pass({ target: targets.bloomB, clear: CLEAR }, (pass) => pass.draw(blurH));
-            frame.pass({ target: targets.bloomA, clear: CLEAR }, (pass) => pass.draw(blurV));
-            frame.pass({ target: canvasSurface, clear: CLEAR }, (pass) => pass.draw(composite));
-          },
-          { fps: reduceMotion ? 20 : 60 },
-        );
-
-        setReady(true);
+            const unsettled = Math.max(
+              Math.abs(pointerTarget[0] - pointer[0]),
+              Math.abs(pointerTarget[1] - pointer[1]),
+              Math.abs(orbitTarget.yaw - orbit.yaw),
+              Math.abs(orbitTarget.pitch - orbit.pitch),
+              Math.abs(1 - energy),
+            ) > 0.0001;
+            if (!reduceMotion && (sceneTime < 1.4 || unsettled)) invalidate();
+          } catch (error) {
+            fail(error);
+          }
+        };
+        invalidate = () => {
+          if (disposed || broken || !visible || document.hidden || animationFrame !== undefined) return;
+          animationFrame = requestAnimationFrame(render);
+        };
+        const syncVisibility = () => {
+          previousTime = 0;
+          if (!visible || document.hidden) {
+            if (animationFrame !== undefined) cancelAnimationFrame(animationFrame);
+            animationFrame = undefined;
+          } else invalidate();
+        };
+        observer = new IntersectionObserver(([entry]) => {
+          visible = entry.isIntersecting;
+          syncVisibility();
+        }, { threshold: 0.01 });
+        observer.observe(canvas);
+        resizeObserver = new ResizeObserver(() => invalidate());
+        resizeObserver.observe(canvas);
+        window.addEventListener("resize", invalidate);
+        document.addEventListener("visibilitychange", syncVisibility);
+        motionPreference.addEventListener("change", invalidate);
+        removeEnvironmentListeners = () => {
+          window.removeEventListener("resize", invalidate);
+          document.removeEventListener("visibilitychange", syncVisibility);
+          motionPreference.removeEventListener("change", invalidate);
+        };
+        syncTheme();
       } catch (error) {
-        console.error("Unable to start the vGPU prism", error);
-        if (!disposed) setFailed(true);
+        fail(error);
       }
     })();
 
@@ -450,7 +537,10 @@ export function PrismShader() {
       observer?.disconnect();
       themeObserver?.disconnect();
       removePointerListeners?.();
-      loop?.stop();
+      resizeObserver?.disconnect();
+      removeEnvironmentListeners?.();
+      removeErrorListener?.();
+      if (animationFrame !== undefined) cancelAnimationFrame(animationFrame);
       destroyTargets(renderTargets);
       gpu?.dispose();
     };
@@ -462,21 +552,34 @@ export function PrismShader() {
       data-ready={ready}
       data-failed={failed}
     >
+      <div className="pointer-events-none absolute inset-0 transition-opacity duration-500 motion-reduce:transition-none" style={{ opacity: ready ? 0 : 1 }} aria-hidden={ready}>
+        <PrismFallback />
+      </div>
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 block h-full w-full cursor-grab touch-none transition-opacity duration-1000 active:cursor-grabbing"
+        className="absolute inset-0 block h-full w-full cursor-grab touch-pan-y transition-opacity duration-500 active:cursor-grabbing focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-[-12px] focus-visible:outline-[hsl(var(--gold))]"
         style={{ opacity: ready ? 1 : 0 }}
-        aria-label="Interactive glass prism. Move to aim the beam, drag horizontally to change its incidence and discover internal reflections, drag vertically to move the strike point, and double-click to reset."
+        tabIndex={ready && !failed ? 0 : -1}
+        aria-hidden={!ready || failed}
+        aria-label="Interactive glass prism"
+        aria-describedby={instructionsId}
       />
-
-      {failed ? (
-        <p
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap font-mono text-[9px] uppercase tracking-[0.22em] text-foreground/50"
-          role="status"
-        >
-          WebGPU unavailable — enable hardware acceleration
+      <div className="prism-controls absolute inset-x-6 bottom-10 flex items-center justify-center gap-3 font-mono text-[9px] uppercase tracking-[0.16em] text-[hsl(var(--foreground-muted))] md:bottom-14">
+        <p id={instructionsId}>
+          {ready && !failed ? (
+            <>
+              <span className="hidden sm:inline">Move to bend light</span>
+              <span className="sm:hidden">Drag to bend light</span>
+              <span className="sr-only">. Arrow keys aim the beam. Drag to change incidence. Home or Escape resets.</span>
+            </>
+          ) : "Light, through a different lens"}
         </p>
-      ) : null}
+        {ready && !failed && (
+          <button type="button" onClick={() => controllerRef.current?.reset()} className="min-h-9 px-2 underline decoration-[hsl(var(--border))] underline-offset-4 transition-colors hover:text-foreground focus-visible:outline focus-visible:outline-1 focus-visible:outline-[hsl(var(--gold))]" aria-label="Reset prism">
+            Reset
+          </button>
+        )}
+      </div>
     </div>
   );
 }

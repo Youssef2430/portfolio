@@ -1,8 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { motion, useInView, AnimatePresence } from "framer-motion";
+import { motion, useInView, AnimatePresence, useReducedMotion } from "framer-motion";
 import dynamic from "next/dynamic";
+import { PrismFallback } from "@/components/prism-fallback";
 import Image from "next/image";
 import Link from "next/link";
 import { projects, type ProjectDetail } from "@/lib/project-data";
@@ -13,7 +14,7 @@ import {
 
 const PrismShader = dynamic(
   () => import("@/components/prism-shader").then((module) => module.PrismShader),
-  { ssr: false },
+  { ssr: false, loading: () => <PrismFallback /> },
 );
 
 const getAspectRatioValue = (ratio?: string) => {
@@ -134,8 +135,10 @@ function HoverProjectPreview({ project }: { project: ProjectDetail }) {
 }
 
 export function Projects() {
+  const reduceMotion = useReducedMotion();
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const shouldLoadPrism = useInView(sectionRef, { once: true, margin: "300px" });
 
   const [hoveredProject, setHoveredProject] = useState<string | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -240,14 +243,14 @@ export function Projects() {
           {/* Left Column - Interactive vGPU prism */}
           <div className="relative z-0">
             <motion.div
-              initial={{ opacity: 0, y: 18, scale: 0.985 }}
+              initial={reduceMotion ? false : { opacity: 0, y: 18, scale: 0.985 }}
               animate={isInView
                 ? { opacity: 1, y: 0, scale: 1 }
                 : { opacity: 0, y: 18, scale: 0.985 }}
-              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: reduceMotion ? 0 : 1.1, ease: [0.16, 1, 0.3, 1] }}
               className="relative -mx-6 h-[19rem] w-[calc(100%+3rem)] md:-mx-12 md:h-[24rem] md:w-[calc(100%+6rem)] lg:-ml-20 lg:-mr-36 lg:h-[25rem] lg:w-[calc(100%+14rem)]"
             >
-              <PrismShader />
+              {shouldLoadPrism ? <PrismShader /> : <PrismFallback />}
             </motion.div>
 
             {/* Intro Text */}

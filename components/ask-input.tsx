@@ -2,66 +2,16 @@
 
 import type React from "react";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X, Send, Trash2 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import ReactMarkdown from "react-markdown";
-import { ThinkingOrb } from "thinking-orbs";
+import { AssistantMessage } from "@/components/assistant-message";
 
 // Utility function for combining class names
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-
-// --- Assistant loading state, powered by Jakub Antalik's thinking orb ---
-const ThinkingLoader = ({ messageId }: { messageId: number }) => {
-  return (
-    <motion.div
-      layoutId={`assistant-shell-${messageId}`}
-      className="relative flex min-h-[52px] w-[92%] origin-top-left cursor-default items-center overflow-hidden rounded-[16px] rounded-bl-[4px] border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 py-2.5 text-card-foreground will-change-transform sm:w-[80%] sm:rounded-[20px] sm:rounded-bl-[4px] sm:px-4 sm:py-3"
-      style={{ transformOrigin: "left top" }}
-      role="status"
-      aria-live="polite"
-      exit={{ opacity: 0 }}
-      transition={{
-        layout: {
-          type: "spring",
-          stiffness: 260,
-          damping: 28,
-          mass: 0.75,
-        },
-        opacity: { duration: 0.18 },
-      }}
-    >
-      <motion.span
-        layout="position"
-        className="flex min-h-5 items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[hsl(var(--gold))]"
-      >
-        <motion.span
-          layoutId={`assistant-orb-${messageId}`}
-          className="block h-5 w-5 shrink-0 overflow-hidden rounded-full"
-          transition={{
-            layout: {
-              type: "spring",
-              stiffness: 300,
-              damping: 26,
-              mass: 0.65,
-            },
-          }}
-        >
-          <ThinkingOrb
-            state="composing"
-            size={20}
-            speed={1}
-            aria-hidden="true"
-          />
-        </motion.span>
-        <motion.span layout="position">Youssef&apos;s AI</motion.span>
-      </motion.span>
-    </motion.div>
-  );
-};
 
 // --- Message Type Definition ---
 interface Message {
@@ -100,6 +50,7 @@ interface Particle {
 
 // --- Main AskInput Component ---
 export function AskInput() {
+  const reduceMotion = useReducedMotion();
   // States
   const [isVisible, setIsVisible] = useState(true);
   const [inputValue, setInputValue] = useState("");
@@ -111,7 +62,9 @@ export function AskInput() {
   const [animating, setAnimating] = useState(false);
 
   // Refs
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesViewportRef = useRef<HTMLDivElement>(null);
+  const messageListRef = useRef<HTMLDivElement>(null);
+  const followAnswerRef = useRef(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
@@ -172,14 +125,21 @@ export function AskInput() {
   }, []);
 
   useEffect(() => {
-    // Scroll to bottom when new messages are added (user query or after AI finishes)
-    if (messagesEndRef.current && messages.length > 0) {
-      const parent = messagesEndRef.current.parentElement;
-      if (parent) {
-        parent.scrollTop = parent.scrollHeight;
-      }
-    }
-  }, [messages.length]);
+    if (!isExpanded) return;
+    const viewport = messagesViewportRef.current;
+    const list = messageListRef.current;
+    if (!viewport || !list) return;
+    followAnswerRef.current = true;
+    const follow = () => {
+      if (followAnswerRef.current) viewport.scrollTop = viewport.scrollHeight;
+    };
+    follow();
+    // Follow the actual expanding bubble, including its animation, while
+    // allowing the reader to scroll up without being pulled back down.
+    const observer = new ResizeObserver(follow);
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, [isExpanded]);
 
   // Clean implementation to prevent scroll-to-top on mobile input focus
   useEffect(() => {
@@ -343,10 +303,10 @@ export function AskInput() {
 
   // Redraw canvas when input value changes (only if not animating)
   useEffect(() => {
-    if (!animating) {
+    if (!animating && !reduceMotion) {
       draw();
     }
-  }, [inputValue, draw, animating]);
+  }, [inputValue, draw, animating, reduceMotion]);
 
   // --- Core Logic Functions ---
 
@@ -356,13 +316,16 @@ export function AskInput() {
       if (!inputValue.trim() || isStreamingRef.current || animating) return;
 
       const currentInput = inputValue;
+      followAnswerRef.current = true;
 
-      setAnimating(true);
-      draw();
+      setAnimating(!reduceMotion);
+      if (!reduceMotion) draw();
 
       setInputValue("");
 
-      if (newDataRef.current.length === 0) {
+      if (reduceMotion) {
+        newDataRef.current = [];
+      } else if (newDataRef.current.length === 0) {
         setTimeout(() => {
           setAnimating(false);
           if (inputRef.current) inputRef.current.focus();
@@ -492,6 +455,7 @@ export function AskInput() {
       nextId,
       isExpanded,
       animating,
+      reduceMotion,
       draw,
       animate,
       setMessages,
@@ -533,14 +497,10 @@ export function AskInput() {
             <motion.div
               ref={chatContainerRef}
               className="relative mb-2.5 max-h-[calc(100dvh-8.5rem)] overflow-hidden bg-card text-card-foreground border border-[hsl(var(--border))] rounded-lg pointer-events-auto shadow-lg sm:mb-4 sm:max-h-[400px]"
-              initial={{ opacity: 0, y: 40, height: 0 }}
+              initial={reduceMotion ? false : { opacity: 0, y: 24, height: 0 }}
               animate={{ opacity: 1, y: 0, height: "auto" }}
-              exit={{ opacity: 0, y: 40, height: 0 }}
-              transition={{
-                type: "spring",
-                damping: 20,
-                stiffness: 200,
-              }}
+              exit={{ opacity: 0, y: reduceMotion ? 0 : 12, height: 0 }}
+              transition={{ duration: reduceMotion ? 0 : 0.3, ease: [0.22, 1, 0.36, 1] }}
             >
               {/* Header */}
               <div className="flex items-center justify-between gap-3 p-3 border-b border-[hsl(var(--border))] sm:p-4">
@@ -577,150 +537,54 @@ export function AskInput() {
               </div>
 
               {/* Messages Area */}
-              <div className="overflow-y-auto max-h-[calc(100dvh-14rem)] sm:max-h-[300px] p-3 sm:p-4 space-y-3 sm:space-y-4 scrollbar-thin">
-                {apiError && (
-                  <motion.div
-                    className="text-center text-red-400 text-xs font-mono p-3 bg-red-900/20 border border-red-900/50"
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                  >
-                    {apiError}
-                  </motion.div>
-                )}
-                <AnimatePresence initial={false}>
-                  {messages.map((message, index) => {
-                    const isLoadingAnswer =
-                      message.type === "answer" &&
-                      index === messages.length - 1 &&
-                      isTyping &&
-                      !message.text;
+              <div
+                ref={messagesViewportRef}
+                onScroll={(event) => {
+                  const viewport = event.currentTarget;
+                  followAnswerRef.current = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 64;
+                }}
+                className="overflow-y-auto max-h-[calc(100dvh-14rem)] sm:max-h-[300px] p-3 sm:p-4 scrollbar-thin [overflow-anchor:none]"
+              >
+                <div ref={messageListRef} className="space-y-3 sm:space-y-4">
+                  {apiError && (
+                    <motion.div
+                      className="text-center text-red-400 text-xs font-mono p-3 bg-red-900/20 border border-red-900/50"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                    >
+                      {apiError}
+                    </motion.div>
+                  )}
+                  <AnimatePresence initial={false}>
+                    {messages.map((message, index) => {
+                      const isActiveAnswer =
+                        message.type === "answer" &&
+                        index === messages.length - 1 &&
+                        isTyping;
 
-                    return (
-                      <motion.div
-                        key={message.id}
-                        layout="position"
-                        className={`flex ${message.type === "question" ? "justify-end" : "justify-start"}`}
-                        initial={{ opacity: 0, y: 15 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{
-                          type: "spring",
-                          damping: 25,
-                          stiffness: 300,
-                        }}
-                      >
-                        {message.type === "question" ? (
-                          <div className="relative max-w-[92%] whitespace-pre-wrap break-words rounded-[16px] rounded-br-[4px] bg-[hsl(var(--gold))] px-3 py-2.5 text-[13px] leading-relaxed text-[hsl(var(--accent-foreground))] sm:max-w-[80%] sm:rounded-[20px] sm:rounded-br-[4px] sm:px-4 sm:py-3 sm:text-sm">
-                            <p className="chat-message-text text-[13px] sm:text-sm">
-                              {message.text}
-                            </p>
-                          </div>
-                        ) : (
-                          <div className="relative w-full">
-                            <LayoutGroup
-                              id={`assistant-response-${message.id}`}
-                            >
-                              <AnimatePresence initial={false}>
-                                {isLoadingAnswer ? (
-                                  <ThinkingLoader
-                                    key="thinking"
-                                    messageId={message.id}
-                                  />
-                                ) : (
-                                  <motion.div
-                                    key="answer"
-                                    layoutId={`assistant-shell-${message.id}`}
-                                    className={cn(
-                                      "relative w-[92%] origin-top-left overflow-hidden whitespace-pre-wrap break-words rounded-[16px] rounded-bl-[4px] border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 py-2.5 text-[13px] leading-relaxed text-card-foreground will-change-transform sm:w-[80%] sm:rounded-[20px] sm:rounded-bl-[4px] sm:px-4 sm:py-3 sm:text-sm",
-                                      isTyping && "min-h-[74px]",
-                                    )}
-                                    style={{ transformOrigin: "left top" }}
-                                    initial={{ opacity: 0.72 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{
-                                      layout: {
-                                        type: "spring",
-                                        stiffness: 260,
-                                        damping: 28,
-                                        mass: 0.75,
-                                      },
-                                      opacity: { duration: 0.2 },
-                                    }}
-                                  >
-                                    <motion.span
-                                      layout="position"
-                                      className="mb-1.5 flex min-h-5 items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[hsl(var(--gold))]"
-                                    >
-                                      <AnimatePresence initial={false}>
-                                        {isTyping && (
-                                          <motion.span
-                                            key="streaming-orb"
-                                            layoutId={`assistant-orb-${message.id}`}
-                                            className="block h-5 w-5 shrink-0 overflow-hidden rounded-full"
-                                            exit={{
-                                              opacity: 0,
-                                              scale: 0.6,
-                                              filter: "blur(3px)",
-                                            }}
-                                            transition={{
-                                              layout: {
-                                                type: "spring",
-                                                stiffness: 300,
-                                                damping: 26,
-                                                mass: 0.65,
-                                              },
-                                              opacity: { duration: 0.16 },
-                                              scale: { duration: 0.18 },
-                                              filter: { duration: 0.18 },
-                                            }}
-                                          >
-                                            <ThinkingOrb
-                                              state="composing"
-                                              size={20}
-                                              speed={1}
-                                              aria-hidden="true"
-                                            />
-                                          </motion.span>
-                                        )}
-                                      </AnimatePresence>
-                                      <motion.span layout="position">
-                                        Youssef&apos;s AI
-                                      </motion.span>
-                                    </motion.span>
-
-                                    <motion.div
-                                      className="chat-message-text text-[13px] leading-relaxed [&_*]:break-words [&_strong]:font-semibold [&_code]:rounded [&_code]:bg-foreground/10 [&_code]:px-1 [&_code]:text-[hsl(var(--gold))] [&_a]:text-[hsl(var(--gold))] [&_a]:underline [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:ml-0 [&_p+p]:mt-2 sm:text-sm"
-                                      initial={{
-                                        opacity: 0,
-                                        y: 4,
-                                        filter: "blur(6px)",
-                                      }}
-                                      animate={{
-                                        opacity: 1,
-                                        y: 0,
-                                        filter: "blur(0px)",
-                                      }}
-                                      transition={{
-                                        duration: 0.28,
-                                        delay: 0.1,
-                                        ease: [0.16, 1, 0.3, 1],
-                                      }}
-                                    >
-                                      <ReactMarkdown>
-                                        {message.text}
-                                      </ReactMarkdown>
-                                    </motion.div>
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                            </LayoutGroup>
-                          </div>
-                        )}
-                      </motion.div>
-                    );
-                  })}
-                </AnimatePresence>
-                <div ref={messagesEndRef} />
+                      return (
+                        <motion.div
+                          key={message.id}
+                          className={`flex ${message.type === "question" ? "justify-end" : "justify-start"}`}
+                          initial={{ opacity: reduceMotion ? 1 : 0, y: reduceMotion ? 0 : 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: reduceMotion ? 0 : 0.24, ease: [0.22, 1, 0.36, 1] }}
+                        >
+                          {message.type === "question" ? (
+                            <div className="relative max-w-[92%] whitespace-pre-wrap break-words rounded-[16px] rounded-br-[4px] bg-[hsl(var(--gold))] px-3 py-2.5 text-[13px] leading-relaxed text-[hsl(var(--accent-foreground))] sm:max-w-[80%] sm:rounded-[20px] sm:rounded-br-[4px] sm:px-4 sm:py-3 sm:text-sm">
+                              <p className="chat-message-text text-[13px] sm:text-sm">
+                                {message.text}
+                              </p>
+                            </div>
+                          ) : (
+                            <AssistantMessage text={message.text} active={isActiveAnswer} />
+                          )}
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
               </div>
             </motion.div>
           )}
@@ -760,6 +624,7 @@ export function AskInput() {
               e.preventDefault();
               e.currentTarget.focus({ preventScroll: true });
             }}
+            aria-label="Ask Youssef’s AI a question"
             placeholder="Ask me anything..."
             className={cn(
               "relative z-10 w-full min-w-0 h-full pl-7 pr-12 sm:pl-8 sm:pr-14",

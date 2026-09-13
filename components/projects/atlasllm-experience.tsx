@@ -3,8 +3,8 @@
 import { type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { ArrowLeft, ArrowUpRight, ArrowDown } from "lucide-react";
+import { motion, MotionConfig } from "framer-motion";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import type { SerializableProject } from "@/components/project-detail";
@@ -13,6 +13,9 @@ import { MacBook, IPad, IPhone } from "@/components/projects/device-frames";
 import { PROVIDERS } from "@/components/projects/provider-icons";
 import { TechStack } from "@/components/projects/tech-stack";
 
+import { StudyNav, NextStudy } from "@/components/projects/case-study-chrome";
+
+const CHAPTERS = [{id:"overview",label:"The idea"},{id:"workflow",label:"Research engine"},{id:"product",label:"The product"},{id:"models",label:"The models"}];
 const EASE = [0.16, 1, 0.3, 1] as const;
 const REPO_URL = "https://github.com/Youssef2430/llmchat";
 
@@ -42,7 +45,7 @@ function Reveal({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
+      initial={false}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-12%" }}
       transition={{ duration: 0.7, delay, ease: EASE }}
@@ -86,102 +89,37 @@ const FACTS = "9 providers · 30+ models · 4 chat modes · 11 workflow tasks";
 
 export function AtlasLLMExperience({ project }: { project: SerializableProject }) {
   return (
-    <main className="atlas-theme min-h-screen bg-background text-foreground overflow-clip">
+    <MotionConfig reducedMotion="user"><main className="atlas-theme study-page atlas-study min-h-screen bg-background text-foreground overflow-clip">
       <div className="grain-overlay" />
       <Navbar />
 
-      {/* ── Opener ── */}
-      <section className="px-6 md:px-12 pt-32 md:pt-40">
-        <div className="mx-auto max-w-6xl">
-          <Link
-            href="/#work"
-            className="group inline-flex items-center font-mono text-xs tracking-[0.15em] uppercase text-[hsl(var(--foreground-muted))] hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-            Back to Work
-          </Link>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: EASE }}
-            className="mt-12 flex items-center gap-3.5"
-          >
-            <AtlasLogo className="h-9 w-9 md:h-11 md:w-11" />
-            <span className="text-2xl md:text-3xl font-semibold tracking-tight text-foreground">
-              AtlasLLM
-            </span>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
-            className="mt-8 max-w-3xl text-5xl md:text-7xl font-light tracking-tight leading-[1.04] text-foreground"
-          >
-            Thirty models.
-            <br />
-            <span className="text-[hsl(var(--gold))]">One conversation.</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2, ease: EASE }}
-            className="mt-6 max-w-2xl text-lg md:text-xl font-light leading-relaxed text-[hsl(var(--foreground-soft))]"
-          >
-            A privacy-first, multi-model AI chat platform with agentic research.
-            Deep Research and Pro Search modes built on a custom workflow engine.
-          </motion.p>
-
-          {/* meta strip */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.35 }}
-            className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-border pt-6 font-mono text-[11px] tracking-[0.12em] uppercase text-[hsl(var(--foreground-subtle))]"
-          >
-            <span>Solo build</span>
-            <span>Turborepo monorepo</span>
-            <a
-              href={project.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-[hsl(var(--gold))] hover:text-foreground transition-colors"
-            >
-              atlasllm.chat
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </a>
-            <a
-              href={REPO_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-[hsl(var(--foreground-muted))] hover:text-foreground transition-colors"
-            >
-              Source
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </a>
-          </motion.div>
-
-          {/* hero - MacBook on the grid */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.4, ease: EASE }}
-            className="atlas-grid mt-14 border border-border p-6 md:p-14"
-          >
-            <div className="mx-auto max-w-3xl">
-              <MacBook src={SHOT_HOME} alt="AtlasLLM home screen with model picker" priority />
+      <section id="project-top" className="atlas-editorial-hero">
+        <div className="study-width">
+          <Link href="/#work" className="study-back"><ArrowLeft size={14} />Back to work</Link>
+          <div className="atlas-hero-grid">
+            <div className="atlas-hero-copy">
+              <div className="atlas-wordmark"><AtlasLogo className="h-9 w-9" /><span>AtlasLLM</span><span className="study-eyebrow">Independent AI workspace</span></div>
+              <h1>One space.<br /><span>Every model.</span></h1>
+              <p>Go from a quick question to a deep investigation. Thirty-plus models, a shared conversation, and a research engine that shows its work.</p>
+              <div className="study-actions"><a href={project.link} target="_blank" rel="noopener noreferrer" className="study-primary">Explore AtlasLLM<ArrowUpRight size={16} /></a><a href="#workflow" className="study-text-link">Follow the research<ArrowDown size={14} /></a></div>
             </div>
-          </motion.div>
+            <div className="atlas-hero-stage">
+              <div className="atlas-stage-top"><span className="study-eyebrow">Your workspace, without the walls</span><span className="atlas-status-dot" /></div>
+              <div className="atlas-hero-device"><MacBook src={SHOT_HOME} alt="AtlasLLM workspace with its multi-model picker" priority /></div>
+              <div className="atlas-model-dock">{PROVIDERS.slice(0, 5).map(({name, Icon, mono}) => <span key={name} title={name}><Icon size={23} className={mono ? "text-foreground" : undefined} /></span>)}<span className="atlas-model-more">+4</span></div>
+              <div className="atlas-stage-note"><span>Switch models.<br /><strong>Keep the context.</strong></span><span>01 — 04<br /><strong>Standard → Deep Research</strong></span></div>
+            </div>
+          </div>
+          <div className="atlas-hero-stats">{[["30+", "Models, one conversation"], ["9", "Providers, one interface"], ["4", "Ways to find your answer"]].map(([value, label]) => <div key={value}><strong>{value}</strong><span>{label}</span></div>)}</div>
         </div>
       </section>
+      <StudyNav name="AtlasLLM" chapters={CHAPTERS} />
 
       {/* ── Overview ── */}
-      <section className="px-6 md:px-12 py-24 md:py-32">
+      <section id="overview" className="px-6 md:px-12 py-24 md:py-32">
         <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
           <Reveal className="lg:col-span-4">
-            <Label>Overview</Label>
+            <Label>Overview</Label><h2 className="study-section-title">Built for<br />curiosity.</h2>
           </Reveal>
           <div className="lg:col-span-8 space-y-6">
             <Reveal>
@@ -216,7 +154,7 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
       </section>
 
       {/* ── Workflow orchestration (signature) ── */}
-      <section className="px-6 md:px-12 pb-24 md:pb-32">
+      <section id="workflow" className="px-6 md:px-12 pb-24 md:pb-32">
         <div className="mx-auto max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 mb-12">
             <Reveal className="lg:col-span-5">
@@ -238,7 +176,7 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
 
           <Reveal delay={0.1}>
             <div className="atlas-grid border border-border p-4 md:p-8 overflow-x-auto">
-              <div className="min-w-[760px]">
+              <div className="min-w-0">
                 <AtlasWorkflow />
               </div>
             </div>
@@ -247,7 +185,7 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
       </section>
 
       {/* ── Product (device family) ── */}
-      <section className="px-6 md:px-12 pb-24 md:pb-32">
+      <section id="product" className="px-6 md:px-12 pb-24 md:pb-32">
         <div className="mx-auto max-w-6xl">
           <Reveal className="mb-14 max-w-2xl">
             <Label>The product</Label>
@@ -256,7 +194,7 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
             </h2>
           </Reveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8 items-end">
+          <div className="atlas-device-gallery grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8 items-end">
             <Reveal className="md:col-span-8">
               <IPad src={SHOT_RESEARCH} alt="AtlasLLM Pro Search conversation with sources" />
               <p className="mt-5 text-sm text-[hsl(var(--foreground-soft))] leading-relaxed">
@@ -278,7 +216,7 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
       </section>
 
       {/* ── Model coverage (icons) ── */}
-      <section className="border-y border-border">
+      <section id="models" className="border-y border-border">
         <div className="mx-auto max-w-6xl px-6 md:px-12 py-20 md:py-24">
           <Reveal className="mb-12">
             <Label>Model coverage</Label>
@@ -288,7 +226,7 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
           </Reveal>
 
           <Reveal delay={0.05}>
-            <div className="flex flex-wrap items-center gap-x-8 gap-y-5">
+            <div className="atlas-provider-grid">
               {PROVIDERS.map(({ name, Icon, mono }) => (
                 <div key={name} className="flex items-center gap-2.5">
                   <Icon size={24} className={mono ? "text-foreground" : undefined} />
@@ -307,10 +245,10 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
       </section>
 
       {/* ── Built with ── */}
-      <section className="px-6 md:px-12 py-20 md:py-24">
+      <section id="stack" className="px-6 md:px-12 py-20 md:py-24">
         <div className="mx-auto max-w-6xl">
           <Reveal className="mb-8">
-            <Label>Built with</Label>
+            <Label>Built with</Label><a href={REPO_URL} target="_blank" rel="noopener noreferrer" className="study-text-link mt-6">Explore the source<ArrowUpRight size={14} /></a>
           </Reveal>
           <Reveal delay={0.05}>
             <TechStack />
@@ -318,53 +256,8 @@ export function AtlasLLMExperience({ project }: { project: SerializableProject }
         </div>
       </section>
 
-      {/* ── Outro ── */}
-      <section className="px-6 md:px-12 pb-28">
-        <div className="mx-auto max-w-6xl border-t border-border pt-14">
-          <div className="flex flex-col gap-10 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3">
-              <AtlasLogo className="h-7 w-7" />
-              <span className="text-lg font-semibold tracking-tight">AtlasLLM</span>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-x-8 gap-y-3 font-mono text-xs tracking-[0.12em] uppercase">
-              <a
-                href={project.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[hsl(var(--gold))] hover:text-foreground transition-colors"
-              >
-                Visit live
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </a>
-              <a
-                href={REPO_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[hsl(var(--foreground-muted))] hover:text-foreground transition-colors"
-              >
-                Source
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </a>
-            </div>
-          </div>
-
-          <div className="mt-12 flex items-center justify-between">
-            <Link
-              href="/#work"
-              className="group inline-flex items-center font-mono text-sm uppercase tracking-[0.1em] text-[hsl(var(--foreground-muted))] hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-              All Projects
-            </Link>
-            <span className="font-arabic text-sm text-[hsl(var(--gold))] opacity-60">
-              「مشروع」
-            </span>
-          </div>
-        </div>
-      </section>
-
+      <NextStudy current="atlasllm" />
       <Footer />
-    </main>
+    </main></MotionConfig>
   );
 }
