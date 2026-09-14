@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -74,14 +75,13 @@ function ThemeToggle({ className = "" }: { className?: string }) {
 }
 
 export function Navbar() {
-  const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
+  const isHome = pathname === "/";
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
 
   useEffect(() => {
-    setMounted(true);
-
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
 
@@ -115,12 +115,13 @@ export function Navbar() {
   }, [mobileMenuOpen]);
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (!isHome || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
     e.preventDefault();
     const targetId = href.replace("#", "");
     const element = document.getElementById(targetId);
 
     if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+      element.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
       window.history.pushState(null, "", href);
     }
 
@@ -135,8 +136,8 @@ export function Navbar() {
             ? "border-border/70 bg-background/85 py-3 shadow-sm backdrop-blur-md"
             : "border-border/20 bg-background/55 py-5 backdrop-blur-sm"
         }`}
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: mounted ? 1 : 0 }}
+        initial={false}
+        animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.2, ease: [0.55, 0.45, 0.16, 1] }}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-10 xl:px-12">
@@ -156,12 +157,12 @@ export function Navbar() {
             >
               {navLinks.map((link) => {
                 const Icon = link.icon;
-                const isActive = activeSection === link.href.replace("#", "");
+                const isActive = isHome && activeSection === link.href.replace("#", "");
 
                 return (
                   <a
                     key={link.href}
-                    href={link.href}
+                    href={isHome ? link.href : `/${link.href}`}
                     onClick={(e) => handleNavClick(e, link.href)}
                     className={`nav-link inline-flex h-9 w-9 items-center justify-center ${
                       isActive ? "active" : ""
@@ -195,12 +196,12 @@ export function Navbar() {
             >
               {navLinks.map((link) => {
                 const Icon = link.icon;
-                const isActive = activeSection === link.href.replace("#", "");
+                const isActive = isHome && activeSection === link.href.replace("#", "");
 
                 return (
                   <a
                     key={link.href}
-                    href={link.href}
+                    href={isHome ? link.href : `/${link.href}`}
                     onClick={(e) => handleNavClick(e, link.href)}
                     className={`nav-link inline-flex h-10 w-10 items-center justify-center xl:h-auto xl:w-auto ${
                       isActive ? "active" : ""
@@ -274,7 +275,7 @@ export function Navbar() {
                     transition={{ delay: index * 0.1 }}
                   >
                     <a
-                      href={link.href}
+                      href={isHome ? link.href : `/${link.href}`}
                       onClick={(e) => handleNavClick(e, link.href)}
                       className="flex flex-col items-center group"
                     >

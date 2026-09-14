@@ -163,6 +163,7 @@ Previously at Wind River Systems (Sept 2022–Aug 2023), he delivered an Angular
 As a University of Ottawa Software Developer (May 2022–Apr 2024), he redesigned the university search engine (PHP/MySQL/Apache), improving response times by 80% and saving $30,000+ annually; he also shipped PHP/Bash/Cron automations that further boosted search speed by 54% and streamlined data migration.
 Teaching Assistant (Sept 2023–present): supports graduate ML for Bio-informatics and undergraduate courses including Data Structures & Algorithms, Design & Analysis of Algorithms, Programming Paradigms, and Discrete Structures.
 Selected projects:
+• Ramelli (previously AtlasLLM): A multi-model AI chat platform supporting 30+ LLMs across 9 providers with Next.js, Convex, Redis, Cloudflare R2, and OpenRouter. Current name: Ramelli. Website: https://ramelli.chat/chat. Portfolio: /projects/ramelli.
 • NLP Phishing Detection (Bell Canada Research): CNN-based website classifier (98.4% accuracy), Chrome extension integration, and an AWS S3-driven retraining pipeline.
 • GeeGees Intramural Sports Hub: Next.js/TypeScript/Tailwind app with a Rust + Actix-web API (SQLx/PostgreSQL) streaming real-time standings, Elo ratings, and predictive analytics with sub-20 ms latency; built with async/await and strict type safety for scalable concurrency.
 • Distributed File Storage System (Go): Engineered a fault-tolerant, gRPC/Protocol Buffers-backed storage network using consistent hashing and replication, reducing transfer latency by 35 %.

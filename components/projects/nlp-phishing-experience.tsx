@@ -6,6 +6,7 @@ import Link from "next/link";
 import {
   AlertTriangle,
   ArrowLeft,
+  ArrowDown,
   ArrowUpRight,
   BrainCircuit,
   CheckCircle2,
@@ -20,11 +21,13 @@ import {
   Terminal,
   type LucideIcon,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, MotionConfig } from "framer-motion";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
+import { StudyNav, NextStudy } from "@/components/projects/case-study-chrome";
 import type { SerializableProject } from "@/components/project-detail";
 
+const CHAPTERS = [{id:"overview",label:"In the inbox"},{id:"scanner",label:"Try a message"},{id:"pipeline",label:"System"},{id:"models",label:"Models"}];
 const EASE = [0.16, 1, 0.3, 1] as const;
 const REPO_URL =
   "https://github.com/capstone-2024-T91/Image-Processing-and-NLP-for-Brand-Protection";
@@ -290,7 +293,7 @@ function Reveal({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
+      initial={false}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-12%" }}
       transition={{ duration: 0.7, delay, ease: EASE }}
@@ -307,113 +310,36 @@ export function NLPPhishingExperience({
   project: SerializableProject;
 }) {
   return (
-    <main className="phish-theme min-h-screen overflow-clip bg-background text-foreground">
+    <MotionConfig reducedMotion="user"><main className="phish-theme study-page phish-study min-h-screen overflow-clip bg-background text-foreground">
       <div className="grain-overlay" />
       <Navbar />
 
-      <section className="phish-hero px-6 pt-32 md:px-12 md:pt-40">
-        <div className="relative z-[1] mx-auto max-w-6xl">
-          <Link
-            href="/#work"
-            className="group phish-mono inline-flex items-center text-xs uppercase text-[hsl(var(--foreground-muted))] transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-            Back to Work
-          </Link>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: EASE }}
-            className="mt-12 flex items-center gap-3"
-          >
-            <span className="phish-mark">G30</span>
-            <div>
-              <p className="phish-mono text-[11px] uppercase text-[hsl(var(--foreground-subtle))]">
-                Brand protection capstone
-              </p>
-              <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
-                NLP Phishing Detection
-              </h1>
+      <section id="project-top" className="phish-editorial-hero">
+        <div className="study-width">
+          <Link href="/#work" className="study-back"><ArrowLeft size={14} />Back to work</Link>
+          <div className="phish-hero-grid">
+            <div className="phish-hero-copy">
+              <div className="phish-wordmark"><span className="phish-mark">G30</span><span>NLP Phishing Detection<small>Brand protection capstone</small></span></div>
+              <h1>A second look.<br /><span>Before you click.</span></h1>
+              <p>A clearer signal in a crowded inbox. Machine learning that reads the message, weighs the risk, and puts the verdict where you need it.</p>
+              <div className="study-actions"><a href="#scanner" className="study-primary">Inspect a message<ArrowDown size={15} /></a><a href={REPO_URL} target="_blank" rel="noopener noreferrer" className="study-text-link">Detector source<ArrowUpRight size={15} /></a></div>
+              <div className="phish-hero-meta"><span>{project.timeline ?? "Capstone project"} / Group 30</span><a href={EXTENSION_REPO_URL} target="_blank" rel="noopener noreferrer">Chrome extension source ↗</a></div>
             </div>
-          </motion.div>
-
-          <motion.h2
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
-            className="phish-display mt-8 max-w-4xl text-5xl leading-none text-foreground md:text-7xl"
-          >
-            Safe or Caution, right in the inbox.
-          </motion.h2>
-
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2, ease: EASE }}
-            className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-[hsl(var(--foreground-soft))] md:text-xl"
-          >
-            A capstone system that turns an open email into a security signal:
-            clean the text, route it through fine-tuned classifiers or LLM
-            adapters, and badge the verdict directly in Gmail.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.35 }}
-            className="phish-mono mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-border pt-6 text-[11px] uppercase text-[hsl(var(--foreground-subtle))]"
-          >
-            <span>{project.timeline ?? "Capstone project"}</span>
-            <span>Group 30 · g30.xyz</span>
-            <a
-              href={REPO_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-[hsl(var(--gold))] transition-colors hover:text-foreground"
-            >
-              Detector source
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </a>
-            <a
-              href={EXTENSION_REPO_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-[hsl(var(--foreground-muted))] transition-colors hover:text-foreground"
-            >
-              Extension source
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </a>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.4, ease: EASE }}
-            className="phish-hero-field mt-14 border border-border p-4 md:p-8"
-          >
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-center">
-              <div className="lg:col-span-7">
-                <ThemedScreenshot
-                  baseSrc={SAFE_SHOT}
-                  alt="Gmail message with a phishing risk button and Safe result badge"
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 45rem"
-                  className="aspect-[16/9]"
-                />
-              </div>
-              <div className="lg:col-span-5">
-                <HeroReadout />
-              </div>
+            <div className="phish-inspection-scene">
+              <div className="phish-inspection-top"><span className="study-eyebrow">Message inspection / 001</span><ShieldCheck size={17} /></div>
+              <div className="phish-email-sheet"><div><Mail size={18} /><span>INBOX / NEW MESSAGE</span><span>09:41</span></div><h3>Your weekly team update</h3><p>Hi team, here’s the summary from our weekly check-in. Thanks for another great week.</p><span className="phish-email-line" /><span className="phish-email-line short" /></div>
+              <HeroReadout />
+              <div className="phish-inspection-note"><span className="phish-signal-dot" />An example of the signal, right beside the message.</div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
+      <StudyNav name="NLP Phishing Detection" chapters={CHAPTERS} />
 
-      <section className="px-6 py-24 md:px-12 md:py-32">
+      <section id="overview" className="px-6 py-24 md:px-12 md:py-32">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
           <Reveal className="lg:col-span-4">
-            <Label>Overview</Label>
+            <Label>In the inbox</Label><h2 className="study-section-title">A signal.<br />Not a guess.</h2>
           </Reveal>
           <div className="space-y-6 lg:col-span-8">
             <Reveal>
@@ -451,17 +377,17 @@ export function NLPPhishingExperience({
         </Reveal>
       </section>
 
-      <section className="border-y border-border px-6 py-16 md:px-12">
+      <section id="metrics" className="border-y border-border px-6 py-16 md:px-12">
         <StatsPanel />
       </section>
 
-      <section className="px-6 py-24 md:px-12 md:py-32">
+      <section id="scanner" className="px-6 py-24 md:px-12 md:py-32">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-16">
             <Reveal className="lg:col-span-5">
               <Label index="01">Classifier readout</Label>
               <h2 className="phish-display mt-5 text-4xl leading-tight text-foreground md:text-5xl">
-                Text preprocessing and classification.
+                Read between the lines.
               </h2>
             </Reveal>
             <Reveal delay={0.1} className="lg:col-span-7">
@@ -480,11 +406,11 @@ export function NLPPhishingExperience({
         </div>
       </section>
 
-      <section className="border-y border-border px-6 py-20 md:px-12 md:py-28">
+      <section id="pipeline" className="border-y border-border px-6 py-20 md:px-12 md:py-28">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-16">
             <Reveal className="lg:col-span-5">
-              <Label index="02">System path</Label>
+              <Label index="02">System path</Label><h2 className="study-section-title">From message<br />to meaning.</h2>
             </Reveal>
             <Reveal delay={0.1} className="lg:col-span-7">
               <p className="text-base leading-relaxed text-[hsl(var(--foreground-soft))] md:text-lg">
@@ -501,12 +427,12 @@ export function NLPPhishingExperience({
         </div>
       </section>
 
-      <section className="px-6 py-24 md:px-12 md:py-32">
+      <section id="models" className="px-6 py-24 md:px-12 md:py-32">
         <div className="mx-auto max-w-6xl">
           <Reveal className="mb-12">
             <Label index="03">Model backends</Label>
             <h2 className="phish-display mt-5 text-4xl leading-tight text-foreground md:text-5xl">
-              Inference options implemented in the detector.
+              Different models. One clear verdict.
             </h2>
           </Reveal>
 
@@ -534,13 +460,13 @@ export function NLPPhishingExperience({
         </div>
       </section>
 
-      <section className="border-y border-border px-6 py-20 md:px-12 md:py-28">
+      <section id="deployment" className="border-y border-border px-6 py-20 md:px-12 md:py-28">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-16">
             <Reveal className="lg:col-span-5">
               <Label index="04">Deployment</Label>
               <h2 className="phish-display mt-5 text-4xl leading-tight text-foreground md:text-5xl">
-                Containerized service and browser integration.
+                Built to leave the notebook.
               </h2>
             </Reveal>
             <Reveal delay={0.1} className="lg:col-span-7">
@@ -575,7 +501,7 @@ export function NLPPhishingExperience({
         </div>
       </section>
 
-      <section className="border-y border-border px-6 py-20 md:px-12 md:py-24">
+      <section id="stack" className="border-y border-border px-6 py-20 md:px-12 md:py-24">
         <div className="mx-auto max-w-6xl">
           <Reveal className="mb-10">
             <Label>Built with</Label>
@@ -586,53 +512,10 @@ export function NLPPhishingExperience({
         </div>
       </section>
 
-      <section className="px-6 pb-28 pt-20 md:px-12 md:pt-24">
-        <div className="mx-auto max-w-6xl border-t border-border pt-14">
-          <div className="flex flex-col gap-10 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3">
-              <span className="phish-mark phish-mark-small">G30</span>
-              <span className="text-lg font-semibold">NLP Phishing Detection</span>
-            </div>
-
-            <div className="phish-mono flex flex-wrap items-center gap-x-8 gap-y-3 text-xs uppercase">
-              <a
-                href={REPO_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[hsl(var(--gold))] transition-colors hover:text-foreground"
-              >
-                Detector source
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </a>
-              <a
-                href={EXTENSION_REPO_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[hsl(var(--foreground-muted))] transition-colors hover:text-foreground"
-              >
-                Extension source
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </a>
-            </div>
-          </div>
-
-          <div className="mt-12 flex items-center justify-between">
-            <Link
-              href="/#work"
-              className="group phish-mono inline-flex items-center text-sm uppercase text-[hsl(var(--foreground-muted))] transition-colors hover:text-foreground"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-              All Projects
-            </Link>
-            <span className="font-arabic text-sm text-[hsl(var(--gold))] opacity-60">
-              「مشروع」
-            </span>
-          </div>
-        </div>
-      </section>
+      <NextStudy current="nlp-phishing-detection" />
 
       <Footer />
-    </main>
+    </main></MotionConfig>
   );
 }
 
@@ -643,7 +526,7 @@ function StatsPanel() {
         {METRICS.map((metric, index) => (
           <motion.div
             key={metric.label}
-            initial={{ opacity: 0, y: 16 }}
+            initial={false}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-10%" }}
             transition={{ duration: 0.55, delay: index * 0.05, ease: EASE }}
@@ -675,36 +558,12 @@ function StatsPanel() {
 }
 
 function HeroReadout() {
-  return (
-    <div className="border border-border bg-card p-5">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="phish-mono text-[11px] uppercase text-[hsl(var(--foreground-subtle))]">
-            Live verdict
-          </p>
-          <p className="mt-1 text-2xl font-semibold text-foreground">Safe</p>
-        </div>
-        <span className="inline-flex h-12 w-12 items-center justify-center border border-[hsl(var(--phish-safe))]/50 bg-[hsl(var(--phish-safe)/0.14)] text-[hsl(var(--phish-safe))]">
-          <CheckCircle2 className="h-5 w-5" />
-        </span>
-      </div>
-
-      <div className="mt-6 space-y-4">
-        <SignalBar label="Legitimate" value={98.4} tone="safe" />
-        <SignalBar label="Phishing" value={1.6} tone="danger" />
-      </div>
-
-      <div className="mt-6 border-t border-border pt-4">
-        <p className="phish-mono text-[11px] uppercase text-[hsl(var(--foreground-subtle))]">
-          Model option
-        </p>
-        <p className="mt-2 text-sm leading-relaxed text-[hsl(var(--foreground-soft))]">
-          local · distilbert-base-uncased_fine_tuned · badge injected by the
-          Chrome content script
-        </p>
-      </div>
-    </div>
-  );
+  return <div className="phish-verdict-card">
+    <div className="phish-verdict-heading"><span className="study-eyebrow">Example verdict</span><span>DistilBERT</span></div>
+    <div className="phish-verdict-main"><div className="phish-verdict-ring"><ShieldCheck size={42} strokeWidth={1.3} /></div><div><span className="study-eyebrow">Message looks</span><strong>Safe.</strong><p>98.4% model confidence</p></div></div>
+    <div className="phish-verdict-bars"><SignalBar label="Legitimate" value={98.4} tone="safe" /><SignalBar label="Phishing" value={1.6} tone="danger" /></div>
+    <p className="phish-verdict-foot">A model signal to support your judgment.</p>
+  </div>;
 }
 
 function ThemedScreenshot({
@@ -793,7 +652,7 @@ function ScannerDemo() {
   const isDanger = sample.tone === "danger";
 
   return (
-    <div className="grid grid-cols-1 border border-border bg-card lg:grid-cols-12">
+    <div className="phish-scanner"><div className="phish-scanner-heading"><span className="study-eyebrow">Interactive example / choose a message</span><span>Illustrative results</span></div><div className="grid grid-cols-1 lg:grid-cols-12">
       <div className="border-b border-border p-5 lg:col-span-5 lg:border-b-0 lg:border-r">
         <div className="mb-5 flex flex-wrap gap-2">
           {SAMPLES.map((item) => (
@@ -801,6 +660,7 @@ function ScannerDemo() {
               key={item.id}
               type="button"
               onClick={() => setSelectedId(item.id)}
+              aria-pressed={selectedId === item.id}
               className={`phish-mono border px-3 py-2 text-xs uppercase transition-colors ${
                 selectedId === item.id
                   ? "border-[hsl(var(--gold))] bg-[hsl(var(--gold)/0.12)] text-foreground"
@@ -832,7 +692,7 @@ function ScannerDemo() {
         </div>
       </div>
 
-      <div className="p-5 lg:col-span-7">
+      <div className="p-5 lg:col-span-7" aria-live="polite" aria-atomic="true">
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <div>
             <p className="phish-mono text-[11px] uppercase text-[hsl(var(--foreground-subtle))]">
@@ -890,6 +750,7 @@ function ScannerDemo() {
         </div>
       </div>
     </div>
+    </div>
   );
 }
 
@@ -917,9 +778,8 @@ function SignalBar({
       </div>
       <div className="h-2 border border-border bg-[hsl(var(--background))]">
         <motion.div
-          initial={{ width: 0 }}
-          whileInView={{ width: `${value}%` }}
-          viewport={{ once: true }}
+          initial={false}
+          animate={{ width: `${value}%` }}
           transition={{ duration: 0.8, ease: EASE }}
           className="h-full"
           style={{ background: color }}
@@ -1071,13 +931,13 @@ function Pipeline() {
 
 function PhishTechStack() {
   return (
-    <div className="phish-tech-strip flex max-w-full overflow-x-auto pb-6 pl-2 pt-10">
+    <div className="study-tech-list" role="list">
       {TECH.map((tech) => (
         <div
           key={tech.name}
-          className="group relative -ml-3 shrink-0 transition-[z-index] duration-0 first:ml-0 hover:z-30"
+          className="study-tech-item" role="listitem"
         >
-          <div className="flex h-14 w-14 items-center justify-center rounded-[16px] border border-border bg-card text-foreground/70 shadow-[0_4px_14px_-6px_rgba(0,0,0,0.45)] transition-all duration-300 ease-out group-hover:-translate-y-2.5 group-hover:border-[hsl(var(--gold))]/50 group-hover:text-[hsl(var(--gold))] group-hover:shadow-[0_16px_30px_-12px_rgba(0,0,0,0.65)]">
+          <div className="study-tech-icon">
             <svg
               viewBox="0 0 24 24"
               width={24}
@@ -1088,9 +948,9 @@ function PhishTechStack() {
               <path d={tech.path} />
             </svg>
           </div>
-          <div className="pointer-events-none absolute bottom-full left-0 z-20 mb-2.5 flex translate-y-1 items-center gap-2 whitespace-nowrap rounded-full bg-foreground py-1.5 pl-4 pr-1.5 text-background opacity-0 shadow-lg transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
-            <span className="text-xs font-semibold">{tech.name}</span>
-            <span className="rounded-full bg-background/15 px-2 py-0.5 text-[10px] tracking-wide text-background/70">
+          <div className="study-tech-label">
+            <span>{tech.name}</span>
+            <span>
               {tech.tag}
             </span>
           </div>

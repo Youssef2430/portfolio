@@ -1,8 +1,4 @@
-/**
- * Compact "built with" strip - a row of technology marks that reveal their
- * name (and role) on hover. Logos are monochrome (currentColor); a few tools
- * without a clean mark use a lettermark in the same chip.
- */
+/** AtlasLLM technology grid. Names and roles remain visible on every screen size. */
 
 type Tech = { name: string; tag: string; path?: string; mono?: string };
 
@@ -23,13 +19,13 @@ const TECHS: Tech[] = [
 
 export function TechStack() {
   return (
-    <div className="flex pl-2">
+    <div className="study-tech-list" role="list">
       {TECHS.map((t) => (
         <div
           key={t.name}
-          className="group relative -ml-3 transition-[z-index] duration-0 first:ml-0 hover:z-30"
+          className="study-tech-item" role="listitem"
         >
-          <div className="flex h-14 w-14 items-center justify-center rounded-[16px] border border-border bg-card text-foreground/70 shadow-[0_4px_14px_-6px_rgba(0,0,0,0.3)] transition-all duration-300 ease-out group-hover:-translate-y-2.5 group-hover:border-[hsl(var(--gold))]/50 group-hover:text-[hsl(var(--gold))] group-hover:shadow-[0_16px_30px_-12px_rgba(0,0,0,0.45)]">
+          <div className="study-tech-icon">
             {t.path ? (
               <svg viewBox="0 0 24 24" width={24} height={24} fill="currentColor" aria-hidden>
                 <path d={t.path} />
@@ -38,10 +34,10 @@ export function TechStack() {
               <span className="font-mono text-sm tracking-tight">{t.mono}</span>
             )}
           </div>
-          {/* tooltip - left-anchored so it never clips at the row's edge */}
-          <div className="pointer-events-none absolute bottom-full left-0 z-20 mb-2.5 flex translate-y-1 items-center gap-2 whitespace-nowrap rounded-full bg-foreground py-1.5 pl-4 pr-1.5 text-background opacity-0 shadow-lg transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
-            <span className="text-xs font-semibold">{t.name}</span>
-            <span className="rounded-full bg-background/15 px-2 py-0.5 text-[10px] tracking-wide text-background/70">
+          {/* Visible name and role. */}
+          <div className="study-tech-label">
+            <span>{t.name}</span>
+            <span>
               {t.tag}
             </span>
           </div>

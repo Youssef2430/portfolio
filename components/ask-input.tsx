@@ -2,48 +2,16 @@
 
 import type React from "react";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X, Send, Trash2 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import ReactMarkdown from "react-markdown";
+import { AssistantMessage } from "@/components/assistant-message";
 
 // Utility function for combining class names
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-
-// --- Loading Cube Component (Conductor style) ---
-const LoadingCube = () => {
-  // 3x3 grid of dots
-  const dots = Array.from({ length: 9 });
-
-  return (
-    <div className="flex items-center gap-3 py-1">
-      <div className="grid grid-cols-3 gap-[3px] w-[18px] h-[18px]">
-        {dots.map((_, i) => (
-          <motion.div
-            key={i}
-            className="w-[4px] h-[4px] rounded-[1px] bg-[hsl(var(--gold))]"
-            animate={{
-              opacity: [0.2, 1, 0.2],
-              scale: [0.8, 1, 0.8],
-            }}
-            transition={{
-              duration: 1.2,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "easeInOut",
-              delay: i * 0.1,
-            }}
-          />
-        ))}
-      </div>
-      <span className="text-xs font-mono text-[hsl(var(--muted-foreground))]">
-        thinking...
-      </span>
-    </div>
-  );
-};
 
 // --- Message Type Definition ---
 interface Message {
@@ -82,6 +50,7 @@ interface Particle {
 
 // --- Main AskInput Component ---
 export function AskInput() {
+  const reduceMotion = useReducedMotion();
   // States
   const [isVisible, setIsVisible] = useState(true);
   const [inputValue, setInputValue] = useState("");
@@ -93,7 +62,9 @@ export function AskInput() {
   const [animating, setAnimating] = useState(false);
 
   // Refs
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesViewportRef = useRef<HTMLDivElement>(null);
+  const messageListRef = useRef<HTMLDivElement>(null);
+  const followAnswerRef = useRef(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
@@ -154,14 +125,21 @@ export function AskInput() {
   }, []);
 
   useEffect(() => {
-    // Scroll to bottom when new messages are added (user query or after AI finishes)
-    if (messagesEndRef.current && messages.length > 0) {
-      const parent = messagesEndRef.current.parentElement;
-      if (parent) {
-        parent.scrollTop = parent.scrollHeight;
-      }
-    }
-  }, [messages.length]);
+    if (!isExpanded) return;
+    const viewport = messagesViewportRef.current;
+    const list = messageListRef.current;
+    if (!viewport || !list) return;
+    followAnswerRef.current = true;
+    const follow = () => {
+      if (followAnswerRef.current) viewport.scrollTop = viewport.scrollHeight;
+    };
+    follow();
+    // Follow the actual expanding bubble, including its animation, while
+    // allowing the reader to scroll up without being pulled back down.
+    const observer = new ResizeObserver(follow);
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, [isExpanded]);
 
   // Clean implementation to prevent scroll-to-top on mobile input focus
   useEffect(() => {
@@ -325,10 +303,10 @@ export function AskInput() {
 
   // Redraw canvas when input value changes (only if not animating)
   useEffect(() => {
-    if (!animating) {
+    if (!animating && !reduceMotion) {
       draw();
     }
-  }, [inputValue, draw, animating]);
+  }, [inputValue, draw, animating, reduceMotion]);
 
   // --- Core Logic Functions ---
 
@@ -338,13 +316,16 @@ export function AskInput() {
       if (!inputValue.trim() || isStreamingRef.current || animating) return;
 
       const currentInput = inputValue;
+      followAnswerRef.current = true;
 
-      setAnimating(true);
-      draw();
+      setAnimating(!reduceMotion);
+      if (!reduceMotion) draw();
 
       setInputValue("");
 
-      if (newDataRef.current.length === 0) {
+      if (reduceMotion) {
+        newDataRef.current = [];
+      } else if (newDataRef.current.length === 0) {
         setTimeout(() => {
           setAnimating(false);
           if (inputRef.current) inputRef.current.focus();
@@ -474,6 +455,7 @@ export function AskInput() {
       nextId,
       isExpanded,
       animating,
+      reduceMotion,
       draw,
       animate,
       setMessages,
@@ -509,233 +491,229 @@ export function AskInput() {
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className="w-full max-w-lg">
-      {/* Messages container */}
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            ref={chatContainerRef}
-            className="relative mb-2.5 max-h-[calc(100dvh-8.5rem)] overflow-hidden bg-card text-card-foreground border border-[hsl(var(--border))] rounded-lg pointer-events-auto shadow-lg sm:mb-4 sm:max-h-[400px]"
-            initial={{ opacity: 0, y: 40, height: 0 }}
-            animate={{ opacity: 1, y: 0, height: "auto" }}
-            exit={{ opacity: 0, y: 40, height: 0 }}
-            transition={{
-              type: "spring",
-              damping: 20,
-              stiffness: 200,
-            }}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between gap-3 p-3 border-b border-[hsl(var(--border))] sm:p-4">
-              <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-                <span className="truncate font-mono text-[11px] text-[hsl(var(--muted-foreground))] uppercase tracking-wider sm:text-xs">
-                  Conversation
-                </span>
-                <span className="hidden text-[hsl(var(--gold))] opacity-50 min-[360px]:inline">「</span>
-                <span className="hidden text-[hsl(var(--gold))] font-arabic text-sm min-[360px]:inline sm:text-base">محادثة</span>
-                <span className="hidden text-[hsl(var(--gold))] opacity-50 min-[360px]:inline">」</span>
-              </div>
-              <div className="flex shrink-0 gap-1 sm:gap-2">
-                <button
-                  onClick={clearMessages}
-                  className="flex h-9 w-9 items-center justify-center text-[hsl(var(--muted-foreground))] hover:text-foreground hover:bg-[hsl(var(--muted))] transition-all duration-300 active:scale-95"
-                  aria-label="Clear conversation"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => setIsExpanded(false)}
-                  className="flex h-9 w-9 items-center justify-center text-[hsl(var(--muted-foreground))] hover:text-foreground hover:bg-[hsl(var(--muted))] transition-all duration-300 active:scale-95"
-                  aria-label="Close conversation"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Messages Area */}
-            <div className="overflow-y-auto max-h-[calc(100dvh-14rem)] sm:max-h-[300px] p-3 sm:p-4 space-y-3 sm:space-y-4 scrollbar-thin">
-              {apiError && (
-                <motion.div
-                  className="text-center text-red-400 text-xs font-mono p-3 bg-red-900/20 border border-red-900/50"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  {apiError}
-                </motion.div>
-              )}
-              <AnimatePresence initial={false}>
-                {messages.map((message, index) => (
-                  <motion.div
-                    key={message.id}
-                    layout
-                    className={`flex ${message.type === "question" ? "justify-end" : "justify-start"}`}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{
-                      type: "spring",
-                      damping: 25,
-                      stiffness: 300,
-                    }}
+        {/* Messages container */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              ref={chatContainerRef}
+              className="relative mb-2.5 max-h-[calc(100dvh-8.5rem)] overflow-hidden bg-card text-card-foreground border border-[hsl(var(--border))] rounded-lg pointer-events-auto shadow-lg sm:mb-4 sm:max-h-[400px]"
+              initial={reduceMotion ? false : { opacity: 0, y: 24, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: "auto" }}
+              exit={{ opacity: 0, y: reduceMotion ? 0 : 12, height: 0 }}
+              transition={{ duration: reduceMotion ? 0 : 0.3, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between gap-3 p-3 border-b border-[hsl(var(--border))] sm:p-4">
+                <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                  <span className="truncate font-mono text-[11px] text-[hsl(var(--muted-foreground))] uppercase tracking-wider sm:text-xs">
+                    Conversation
+                  </span>
+                  <span className="hidden text-[hsl(var(--gold))] opacity-50 min-[360px]:inline">
+                    「
+                  </span>
+                  <span className="hidden text-[hsl(var(--gold))] font-arabic text-sm min-[360px]:inline sm:text-base">
+                    محادثة
+                  </span>
+                  <span className="hidden text-[hsl(var(--gold))] opacity-50 min-[360px]:inline">
+                    」
+                  </span>
+                </div>
+                <div className="flex shrink-0 gap-1 sm:gap-2">
+                  <button
+                    onClick={clearMessages}
+                    className="flex h-9 w-9 items-center justify-center text-[hsl(var(--muted-foreground))] hover:text-foreground hover:bg-[hsl(var(--muted))] transition-all duration-300 active:scale-95"
+                    aria-label="Clear conversation"
                   >
-                    <div
-                      className={cn(
-                        "relative max-w-[92%] sm:max-w-[80%] px-3 py-2.5 sm:px-4 sm:py-3 text-[13px] sm:text-sm whitespace-pre-wrap break-words leading-relaxed",
-                        message.type === "question"
-                          ? "bg-[hsl(var(--gold))] text-[hsl(var(--accent-foreground))] rounded-[16px] rounded-br-[4px] sm:rounded-[20px] sm:rounded-br-[4px]"
-                          : "bg-[hsl(var(--card))] text-card-foreground border border-[hsl(var(--border))] rounded-[16px] rounded-bl-[4px] sm:rounded-[20px] sm:rounded-bl-[4px]",
-                      )}
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setIsExpanded(false)}
+                    className="flex h-9 w-9 items-center justify-center text-[hsl(var(--muted-foreground))] hover:text-foreground hover:bg-[hsl(var(--muted))] transition-all duration-300 active:scale-95"
+                    aria-label="Close conversation"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Messages Area */}
+              <div
+                ref={messagesViewportRef}
+                onScroll={(event) => {
+                  const viewport = event.currentTarget;
+                  followAnswerRef.current = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 64;
+                }}
+                className="overflow-y-auto max-h-[calc(100dvh-14rem)] sm:max-h-[300px] p-3 sm:p-4 scrollbar-thin [overflow-anchor:none]"
+              >
+                <div ref={messageListRef} className="space-y-3 sm:space-y-4">
+                  {apiError && (
+                    <motion.div
+                      className="text-center text-red-400 text-xs font-mono p-3 bg-red-900/20 border border-red-900/50"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
                     >
-                      {message.type === "answer" && (
-                        <span className="block text-[10px] text-[hsl(var(--gold))] uppercase tracking-widest mb-1.5 font-mono">
-                          Youssef&apos;s AI
-                        </span>
-                      )}
-                      {message.type === "answer" &&
+                      {apiError}
+                    </motion.div>
+                  )}
+                  <AnimatePresence initial={false}>
+                    {messages.map((message, index) => {
+                      const isActiveAnswer =
+                        message.type === "answer" &&
                         index === messages.length - 1 &&
-                        isTyping &&
-                        !message.text ? (
-                        <LoadingCube />
-                      ) : message.type === "answer" ? (
-                        <div className="chat-message-text text-[13px] sm:text-sm leading-relaxed [&_*]:break-words [&_strong]:font-semibold [&_code]:bg-foreground/10 [&_code]:px-1 [&_code]:rounded [&_code]:text-[hsl(var(--gold))] [&_a]:text-[hsl(var(--gold))] [&_a]:underline [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:ml-0 [&_p+p]:mt-2">
-                          <ReactMarkdown>{message.text}</ReactMarkdown>
-                        </div>
-                      ) : (
-                        <p className="chat-message-text text-[13px] sm:text-sm">{message.text}</p>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-              <div ref={messagesEndRef} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                        isTyping;
 
-      {/* Input form */}
-      <form
-        onSubmit={handleSubmit}
-        className="relative h-14 w-full min-w-0 overflow-hidden bg-card text-card-foreground border border-[hsl(var(--border))] rounded-lg flex items-center pointer-events-auto transition-all duration-300 shadow-lg hover:border-[hsl(var(--gold))/0.3]"
-      >
-        {/* Canvas for vanishing effect */}
-        <canvas
-          ref={canvasRef}
-          className={cn(
-            "absolute inset-0 w-full h-full pointer-events-none z-[5]",
-            animating ? "opacity-100" : "opacity-0",
-            "transition-opacity duration-100 ease-out",
+                      return (
+                        <motion.div
+                          key={message.id}
+                          className={`flex ${message.type === "question" ? "justify-end" : "justify-start"}`}
+                          initial={{ opacity: reduceMotion ? 1 : 0, y: reduceMotion ? 0 : 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: reduceMotion ? 0 : 0.24, ease: [0.22, 1, 0.36, 1] }}
+                        >
+                          {message.type === "question" ? (
+                            <div className="relative max-w-[92%] whitespace-pre-wrap break-words rounded-[16px] rounded-br-[4px] bg-[hsl(var(--gold))] px-3 py-2.5 text-[13px] leading-relaxed text-[hsl(var(--accent-foreground))] sm:max-w-[80%] sm:rounded-[20px] sm:rounded-br-[4px] sm:px-4 sm:py-3 sm:text-sm">
+                              <p className="chat-message-text text-[13px] sm:text-sm">
+                                {message.text}
+                              </p>
+                            </div>
+                          ) : (
+                            <AssistantMessage text={message.text} active={isActiveAnswer} />
+                          )}
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </motion.div>
           )}
-          aria-hidden="true"
-        />
+        </AnimatePresence>
 
-        {/* Arabic decoration */}
-        <div className="absolute left-3 sm:left-4 text-[hsl(var(--gold))] opacity-40 font-arabic text-sm pointer-events-none">
-          「
-        </div>
-
-        {/* Input Field */}
-        <input
-          ref={inputRef}
-          type="text"
-          value={inputValue}
-          onChange={(e) => {
-            if (!animating) setInputValue(e.target.value);
-          }}
-          onFocus={(e) => {
-            if (!isExpanded) setIsExpanded(true);
-            e.preventDefault();
-            e.currentTarget.focus({ preventScroll: true });
-          }}
-          placeholder="Ask me anything..."
-          className={cn(
-            "relative z-10 w-full min-w-0 h-full pl-7 pr-12 sm:pl-8 sm:pr-14",
-            "bg-transparent border-none focus:outline-none focus:ring-0",
-            "text-[16px] sm:text-sm font-mono placeholder:text-[hsl(var(--muted-foreground))] placeholder:font-mono placeholder:text-[11px] sm:placeholder:text-xs placeholder:uppercase placeholder:tracking-wider",
-            animating && newDataRef.current.length > 0
-              ? "text-transparent caret-transparent"
-              : "text-card-foreground",
-            "transition-colors duration-100",
-          )}
-          disabled={isStreamingRef.current}
-          autoComplete="off"
-          enterKeyHint="send"
-          spellCheck="true"
-        />
-
-        {/* Arabic decoration */}
-        <div className="absolute right-12 sm:right-14 text-[hsl(var(--gold))] opacity-40 font-arabic text-sm pointer-events-none">
-          」
-        </div>
-
-        {/* Submit Button */}
-        <button
-          ref={submitButtonRef}
-          type="submit"
-          disabled={!inputValue.trim() || isStreamingRef.current || animating}
-          className={cn(
-            "absolute right-0 top-0 bottom-0 z-20",
-            "w-12 sm:w-14 border-l border-[hsl(var(--border))]",
-            "bg-transparent hover:bg-[hsl(var(--gold))]",
-            "transition-all duration-300 flex items-center justify-center group",
-            "active:scale-95",
-            "disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent",
-          )}
-          aria-label="Send message"
+        {/* Input form */}
+        <form
+          onSubmit={handleSubmit}
+          className="relative h-14 w-full min-w-0 overflow-hidden bg-card text-card-foreground border border-[hsl(var(--border))] rounded-lg flex items-center pointer-events-auto transition-all duration-300 shadow-lg hover:border-[hsl(var(--gold))/0.3]"
         >
-          <Send className="h-4 w-4 text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--accent-foreground))] transition-colors duration-300" />
-        </button>
-      </form>
+          {/* Canvas for vanishing effect */}
+          <canvas
+            ref={canvasRef}
+            className={cn(
+              "absolute inset-0 w-full h-full pointer-events-none z-[5]",
+              animating ? "opacity-100" : "opacity-0",
+              "transition-opacity duration-100 ease-out",
+            )}
+            aria-hidden="true"
+          />
 
-      {/* Hint text */}
-      <motion.p
-        className="text-center mt-2 px-2 text-[9px] sm:text-[10px] leading-tight font-mono text-[hsl(var(--muted-foreground))] uppercase tracking-widest sm:mt-3"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-      >
-        Ask Youssef&apos;s AI anything
-      </motion.p>
+          {/* Arabic decoration */}
+          <div className="absolute left-3 sm:left-4 text-[hsl(var(--gold))] opacity-40 font-arabic text-sm pointer-events-none">
+            「
+          </div>
 
-      {/* CSS for scrollbar styling */}
-      <style jsx>{`
-        .scrollbar-thin::-webkit-scrollbar {
-          width: 4px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb {
-          background-color: hsl(var(--muted));
-          border-radius: 0;
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-          background-color: hsl(var(--gold));
-        }
-        .scrollbar-thin {
-          scrollbar-width: thin;
-          scrollbar-color: hsl(var(--muted)) transparent;
-        }
-        .break-words {
-          word-break: break-word;
-          overflow-wrap: break-word;
-        }
+          {/* Input Field */}
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputValue}
+            onChange={(e) => {
+              if (!animating) setInputValue(e.target.value);
+            }}
+            onFocus={(e) => {
+              if (!isExpanded) setIsExpanded(true);
+              e.preventDefault();
+              e.currentTarget.focus({ preventScroll: true });
+            }}
+            aria-label="Ask Youssef’s AI a question"
+            placeholder="Ask me anything..."
+            className={cn(
+              "relative z-10 w-full min-w-0 h-full pl-7 pr-12 sm:pl-8 sm:pr-14",
+              "bg-transparent border-none focus:outline-none focus:ring-0",
+              "text-[16px] sm:text-sm font-mono placeholder:text-[hsl(var(--muted-foreground))] placeholder:font-mono placeholder:text-[11px] sm:placeholder:text-xs placeholder:uppercase placeholder:tracking-wider",
+              animating && newDataRef.current.length > 0
+                ? "text-transparent caret-transparent"
+                : "text-card-foreground",
+              "transition-colors duration-100",
+            )}
+            disabled={isStreamingRef.current}
+            autoComplete="off"
+            enterKeyHint="send"
+            spellCheck="true"
+          />
 
-        /* iOS-specific fixes */
-        @supports (-webkit-touch-callout: none) {
-          input[type="text"],
-          input,
-          textarea,
-          select {
-            font-size: 16px;
-            -webkit-user-select: text;
-            user-select: text;
+          {/* Arabic decoration */}
+          <div className="absolute right-12 sm:right-14 text-[hsl(var(--gold))] opacity-40 font-arabic text-sm pointer-events-none">
+            」
+          </div>
+
+          {/* Submit Button */}
+          <button
+            ref={submitButtonRef}
+            type="submit"
+            disabled={!inputValue.trim() || isStreamingRef.current || animating}
+            className={cn(
+              "absolute right-0 top-0 bottom-0 z-20",
+              "w-12 sm:w-14 border-l border-[hsl(var(--border))]",
+              "bg-transparent hover:bg-[hsl(var(--gold))]",
+              "transition-all duration-300 flex items-center justify-center group",
+              "active:scale-95",
+              "disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent",
+            )}
+            aria-label="Send message"
+          >
+            <Send className="h-4 w-4 text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--accent-foreground))] transition-colors duration-300" />
+          </button>
+        </form>
+
+        {/* Hint text */}
+        <motion.p
+          className="text-center mt-2 px-2 text-[9px] sm:text-[10px] leading-tight font-mono text-[hsl(var(--muted-foreground))] uppercase tracking-widest sm:mt-3"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          Ask Youssef&apos;s AI anything
+        </motion.p>
+
+        {/* CSS for scrollbar styling */}
+        <style jsx>{`
+          .scrollbar-thin::-webkit-scrollbar {
+            width: 4px;
           }
-          * {
-            overflow-anchor: none;
+          .scrollbar-thin::-webkit-scrollbar-track {
+            background: transparent;
           }
-        }
-      `}</style>
+          .scrollbar-thin::-webkit-scrollbar-thumb {
+            background-color: hsl(var(--muted));
+            border-radius: 0;
+          }
+          .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background-color: hsl(var(--gold));
+          }
+          .scrollbar-thin {
+            scrollbar-width: thin;
+            scrollbar-color: hsl(var(--muted)) transparent;
+          }
+          .break-words {
+            word-break: break-word;
+            overflow-wrap: break-word;
+          }
+
+          /* iOS-specific fixes */
+          @supports (-webkit-touch-callout: none) {
+            input[type="text"],
+            input,
+            textarea,
+            select {
+              font-size: 16px;
+              -webkit-user-select: text;
+              user-select: text;
+            }
+            * {
+              overflow-anchor: none;
+            }
+          }
+        `}</style>
       </div>
     </motion.div>
   );

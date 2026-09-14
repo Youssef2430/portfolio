@@ -66,11 +66,13 @@ export function CluiFlow() {
   const inView = useInView(ref, { once: false, margin: "-20%" });
   const reduced = useReducedMotion();
   const [frameIdx, setFrameIdx] = useState(0);
+  const [mode, setMode] = useState(1);
+  const [playing, setPlaying] = useState(true);
   const [hovered, setHovered] = useState<string | null>(null);
 
   const frames = useMemo(() => {
     const out: Array<{ mode: string; node: string; from: string | null; visited: Set<string> }> = [];
-    for (const run of RUNS) {
+    for (const run of [RUNS[mode]]) {
       const visited = new Set<string>();
       run.path.forEach((node, i) => {
         visited.add(node);
@@ -78,16 +80,15 @@ export function CluiFlow() {
       });
     }
     return out;
-  }, []);
+  }, [mode]);
 
   useEffect(() => {
-    if (reduced || !inView) return;
+    if (reduced || !inView || !playing) return;
     const id = setInterval(() => setFrameIdx((i) => (i + 1) % frames.length), 760);
     return () => clearInterval(id);
-  }, [reduced, inView, frames.length]);
+  }, [reduced, inView, playing, frames.length]);
 
-  const frame = reduced ? null : frames[frameIdx];
-  const activeMode = frame?.mode ?? "Tool call";
+  const frame = frames[frameIdx % frames.length];
 
   const isVisited = (id: string) => !hovered && frame?.visited.has(id);
   const isCurrent = (id: string) => (hovered ? hovered === id : frame?.node === id);
@@ -96,15 +97,12 @@ export function CluiFlow() {
   const caption = hovered ? NODES[hovered] : frame ? NODES[frame.node] : NODES.cli;
 
   return (
-    <div ref={ref}>
-      <div className="mb-6 flex items-center gap-3">
-        <span className="clui-mono text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--foreground-subtle))]">Active flow</span>
-        <span className="clui-mono text-xs tracking-wide text-[hsl(var(--gold))]">{activeMode}</span>
-      </div>
+    <div ref={ref} className="study-flow" style={{ animationPlayState: playing && inView ? "running" : "paused" }}>
+      <div className="study-flow-controls"><div aria-label="Workflow mode">{RUNS.map((run, index) => <button type="button" key={run.mode} aria-pressed={mode === index} onClick={() => { setMode(index); setFrameIdx(0); setHovered(null); }}>{run.mode}</button>)}</div>{!reduced && <button type="button" aria-label={playing ? "Pause workflow animation" : "Play workflow animation"} onClick={() => setPlaying(value => !value)}>{playing ? "Pause" : "Play"}<span aria-hidden="true">{playing ? "Ⅱ" : "▷"}</span></button>}</div>
 
       <svg
         viewBox="0 0 920 360"
-        className="h-auto w-full"
+        className="hidden md:block h-auto w-full"
         role="img"
         aria-label="Clui architecture: the renderer sends a prompt to the main process, which spawns claude -p; events stream back as NDJSON to the live render. Tool calls detour through the PreToolUse hook and the permission UI before resuming."
       >
@@ -129,7 +127,7 @@ export function CluiFlow() {
                     strokeWidth={2.2}
                     strokeOpacity={active ? 0.95 : 0}
                     className="clui-flow-line"
-                    style={{ transition: "stroke-opacity 0.3s ease" }}
+                    style={{ transition: "stroke-opacity 0.3s ease", animationPlayState: playing && inView ? "running" : "paused" }}
                   />
                 )}
               </g>
@@ -196,8 +194,9 @@ export function CluiFlow() {
         })}
       </svg>
 
+      <ol className="study-flow-mobile">{Array.from(new Set(RUNS[mode].path)).map((id, index) => <li key={id} data-active={isCurrent(id)}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{NODES[id].label}</strong><p>{NODES[id].purpose}</p></div></li>)}</ol>
       {/* caption */}
-      <div className="mt-6 flex items-baseline gap-3 min-h-[1.5rem]">
+      <div className="study-flow-caption">
         <span className="clui-mono text-xs text-[hsl(var(--gold))]">{caption.label}</span>
         <span className="text-sm text-[hsl(var(--foreground-soft))]">{caption.purpose}</span>
       </div>
