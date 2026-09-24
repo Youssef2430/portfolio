@@ -6,6 +6,7 @@ import {
   Cormorant_Garamond,
   DM_Mono,
   Fraunces,
+  Hanken_Grotesk,
   IBM_Plex_Mono,
   Inter,
   Newsreader,
@@ -16,6 +17,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import "./project-studies.css";
+import "./glui.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PostHogProvider } from "./providers";
 import { CustomCursor } from "@/components/custom-cursor";
@@ -26,6 +28,13 @@ const inter = Inter({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
   variable: "--font-inter",
+  display: "swap",
+});
+
+const hanken = Hanken_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-hanken",
   display: "swap",
 });
 
@@ -112,6 +121,7 @@ const nunito = Nunito({
 
 const fontVariables = [
   inter.variable,
+  hanken.variable,
   arefRuqaa.variable,
   amiri.variable,
   robotoMono.variable,

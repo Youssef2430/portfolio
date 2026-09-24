@@ -48,7 +48,7 @@ Sept 2023 - Present, Ottawa, ON
 ## Projects
 
 - Ramelli (previously AtlasLLM, https://ramelli.chat/chat): Built and monetized a multi-model AI chat platform supporting 30+ LLMs across 9 providers with Next.js, Convex, Redis, Cloudflare R2, and OpenRouter.
-- CLUI: Built a macOS floating overlay for the Claude Code CLI using Electron, React, TypeScript, Zustand, and node-pty, with multi-tab sessions, global hotkeys, slash commands, attachments, and auto-updates.
+- GLUI (formerly Clui): Designed and integrated a floating macOS workspace for Claude Code, Codex, and OpenCode using Electron, React, TypeScript, and Zustand. Builds on Clui CC and T3 Code’s Orchestrator V2 for persistent conversations, context handoffs, branching, and recovery, with native Liquid Glass, burgundy styling, local voice input, and a shared skills directory. Portfolio: /projects/glui. Website: https://clui.app/. Source: https://github.com/Youssef2430/glui. Current releases require Apple Silicon; Clui v0.1.17 remains the legacy Intel release.
 - NLP Phishing Detection: Built a phishing detection system using NLP and computer vision CNNs for website classification and clustering, achieving 98.4% accuracy; shipped a Chrome extension and AWS S3 retraining pipeline.
 
 ## Skills

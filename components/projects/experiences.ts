@@ -1,7 +1,7 @@
 import type { ComponentType } from "react";
 import type { SerializableProject } from "@/components/project-detail";
 import { RamelliExperience } from "@/components/projects/atlasllm-experience";
-import { CluiExperience } from "@/components/projects/clui-experience";
+import { GluiExperience } from "@/components/projects/glui-experience";
 import { NLPPhishingExperience } from "@/components/projects/nlp-phishing-experience";
 import { MugshotExperience } from "@/components/projects/mugshot-experience";
 
@@ -17,7 +17,7 @@ export const projectExperiences: Record<
   ComponentType<{ project: SerializableProject }>
 > = {
   ramelli: RamelliExperience,
-  clui: CluiExperience,
+  glui: GluiExperience,
   "nlp-phishing-detection": NLPPhishingExperience,
   mugshot: MugshotExperience,
 };
