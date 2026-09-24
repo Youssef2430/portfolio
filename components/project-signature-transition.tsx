@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 // Preserve the public event API used by project cards and AI answer links.
 const PROJECT_SIGNATURE_EVENT = "portfolio:project-signature-transition";
-type ProjectId = "ramelli" | "clui" | "mugshot" | "nlp-phishing-detection";
+type ProjectId = "ramelli" | "glui" | "mugshot" | "nlp-phishing-detection";
 type ProjectConfig = {
   id: ProjectId;
   title: string;
@@ -22,10 +22,10 @@ const PROJECTS: Record<ProjectId, ProjectConfig> = {
     description: "A little space for big ideas.",
     stages: ["Finding our bearings", "A world of possibilities", "Welcome to Ramelli"],
   },
-  clui: {
-    id: "clui", title: "Clui", category: "Desktop companion", index: "01", theme: "clui-theme",
-    description: "Big terminal energy. Little window.",
-    stages: ["Hello, world", "Making room for your next idea", "Make yourself at home"],
+  glui: {
+    id: "glui", title: "GLUI", category: "macOS agent workspace", index: "01", theme: "glui-theme",
+    description: "A little glue. A clearer headspace.",
+    stages: ["Bringing your agents together", "A little room to think", "Make yourself at home"],
   },
   mugshot: {
     id: "mugshot", title: "Mugshot", category: "Coffee & daily rituals", index: "03", theme: "mugshot-theme",
@@ -43,13 +43,14 @@ type TransitionDetail = { projectId: string; href?: string };
 
 function getConfig(projectId: string): ProjectConfig | undefined {
   if (projectId === "atlasllm") projectId = "ramelli";
+  if (projectId === "clui") projectId = "glui";
   return Object.hasOwn(PROJECTS, projectId) ? PROJECTS[projectId as ProjectId] : undefined;
 }
 function getPathname(href: string) {
-  try { const path = new URL(href, window.location.origin).pathname; return path === "/projects/atlasllm" ? "/projects/ramelli" : path; }
+  try { const path = new URL(href, window.location.origin).pathname; return path === "/projects/atlasllm" ? "/projects/ramelli" : path === "/projects/clui" ? "/projects/glui" : path; }
   catch { return href.split("?")[0].split("#")[0]; }
 }
-export function hasProjectSignatureTransition(projectId: string): projectId is ProjectId | "atlasllm" {
+export function hasProjectSignatureTransition(projectId: string): projectId is ProjectId | "atlasllm" | "clui" {
   return Boolean(getConfig(projectId));
 }
 export function startProjectSignatureTransition(projectId: string, href?: string) {
@@ -67,14 +68,7 @@ function ProjectPixels({ id, progress, still }: { id: ProjectId; progress: numbe
         <image href="/ramelli/logo-light.svg" width="32" height="32" className="dark:hidden" />
         <image href="/ramelli/logo-dark.svg" width="32" height="32" className="hidden dark:block" />
       </>}
-      {id === "clui" && <>
-        <path d="M4 6h24v1h1v19h-1v1H4v-1H3V7h1z" opacity=".08" />
-        <path d="M4 6h24v1h1v19h-1v1H4v-1H3V7h1z M3 11h26" fill="none" stroke="currentColor" />
-        <rect x="6" y="8" width="1" height="1" /><rect x="9" y="8" width="1" height="1" opacity=".5" /><rect x="12" y="8" width="1" height="1" opacity=".25" />
-        <path d="M7 15h2v1h1v1h1v1h-1v1H9v1H7v-1h1v-1h1v-1H8v-1H7z" />
-        <rect x="13" y="19" width="4" height="1" className={still ? "" : "project-loader-cursor"} />
-        {[8, 5, 3].map((width, i) => <rect key={i} x={7 + i * 6} y="23" width={width > 5 ? 4 : width} height="1" opacity={progress > 25 + i * 22 ? .5 : .08} />)}
-      </>}
+      {id === "glui" && <image href="/glui/icon.svg" width="32" height="32" />}
       {id === "mugshot" && <>
         <g className={still ? "" : "project-loader-steam"}><path d="M10 3h1v2h-1v2H9V5h1z M16 2h1v2h-1v2h-1V4h1z M22 3h1v2h-1v2h-1V5h1z" opacity=".6" /></g>
         <path d="M7 11h17v12h-2v2H9v-2H7z" opacity=".08" />

@@ -239,14 +239,14 @@
 
 /* Atlas: a generous product stage and a precise, navigable research map. */
 .study-section-title { margin-top: 24px; font-size: clamp(38px, 4vw, 58px); line-height: 1.1; letter-spacing: -.045em; font-weight: 400; }
-.atlas-editorial-hero, .clui-editorial-hero, .phish-editorial-hero { padding: 128px 48px 64px; }
+.atlas-editorial-hero, .phish-editorial-hero { padding: 128px 48px 64px; }
 .atlas-hero-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 45px; align-items: center; padding: 65px 0; }
-.atlas-wordmark, .clui-wordmark { display: flex; gap: 10px; align-items: center; }
+.atlas-wordmark { display: flex; gap: 10px; align-items: center; }
 .atlas-wordmark > span:first-of-type { font-size: 20px; letter-spacing: -.05em; font-weight: 600; }
 .atlas-wordmark .study-eyebrow { font-size: 8px; margin-left: 8px; max-width: 105px; }
 .atlas-hero-copy h1 { font-size: clamp(55px, 5.6vw, 81px); line-height: 1.07; letter-spacing: -.065em; font-weight: 500; margin: 30px -40px 26px 0; }
 .atlas-hero-copy h1 > span { color: hsl(var(--gold)); }
-.atlas-hero-copy > p, .clui-hero-copy > p, .phish-hero-copy > p { font-size: 16px; line-height: 1.85; max-width: 455px; color: hsl(var(--foreground-soft)); }
+.atlas-hero-copy > p, .phish-hero-copy > p { font-size: 16px; line-height: 1.85; max-width: 455px; color: hsl(var(--foreground-soft)); }
 .atlas-hero-copy .study-actions { gap: 20px; }
 .atlas-hero-copy .study-text-link { font-size: 11px; }
 .atlas-hero-stage { min-width: 0; padding: 26px 25px; position: relative; }
@@ -277,43 +277,6 @@
 .study-flow-caption > span:first-child { flex-shrink: 0; }
 .study-flow-mobile { display: none; }
 
-/* Clui: a calm desktop, a tactile keyboard, and an overlay that responds. */
-.clui-hero-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 50px; align-items: center; min-height: 660px; padding-top: 20px; }
-.clui-wordmark > span:first-of-type { font-family: var(--font-newsreader); font-size: 31px; padding-top: 5px; }
-.clui-wordmark .study-eyebrow { padding-left: 17px; margin-left: 10px; border-left: 1px solid hsl(var(--border)); font-size: 9px; }
-.clui-hero-copy h1 { font-size: clamp(52px, 5.5vw, 80px); margin: 30px -40px 24px 0; line-height: 1.05; letter-spacing: -.055em; }
-.clui-hero-footnote { display: flex; gap: 15px; flex-wrap: wrap; font-family: var(--font-dm-mono); font-size: 8px; color: hsl(var(--foreground-muted)); margin-top: 35px; }
-.clui-hero-footnote span + span::before { content: '·'; margin-right: 15px; }
-.clui-desktop-stage { height: 550px; position: relative; }
-.clui-desktop-type { position: absolute; top: 100px; left: 40px; font-family: var(--font-newsreader); font-size: 65px; font-weight: 300; line-height: 1.04; letter-spacing: -.045em; color: hsl(var(--foreground)/.3); }
-.clui-desktop-overlay { position: absolute; width: 90%; top: 150px; left: 5%; transform: rotate(-3deg); filter: drop-shadow(0 16px 12px #21180e22); }
-.clui-desktop-overlay img { width: 100%; height: auto; }
-.clui-desktop-note { position: absolute; bottom: 105px; left: 0; width: 100%; text-align: center; font-family: var(--font-dm-mono); font-size: 9px; color: hsl(var(--foreground-muted)); }
-.clui-desktop-dock { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; align-items: center; padding: 10px; }
-.clui-desktop-dock > span { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid hsl(var(--border)); background: hsl(var(--card)); border-radius: 8px; font-size: 18px; }
-.clui-study #gallery figure, .clui-study #gallery .clui-shot { border-radius: 14px; }
-.clui-study #get-started > div { padding: 40px; background: hsl(var(--card)); border-radius: 18px; }
-.clui-summon-demo { text-align: center; }
-.clui-summon-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; text-align: left; border-bottom: 1px solid hsl(var(--border)); padding-bottom: 20px; }
-.clui-summon-heading > span:last-child { font-size: 9px; color: hsl(var(--foreground-muted)); }
-.clui-summon-field { height: 180px; display: grid; place-items: center; position: relative; }
-.clui-summon-empty { position: absolute; font-family: var(--font-newsreader); font-size: 29px; line-height: 1.35; color: hsl(var(--foreground-muted)); font-weight: 300; }
-.clui-summon-empty em { color: hsl(var(--gold)); }
-.clui-summon-overlay { display: flex; gap: 12px; align-items: center; width: min(100%, 650px); position: absolute; }
-.clui-summon-tools { display: flex; gap: 12px; flex-shrink: 0; padding: 13px; border: 1px solid hsl(var(--border)); border-radius: 50px; background: hsl(var(--background)); }
-.clui-summon-input { display: flex; align-items: center; gap: 12px; border-radius: 50px; padding: 6px 6px 6px 20px; flex: 1; min-width: 0; height: 54px; background: hsl(var(--background)); border: 1px solid hsl(var(--border)); box-shadow: 0 10px 20px -10px #00000020; }
-.clui-summon-input > span:first-child { font-size: 13px; text-align: left; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.clui-summon-input > svg { flex-shrink: 0; color: hsl(var(--foreground-muted)); }
-.clui-summon-send { display: grid; place-items: center; height: 40px; width: 40px; flex-shrink: 0; border-radius: 50%; color: #fff; background: hsl(var(--gold)); }
-.clui-shortcut { display: inline-flex; align-items: center; gap: 14px; padding: 5px; border-radius: 12px; }
-.clui-shortcut > span { color: hsl(var(--foreground-muted)); font-weight: 300; }
-.clui-shortcut kbd { display: grid; place-items: center; height: 55px; min-width: 55px; padding: 0 15px; font-family: var(--font-dm-mono); font-size: 19px; border: 1px solid hsl(var(--border)); border-bottom-width: 4px; border-radius: 10px; background: hsl(var(--background)); box-shadow: 0 4px 6px #00000006; transition: transform .15s, border .15s; }
-.clui-shortcut kbd:last-child { width: 155px; font-size: 13px; }
-.clui-shortcut:active kbd { transform: translateY(3px); border-bottom-width: 1px; }
-.clui-summon-instruction { margin-top: 20px; font-size: 10px; color: hsl(var(--foreground-muted)); min-height: 30px; }
-.clui-prompt-examples { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; padding-top: 20px; }
-.clui-prompt-examples button { display: flex; align-items: center; gap: 10px; padding: 10px 14px; font-size: 10px; border: 1px solid hsl(var(--border)); border-radius: 99px; color: hsl(var(--foreground-muted)); }
-.clui-prompt-examples button[aria-pressed="true"] { color: hsl(var(--gold)); border-color: hsl(var(--gold)/.4); background: hsl(var(--gold)/.06); }
 
 /* Phishing: a considered inspection desk, with clearly labelled example data. */
 .phish-study .phish-display { font-family: var(--font-inter), sans-serif; letter-spacing: -.045em; font-weight: 500; }
@@ -364,22 +327,18 @@
 .phish-study #deployment .grid.overflow-hidden { border-radius: 14px; }
 
 @media (max-width: 1100px) {
-  .atlas-hero-grid, .clui-hero-grid, .phish-hero-grid { gap: 35px; }
+  .atlas-hero-grid, .phish-hero-grid { gap: 35px; }
   .atlas-hero-copy h1 { font-size: 65px; }
-  .clui-hero-copy h1 { font-size: 64px; }
   .phish-hero-copy h1 { font-size: 56px; }
   .atlas-model-dock { gap: 14px; }
-  .clui-desktop-stage { height: 510px; }
-  .clui-desktop-type { left: 25px; font-size: 57px; }
   .phish-verdict-main { gap: 18px; }
   .phish-verdict-ring { width: 85px; height: 85px; }
 }
 @media (max-width: 767px) {
-  .atlas-editorial-hero, .clui-editorial-hero, .phish-editorial-hero { padding: 108px 24px 40px; }
-  .atlas-hero-grid, .clui-hero-grid, .phish-hero-grid { grid-template-columns: 1fr; gap: 40px; min-height: 0; padding: 40px 0; }
-  .atlas-hero-copy h1, .clui-hero-copy h1, .phish-hero-copy h1 { font-size: clamp(45px, 10.6vw, 72px); margin-right: 0; }
-  .clui-hero-copy h1 { font-size: clamp(48px, 11.5vw, 78px); }
-  .atlas-hero-copy > p, .clui-hero-copy > p, .phish-hero-copy > p { font-size: 15px; }
+  .atlas-editorial-hero, .phish-editorial-hero { padding: 108px 24px 40px; }
+  .atlas-hero-grid, .phish-hero-grid { grid-template-columns: 1fr; gap: 40px; min-height: 0; padding: 40px 0; }
+  .atlas-hero-copy h1, .phish-hero-copy h1 { font-size: clamp(45px, 10.6vw, 72px); margin-right: 0; }
+  .atlas-hero-copy > p, .phish-hero-copy > p { font-size: 15px; }
   .atlas-hero-stage { padding: 20px 17px; }
   .atlas-hero-device { margin: 36px -22px 0; }
   .atlas-model-dock { gap: 17px; padding: 12px 16px; margin-block: 20px; }
@@ -401,22 +360,6 @@
   .study-flow-mobile strong { font-family: var(--font-dm-mono); font-size: 11px; font-weight: 400; }
   .study-flow-mobile p { font-size: 12px; line-height: 1.6; color: hsl(var(--foreground-muted)); margin-top: 5px; }
   .study-flow-caption { display: none; }
-  .clui-desktop-stage { height: 470px; }
-  .clui-desktop-type { font-size: 59px; top: 80px; }
-  .clui-desktop-overlay { top: 145px; width: 100%; left: 0; }
-  .clui-desktop-note { font-size: 8px; }
-  .clui-summon-heading { flex-direction: column; align-items: start; gap: 8px; }
-  .clui-summon-heading .study-eyebrow { font-size: 8px; }
-  .clui-summon-tools { display: none; }
-  .clui-summon-input { padding-left: 14px; }
-  .clui-summon-input > span:first-child { font-size: 10px; }
-  .clui-summon-input > svg { display: none; }
-  .clui-summon-send { height: 35px; width: 35px; }
-  .clui-summon-empty { font-size: 24px; }
-  .clui-summon-instruction { font-size: 9px; min-height: 35px; }
-  .clui-prompt-examples { gap: 8px; }
-  .clui-prompt-examples button { width: 100%; justify-content: space-between; padding: 12px; text-align: left; }
-  .clui-study #get-started > div { padding: 25px; }
   .study-command { gap: 5px; }
   .study-command code { font-size: 11px; padding: 12px; }
   .phish-hero-grid { padding-bottom: 10px; }
@@ -430,12 +373,8 @@
   .phish-scanner > .grid > div { padding: 20px; }
   .phish-scanner > .grid > div:first-child > .border { min-height: 230px; }
 }
-/* The exported Clui overlay has a transparent desktop above it. Frame the UI. */
-.clui-desktop-overlay { top: 245px; left: 0; width: 108%; aspect-ratio: 1040 / 260; overflow: hidden; }
-.clui-desktop-overlay img { position: absolute; bottom: 0; width: 100%; height: auto; }
 .mug-widget-pair { margin-bottom: 25px; }
 @media (max-width: 767px) {
-  .clui-desktop-overlay { top: 225px; left: -2%; width: 114%; }
   .mug-widget-pair { margin-bottom: 18px; }
 }
 .atlas-study #workflow h2, .atlas-study #product h2, .atlas-study #models h2 { font-size: clamp(32px, 3.5vw, 48px); letter-spacing: -.045em; }
@@ -457,9 +396,6 @@
   .study-tech-label > span:last-child { font-size: 7px; }
 }
 .phish-study .study-tech-item:last-child { grid-column: 1 / -1; }
-@media (min-width: 1024px) {
-  .clui-study .study-tech-item:nth-last-child(-n+2) { grid-column: span 2; }
-}
 @media (min-width: 768px) and (max-width: 1023px) {
   .study-tech-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

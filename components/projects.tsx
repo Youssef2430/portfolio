@@ -7,6 +7,7 @@ import { PrismFallback } from "@/components/prism-fallback";
 import Image from "next/image";
 import Link from "next/link";
 import { projects, type ProjectDetail } from "@/lib/project-data";
+import { GluiCardPreview } from "@/components/projects/glui-preview";
 import {
   hasProjectSignatureTransition,
   startProjectSignatureTransition,
@@ -70,6 +71,8 @@ function HoverPreviewShot({
 }
 
 function HoverProjectPreview({ project }: { project: ProjectDetail }) {
+  if (project.id === "glui") return <GluiCardPreview />;
+
   const preview = project.hoverPreview ?? {
     device: "mac",
     src: project.image,
@@ -177,7 +180,9 @@ export function Projects() {
     : activePreviewDevice === "browser"
       ? { x: 96, y: -92 }
     : { x: 120, y: -118 };
-  const previewBounds = activePreviewDevice === "iphone"
+  const previewBounds = activeProject?.id === "glui"
+    ? { width: 380, height: 335 }
+    : activePreviewDevice === "iphone"
     ? { width: 174, height: 358 }
     : activePreviewDevice === "browser"
       ? { width: browserPreviewWidth, height: browserPreviewHeight }
@@ -360,7 +365,10 @@ export function Projects() {
                     href={`/projects/${project.id}`}
                     className="inline-block group/title"
                     onClick={(e) => handleProjectClick(e, project.id)}
-                    onMouseEnter={() => setHoveredProject(project.id)}
+                    onMouseEnter={(e) => {
+                      setHoveredProject(project.id);
+                      handleMouseMove(e);
+                    }}
                     onMouseLeave={() => setHoveredProject(null)}
                     onMouseMove={(e) => {
                       setHoveredProject(project.id);

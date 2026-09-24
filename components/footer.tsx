@@ -80,7 +80,7 @@ export function Footer() {
                   {["Home", "Work", "Info"].map((item) => (
                     <li key={item}>
                       <a
-                        href={`#${item.toLowerCase()}`}
+                        href={`/#${item === "Info" ? "about" : item.toLowerCase()}`}
                         className="text-sm text-[hsl(var(--foreground-muted))] hover:text-foreground transition-colors link-hover"
                       >
                         {item}

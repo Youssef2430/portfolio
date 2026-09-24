@@ -24,8 +24,8 @@ export function StudyNav({ name, chapters }: { name: string; chapters: Chapter[]
   </nav>;
 }
 const NEXT = {
-  ramelli: { id: "clui", name: "Clui", note: "A little window. A lot of possibility.", tag: "Desktop companion", number: "01" },
-  clui: { id: "mugshot", name: "Mugshot", note: "Your daily cup, turned into a keepsake.", tag: "iOS coffee journal", number: "03" },
+  ramelli: { id: "glui", name: "GLUI", note: "A little glue. A clearer headspace.", tag: "macOS agent workspace", number: "01" },
+  glui: { id: "mugshot", name: "Mugshot", note: "Your daily cup, turned into a keepsake.", tag: "iOS coffee journal", number: "03" },
   mugshot: { id: "nlp-phishing-detection", name: "Phishing Detection", note: "Reading between the suspicious lines.", tag: "Applied NLP", number: "04" },
   "nlp-phishing-detection": { id: "ramelli", name: "Ramelli", note: "Thirty models. One conversation.", tag: "AI workspace", number: "02" },
 };
