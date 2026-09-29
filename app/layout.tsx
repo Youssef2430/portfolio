@@ -21,6 +21,7 @@ import "./glui.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PostHogProvider } from "./providers";
 import { CustomCursor } from "@/components/custom-cursor";
+import { ThemeFavicon, themeFaviconScript } from "@/components/theme-favicon";
 import { ProjectSignatureTransitionProvider } from "@/components/project-signature-transition";
 import { Analytics } from "@vercel/analytics/next";
 
@@ -188,14 +189,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={fontVariables} suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png" />
-        <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
-        <link rel="apple-touch-icon" href="/favicon-100.png" />
+        <link rel="icon" href="/favicon.ico" sizes="32x32" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <script dangerouslySetInnerHTML={{ __html: themeFaviconScript }} />
       </head>
       <body className="bg-background text-foreground antialiased">
         <PostHogProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <ThemeFavicon />
             <CustomCursor />
             {children}
             <ProjectSignatureTransitionProvider />
