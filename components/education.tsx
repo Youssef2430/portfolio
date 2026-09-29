@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { MapPin } from "lucide-react";
 import { ThesisFigure } from "@/components/thesis-figure";
+import { useNow } from "@/components/experience";
 
 // ---------------------------------------------------------------------------
 // Data
@@ -171,10 +172,7 @@ export function Education() {
   const titleRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(titleRef, { once: true, margin: "-100px" });
   const [active, setActive] = useState<Degree["id"]>("msc");
-  const [now] = useState<YearMonth>(() => {
-    const d = new Date();
-    return [d.getFullYear(), d.getMonth() + d.getDate() / 31];
-  });
+  const now = useNow([2026, 9]);
   const nowPct = toPct(now);
   const mscProgress = progressOf(degrees[1], now);
 

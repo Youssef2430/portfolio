@@ -173,11 +173,14 @@ const RULER_MONTHS = 5 * 12; // Jan 2022 → Jan 2027
 const toPct = ([y, m]: YearMonth) =>
   Math.min(100, Math.max(0, (((y - RULER_START) * 12 + m) / RULER_MONTHS) * 100));
 
-function useNow(): YearMonth {
-  const [now] = useState(() => {
+// The page is prerendered, so read the clock after mount; a render-time Date would
+// hydrate against the build date.
+export function useNow(fallback: YearMonth): YearMonth {
+  const [now, setNow] = useState(fallback);
+  useEffect(() => {
     const d = new Date();
-    return [d.getFullYear(), d.getMonth() + d.getDate() / 31] as YearMonth;
-  });
+    setNow([d.getFullYear(), d.getMonth() + d.getDate() / 31]);
+  }, []);
   return now;
 }
 
@@ -346,7 +349,7 @@ function MiniTimeline({
   onSelect: (id: string) => void;
   title?: ReactNode;
 }) {
-  const now = useNow();
+  const now = useNow([2026, 9]);
   const nowPct = toPct(now);
   const { lanes, count } = packLanes(roles, now);
   const role = roles.find((r) => r.id === active)!;
