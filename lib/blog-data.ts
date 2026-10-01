@@ -9,6 +9,7 @@ export type BlogPost = {
   slug: string; // unique identifier used in URLs
   title: string;
   date: string; // ISO-8601 date string
+  updated?: string; // ISO-8601, when a post was substantially revised
   excerpt: string;
   contentFile: string; // path to markdown file (e.g. blogs/my-post.md)
   tags: string[];
@@ -25,7 +26,7 @@ const blogPostsData: BlogPost[] = [
       "Modeling Stock Market Volatility with Independent Economic Shocks: A Multivariate Stochastic Approach",
     date: "2025-11-30",
     excerpt:
-      "When Markets Misbehave: A Student's Guide to Taming Volatility with Stochastic Processes",
+      "A stochastic processes project on market returns, conditional volatility, and independent shocks.",
     contentFile: "blogs/stock_volatility_blog.md",
     tags: [
       "stochastic-processes",
@@ -38,7 +39,7 @@ const blogPostsData: BlogPost[] = [
       "conditional-distributions",
     ],
     coverImage: "/blog/figures/fig1_gbm_foundations.png",
-    readingTimeMinutes: 8,
+    readingTimeMinutes: 11,
     published: true,
     blurBehindText: true,
   },
@@ -46,12 +47,13 @@ const blogPostsData: BlogPost[] = [
     slug: "llm-evals-building-a-chess-benchmark",
     title: "LLM Evals: Building a Chess Benchmark",
     date: "2025-07-10",
+    updated: "2026-09-30",
     excerpt:
-      "What I learned building a provider-agnostic evaluation harness that pits LLMs against Stockfish with calibrated difficulty.",
+      "Seven language models, a chess harness rebuilt three times, and everything it took to stop losing games to sentences without starting to guess.",
     contentFile: "blogs/chessLLM.md",
     tags: ["ai", "evals", "chess"],
     coverImage: "/chessllm.png",
-    readingTimeMinutes: 7,
+    readingTimeMinutes: 15,
     published: true,
   },
 ];
@@ -152,6 +154,7 @@ export function paginatePosts(params: {
 export function formatPostDate(date: string, locale = "en-US"): string {
   const dt = toDate(date);
   return dt.toLocaleDateString(locale, {
+    timeZone: "UTC",
     year: "numeric",
     month: "short",
     day: "numeric",

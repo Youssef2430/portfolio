@@ -4,8 +4,13 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Children, isValidElement, type ReactNode } from "react";
-import { ArrowLeft, Clock, Calendar } from "lucide-react";
+import {
+  Children,
+  isValidElement,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
+import { ArrowLeft, ArrowUpRight, Clock, Calendar } from "lucide-react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -27,6 +32,32 @@ import {
   breadcrumbSchema,
   SITE_URL,
 } from "@/lib/seo";
+import {
+  extractSidenotes,
+  noteIdentity,
+  splitNoteChapters,
+} from "@/lib/field-notes";
+import {
+  GameReplay,
+  ParserLab,
+  RunResults,
+  YouAreTheModel,
+} from "@/components/field-notes/chess-lab";
+import {
+  FalseStart,
+  RetryTrace,
+  ToolIncident,
+} from "@/components/field-notes/chess-v3";
+import {
+  DecisionFlow,
+  ForfeitFlip,
+  LatencyStrip,
+  PriceOfThinking,
+  RunTimeline,
+} from "@/components/field-notes/chess-charts";
+import { MarketLab } from "@/components/field-notes/lazy-market-lab";
+import { LivingTitle } from "@/components/field-notes/living-title";
+import { NoteReader, EndNote } from "@/components/field-notes/reader";
 import { BlogCodeBlock } from "@/components/blog-code-block";
 
 const VIDEO_EXTENSIONS = [".mp4", ".webm", ".ogg", ".mov"];
@@ -75,10 +106,10 @@ function getTextContent(node: ReactNode): string {
 
 function getCodeBlockMetadata(children: ReactNode) {
   const codeElement = Children.toArray(children).find((child) =>
-    isValidElement<MarkdownElementProps>(child)
+    isValidElement<MarkdownElementProps>(child),
   );
   const className = isValidElement<MarkdownElementProps>(codeElement)
-    ? codeElement.props.className ?? ""
+    ? (codeElement.props.className ?? "")
     : "";
   const language = className.match(/language-([\w-]+)/)?.[1];
 
@@ -137,6 +168,27 @@ export async function generateMetadata({
   };
 }
 
+function MarkdownLink({
+  href,
+  children,
+  // react-markdown's AST node must not reach the DOM.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  node: _node,
+  ...props
+}: ComponentProps<"a"> & { node?: unknown }) {
+  return (
+    <a
+      href={href}
+      className="text-[hsl(var(--gold))] underline underline-offset-4 decoration-[hsl(var(--gold))]/30 hover:decoration-[hsl(var(--gold))] transition-colors"
+      target={href?.startsWith("http") ? "_blank" : undefined}
+      rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
+      {...props}
+    >
+      {children}
+    </a>
+  );
+}
+
 // Custom components for markdown rendering
 const MarkdownComponents: Components = {
   h1: ({ children }) => (
@@ -155,7 +207,9 @@ const MarkdownComponents: Components = {
     </h3>
   ),
   p: ({ children }) => (
-    <p className="text-[hsl(var(--foreground-soft))] leading-relaxed mb-6">{children}</p>
+    <p className="text-[hsl(var(--foreground-soft))] leading-relaxed mb-6">
+      {children}
+    </p>
   ),
   ul: ({ children }) => (
     <ul className="list-disc pl-6 space-y-2 mb-6 text-[hsl(var(--foreground-soft))]">
@@ -168,7 +222,9 @@ const MarkdownComponents: Components = {
     </ol>
   ),
   li: ({ children }) => (
-    <li className="text-[hsl(var(--foreground-soft))] leading-relaxed">{children}</li>
+    <li className="text-[hsl(var(--foreground-soft))] leading-relaxed">
+      {children}
+    </li>
   ),
   blockquote: ({ children }) => (
     <blockquote className="border-l-2 border-[hsl(var(--gold))] pl-6 py-2 my-6 italic text-[hsl(var(--foreground-muted))]">
@@ -179,10 +235,7 @@ const MarkdownComponents: Components = {
     const isInline = !className;
     if (isInline) {
       return (
-        <code
-          className="bg-muted px-1.5 py-0.5 text-sm font-mono text-[hsl(var(--gold))] border border-border"
-          {...props}
-        >
+        <code className="fn-inline-code" {...props}>
           {children}
         </code>
       );
@@ -202,17 +255,7 @@ const MarkdownComponents: Components = {
       </BlogCodeBlock>
     );
   },
-  a: ({ href, children, ...props }) => (
-    <a
-      href={href}
-      className="text-[hsl(var(--gold))] underline underline-offset-4 decoration-[hsl(var(--gold))]/30 hover:decoration-[hsl(var(--gold))] transition-colors"
-      target={href?.startsWith("http") ? "_blank" : undefined}
-      rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
-      {...props}
-    >
-      {children}
-    </a>
-  ),
+  a: MarkdownLink,
   strong: ({ children }) => (
     <strong className="font-medium text-foreground">{children}</strong>
   ),
@@ -228,24 +271,33 @@ const MarkdownComponents: Components = {
         {isVideoSrc(mediaSrc) ? (
           <video
             src={mediaSrc}
-            autoPlay
-            loop
+            controls
+            preload="metadata"
             muted
             playsInline
             className="w-full border border-border"
             aria-label={alt || undefined}
           />
         ) : (
-          <Image
-            src={mediaSrc}
-            alt={alt || ""}
-            width={800}
-            height={450}
-            className="w-full border border-border"
-          />
+          <a
+            href={mediaSrc}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Open full-size figure: ${alt || "Article figure"}`}
+            className="fn-figure-link"
+          >
+            <Image
+              src={mediaSrc}
+              alt={alt || ""}
+              width={800}
+              height={450}
+              className="w-full h-auto border border-border"
+              sizes="(max-width: 768px) 100vw, 760px"
+            />
+          </a>
         )}
         {alt && (
-          <span className="block mt-2 text-center text-sm text-[hsl(var(--foreground-subtle))]">
+          <span className="block mt-2 text-center text-xs text-[hsl(var(--foreground-muted))]">
             {alt}
           </span>
         )}
@@ -272,6 +324,143 @@ const MarkdownComponents: Components = {
   ),
 };
 
+const experiments: Record<string, ReactNode> = {
+  markets: <MarketLab kind="paths" />,
+  conditional: <MarketLab kind="conditional" />,
+  foundations: <MarketLab kind="foundations" />,
+  diagnostics: <MarketLab kind="diagnostics" />,
+  history: <MarketLab kind="history" />,
+  risk: <MarketLab kind="risk" />,
+  model: <YouAreTheModel />,
+  parsers: <ParserLab />,
+  replay: <GameReplay initialCohort="v3" />,
+  results: <RunResults initialCohort="v3" />,
+  falsestart: <FalseStart />,
+  retry: <RetryTrace />,
+  tool: <ToolIncident />,
+  flip: <ForfeitFlip />,
+  flow: <DecisionFlow />,
+  price: <PriceOfThinking />,
+  latency: <LatencyStrip />,
+  timeline: <RunTimeline />,
+};
+
+const inlineComponents: Components = {
+  ...MarkdownComponents,
+  p: ({ children }) => <>{children}</>,
+};
+
+function Sidenote({ id, n, text }: { id: string; n: string; text: string }) {
+  return (
+    <span className="sn">
+      <label htmlFor={`sn-${id}`} className="sn-ref">
+        <span className="sr-only">Note </span>
+        {n}
+      </label>
+      <input type="checkbox" id={`sn-${id}`} className="sn-toggle" />
+      <span className="sn-note" role="note">
+        <span className="sn-num" aria-hidden="true">
+          {n}
+        </span>
+        <ReactMarkdown
+          components={inlineComponents}
+          remarkPlugins={[remarkGfm, remarkMath]}
+          rehypePlugins={[[rehypeKatex, { strict: false, throwOnError: false }]]}
+        >
+          {text}
+        </ReactMarkdown>
+      </span>
+    </span>
+  );
+}
+
+function withSidenotes(notes: Map<string, string>): Components {
+  if (!notes.size) return MarkdownComponents;
+  return {
+    ...MarkdownComponents,
+    a: (props) => {
+      const id = props.href?.startsWith("#sn-") ? props.href.slice(4) : null;
+      if (id && notes.has(id))
+        return (
+          <Sidenote id={id} n={getTextContent(props.children)} text={notes.get(id)!} />
+        );
+      return <MarkdownLink {...props} />;
+    },
+  };
+}
+
+function NoteMarkdown({
+  content,
+  components,
+}: {
+  content: string;
+  components: Components;
+}) {
+  const parts = content.split(/^:::experiment (\w+):::\s*$/m);
+  if (parts.length > 1)
+    return (
+      <>
+        {parts.map((part, i) =>
+          i % 2 ? (
+            <div className="fn-inline-experiment" key={i}>
+              {experiments[part]}
+            </div>
+          ) : (
+            <NoteMarkdown key={i} content={part} components={components} />
+          ),
+        )}
+      </>
+    );
+  return <MarkdownPassage content={content} components={components} />;
+}
+
+function MarkdownPassage({
+  content,
+  components,
+}: {
+  content: string;
+  components: Components;
+}) {
+  const render = (text: string) => (
+    <ReactMarkdown
+      components={components}
+      remarkPlugins={[remarkGfm, remarkMath]}
+      rehypePlugins={[
+        [rehypeKatex, { strict: false, throwOnError: false }],
+        rehypeHighlight,
+      ]}
+    >
+      {text}
+    </ReactMarkdown>
+  );
+  const derivation = content.match(
+    /### 1\.2 Solving the SDE via Itô['’]s Lemma[\s\S]*?(?=\n### |$)/,
+  );
+  if (!derivation || derivation.index === undefined) return render(content);
+  return (
+    <>
+      {render(content.slice(0, derivation.index))}
+      <details className="fn-derivation">
+        <summary>
+          <span className="fn-derivation-symbol" aria-hidden="true">
+            ∫
+          </span>
+          <span className="fn-derivation-label">
+            <small>Derivation</small>
+            <strong>From price changes to log-returns</strong>
+            <em>Itô’s lemma · about 2 minutes</em>
+          </span>
+          <span className="fn-derivation-toggle" aria-hidden="true">
+            ↗
+          </span>
+        </summary>
+        <div>{render(derivation[0].replace(/^### .+\n/, ""))}</div>
+      </details>
+      {render(content.slice(derivation.index + derivation[0].length))}
+    </>
+  );
+}
+
 function PostMeta({ post }: { post: BlogPost }) {
   const dateStr = formatPostDate(post.date);
   const rt = post.readingTimeMinutes;
@@ -282,6 +471,11 @@ function PostMeta({ post }: { post: BlogPost }) {
         <Calendar className="w-4 h-4" />
         {dateStr}
       </span>
+      {post.updated && (
+        <span className="flex items-center gap-2">
+          Updated {formatPostDate(post.updated)}
+        </span>
+      )}
       {typeof rt === "number" && rt > 0 && (
         <span className="flex items-center gap-2">
           <Clock className="w-4 h-4" />
@@ -310,8 +504,14 @@ export default async function BlogPostPage({
     .replace(/\\\(([\s\S]*?)\\\)/g, (_match, m) => `$${m}$`)
     .replace(/\\\[([\s\S]*?)\\\]/g, (_match, m) => `$$${m}$$`);
 
+  const note = noteIdentity(post);
+  const { content: body, notes } = extractSidenotes(normalizedContent);
+  const components = withSidenotes(notes);
+  const { intro, chapters } = splitNoteChapters(body);
+  const nextPost = getAllPosts().find((p) => p.slug !== post.slug);
+
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main className="min-h-screen bg-background text-foreground fn-article-page">
       <JsonLd
         data={jsonLdGraph(
           {
@@ -320,7 +520,7 @@ export default async function BlogPostPage({
             headline: post.title,
             description: post.excerpt,
             datePublished: post.date,
-            dateModified: post.date,
+            dateModified: post.updated ?? post.date,
             url: `${SITE_URL}/blog/${post.slug}`,
             mainEntityOfPage: {
               "@type": "WebPage",
@@ -329,7 +529,9 @@ export default async function BlogPostPage({
             author: { "@id": `${SITE_URL}/#person` },
             publisher: { "@id": `${SITE_URL}/#person` },
             keywords: post.tags?.join(", "),
-            image: post.coverImage ? [`${SITE_URL}${post.coverImage}`] : undefined,
+            image: post.coverImage
+              ? [`${SITE_URL}${post.coverImage}`]
+              : undefined,
             inLanguage: "en",
           },
           personSchema,
@@ -337,7 +539,7 @@ export default async function BlogPostPage({
             { name: "Home", path: "/" },
             { name: "Blog", path: "/blog" },
             { name: post.title, path: `/blog/${post.slug}` },
-          ])
+          ]),
         )}
       />
       {/* Grain overlay */}
@@ -345,84 +547,87 @@ export default async function BlogPostPage({
 
       <Navbar />
 
-      <div className="container mx-auto px-6 md:px-12 pt-32 pb-24 relative z-10">
-        <div className="max-w-3xl mx-auto">
-          {/* Back link */}
-          <Link
-            href="/blog"
-            className="mb-12 inline-flex items-center text-sm text-[hsl(var(--foreground-muted))] hover:text-foreground transition-colors group"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4 transform group-hover:-translate-x-1 transition-transform" />
-            Back to Blog
-          </Link>
-
-          {/* Post Header */}
-          <header className="mb-12">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-light tracking-tight mb-6 text-foreground">
-              {post.title}
-            </h1>
-
+      <div className="fn-article-shell" id="note-top">
+        <Link href="/blog" className="fn-back-link">
+          <ArrowLeft size={15} /> Back to field notes
+        </Link>
+        <header className="fn-article-header">
+          <div className="fn-kicker">
+            <span className="fn-note-number">{note.number}</span> /{" "}
+            {note.category}{" "}
+            <span className="fn-header-arabic" lang="ar" dir="rtl">
+              ملاحظات
+            </span>
+          </div>
+          <LivingTitle kind={note.kind} title={note.title} />
+          <p className="fn-article-deck">{note.subtitle}</p>
+          <div className="fn-article-meta">
+            <span className="fn-kicker">By Youssef Chouay</span>
             <PostMeta post={post} />
-
-            {/* Tags */}
-            {post.tags && post.tags.length > 0 && (
-              <div className="mt-6 flex flex-wrap gap-2">
-                {post.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-3 py-1 text-[11px] font-mono uppercase tracking-wider bg-foreground/5 text-[hsl(var(--foreground-muted))] border border-foreground/10"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-          </header>
-
-          {/* Cover Image */}
-          {post.coverImage && (
-            <div className="relative mb-12 aspect-[16/9] w-full overflow-hidden border border-border">
-              <Image
-                src={post.coverImage}
-                alt={post.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 768px"
-                priority
-              />
+          </div>
+          <details className="fn-research-title">
+            <summary>Research title & topics</summary>
+            <p>{post.title}</p>
+            <div className="fn-tags">
+              {post.tags.map((tag) => (
+                <span key={tag}>{tag}</span>
+              ))}
             </div>
-          )}
-
-          {/* Article Content */}
-          <article className="blog-article prose max-w-none">
-            <ReactMarkdown
-              components={MarkdownComponents}
-              remarkPlugins={[remarkGfm, remarkMath]}
-              rehypePlugins={[
-                [rehypeKatex, { strict: false, throwOnError: false }],
-                rehypeHighlight,
-              ]}
+          </details>
+        </header>
+        <div className="fn-article-layout">
+          <NoteReader
+            kind={note.kind}
+            chapters={chapters.map(({ id, title }) => ({ id, title }))}
+          />
+          <article id="note-body" className="fn-article-content">
+            <div
+              id="start-reading"
+              className="blog-article prose max-w-none fn-prose fn-opening"
             >
-              {normalizedContent}
-            </ReactMarkdown>
-          </article>
-
-          {/* Post Footer */}
-          <footer className="mt-16 pt-8 border-t border-border">
-            <div className="flex items-center justify-between">
-              <Link
-                href="/blog"
-                className="inline-flex items-center text-sm text-[hsl(var(--foreground-muted))] hover:text-foreground transition-colors group"
+              <NoteMarkdown content={intro} components={components} />
+            </div>
+            {chapters.map((chapter, index) => (
+              <section
+                key={chapter.id}
+                id={chapter.id}
+                className="fn-chapter"
+                aria-labelledby={`${chapter.id}-heading`}
               >
-                <ArrowLeft className="mr-2 h-4 w-4 transform group-hover:-translate-x-1 transition-transform" />
-                All Posts
-              </Link>
-
-              <span className="font-arabic text-sm text-[hsl(var(--gold))] opacity-60">
+                <header className="fn-chapter-heading">
+                  <span className="fn-kicker">
+                    {String(index + 1).padStart(2, "0")} / Field note
+                  </span>
+                  <h2 id={`${chapter.id}-heading`}>{chapter.title}</h2>
+                </header>
+                <div className="blog-article prose max-w-none fn-prose">
+                  <NoteMarkdown
+                    content={chapter.markdown}
+                    components={components}
+                  />
+                </div>
+              </section>
+            ))}
+            <footer className="fn-article-end">
+              <span className="fn-kicker">
+                End of field note / {note.number}
+              </span>
+              <span className="font-arabic text-gold" lang="ar" dir="rtl">
                 شكراً للقراءة
               </span>
-            </div>
-          </footer>
+              <EndNote kind={note.kind} />
+            </footer>
+            {nextPost && (
+              <Link href={`/blog/${nextPost.slug}`} className="fn-next-note">
+                <span className="fn-kicker">Read another article</span>
+                <span>
+                  {noteIdentity(nextPost).title}
+                  <ArrowUpRight size={25} />
+                </span>
+                <small>{nextPost.readingTimeMinutes} min read</small>
+              </Link>
+            )}
+          </article>
         </div>
       </div>
 

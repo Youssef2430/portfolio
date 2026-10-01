@@ -18,6 +18,7 @@ import {
 import "./globals.css";
 import "./project-studies.css";
 import "./glui.css";
+import "./field-notes.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PostHogProvider } from "./providers";
 import { CustomCursor } from "@/components/custom-cursor";
