@@ -5057,3 +5057,12 @@ body:has(.fn-article-page) .portfolio-custom-cursor {
     padding-inline: 8px;
   }
 }
+.cl-endings i.is-drawn,
+.cl-legend i.is-drawn {
+  background: linear-gradient(
+    90deg,
+    var(--oc-clean) 50%,
+    hsl(var(--foreground-soft)) 50%
+  );
+  border-color: hsl(var(--foreground-subtle));
+}

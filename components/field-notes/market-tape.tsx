@@ -68,7 +68,9 @@ export function MarketsHero({ title }: { title: string }) {
   );
 
   function shock() {
-    const count = Math.min(3, shocks + 1);
+    // The title word is also a shock button; both stop at three.
+    if (shocks >= 3) return;
+    const count = shocks + 1;
     setShocks(count);
     setTape((t) => {
       const last = t.path[t.path.length - 1];

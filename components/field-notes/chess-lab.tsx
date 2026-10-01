@@ -1377,6 +1377,7 @@ export function RunResults({ initialCohort = "v2" }: { initialCohort?: Cohort })
             {rows.map((m) => {
               const segments = [
                 ["won", m.wins],
+                ["drawn", m.draws],
                 ["mated", m.checkmated],
                 ["forfeit", m.forfeits],
                 ["unfinished", m.unfinished],
@@ -1423,7 +1424,7 @@ export function RunResults({ initialCohort = "v2" }: { initialCohort?: Cohort })
         </table>
       </div>
       <div className="cl-legend">
-        {(["won", "mated", "forfeit", "unfinished", "aborted"] as const).map((k) => (
+        {(["won", "drawn", "mated", "forfeit", "unfinished", "aborted"] as const).map((k) => (
           <span key={k}>
             <i className={`is-${k}`} />
             {k}
