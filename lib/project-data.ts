@@ -15,6 +15,8 @@ export type ProjectDetail = {
     aspectRatio?: string;
   };
   technologies: string[];
+  /** Section anchors on the case study page, in reading order. */
+  chapters?: { id: string; label: string }[];
   timeline?: string;
   contributors?: string[];
   link?: string;
@@ -51,6 +53,13 @@ export const projects: ProjectDetail[] = [
       "Codex",
       "OpenCode",
       "Local Voice Transcription",
+    ],
+    chapters: [
+      { id: "idea", label: "The idea" },
+      { id: "experience", label: "The experience" },
+      { id: "appearance", label: "The aesthetic" },
+      { id: "architecture", label: "The engineering" },
+      { id: "get-started", label: "Get GLUI" },
     ],
     timeline: "Recent",
     contributors: ["Youssef Chouay"],
@@ -90,6 +99,12 @@ export const projects: ProjectDetail[] = [
       "Cloudflare R2",
       "Zustand",
       "Radix UI",
+    ],
+    chapters: [
+      { id: "overview", label: "The idea" },
+      { id: "workflow", label: "Research engine" },
+      { id: "product", label: "The product" },
+      { id: "models", label: "The models" },
     ],
     timeline: "Recent",
     contributors: ["Youssef Chouay"],
@@ -148,6 +163,12 @@ export const projects: ProjectDetail[] = [
       "Apple Intelligence",
       "WidgetKit",
       "HealthKit",
+    ],
+    chapters: [
+      { id: "ritual", label: "The ritual" },
+      { id: "collection", label: "The app" },
+      { id: "daily", label: "Daily details" },
+      { id: "craft", label: "The craft" },
     ],
     timeline: "Jun 2026",
     contributors: ["Youssef Chouay"],
@@ -210,6 +231,12 @@ export const projects: ProjectDetail[] = [
       "Docker",
       "Nginx",
       "Chrome Extension API"
+    ],
+    chapters: [
+      { id: "overview", label: "In the inbox" },
+      { id: "scanner", label: "Try a message" },
+      { id: "pipeline", label: "System" },
+      { id: "models", label: "Models" },
     ],
     timeline: "Jan 2024 - Dec 2024",
     contributors: ["Youssef Chouay", "Group 30 Capstone Team"],

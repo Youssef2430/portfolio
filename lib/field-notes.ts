@@ -122,3 +122,15 @@ export function splitNoteChapters(markdown: string): {
     })),
   };
 }
+
+/**
+ * The article page and the site guide both read notes through this, so the
+ * chapter anchors the guide links to are always the ones the page renders.
+ */
+export function parseFieldNote(markdown: string) {
+  const normalized = markdown
+    .replace(/\\\(([\s\S]*?)\\\)/g, (_match, m) => `$${m}$`)
+    .replace(/\\\[([\s\S]*?)\\\]/g, (_match, m) => `$$${m}$$`);
+  const { content, notes } = extractSidenotes(normalized);
+  return { ...splitNoteChapters(content), notes };
+}

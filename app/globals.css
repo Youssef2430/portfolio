@@ -724,6 +724,42 @@
   font-family: var(--font-roboto-mono), ui-monospace, monospace !important;
 }
 
+/* A section the site guide cited: a ring in the page's own accent settles
+   around it, holds, then fades. Full-width sections get it inset. */
+.citation-flash {
+  outline: 1px solid transparent;
+  outline-offset: 12px;
+  animation: citation-flash 2.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.citation-flash-inset {
+  outline-offset: -12px;
+}
+@keyframes citation-flash {
+  0% { outline-color: hsl(var(--gold) / 0); outline-offset: 24px; }
+  18%, 65% { outline-color: hsl(var(--gold) / 0.85); }
+  18% { outline-offset: 12px; }
+  100% { outline-color: hsl(var(--gold) / 0); }
+}
+.citation-flash-inset {
+  animation-name: citation-flash-inset;
+}
+@keyframes citation-flash-inset {
+  0% { outline-color: hsl(var(--gold) / 0); outline-offset: 0; }
+  18%, 65% { outline-color: hsl(var(--gold) / 0.85); }
+  18% { outline-offset: -12px; }
+  100% { outline-color: hsl(var(--gold) / 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .citation-flash,
+  .citation-flash-inset {
+    animation-name: citation-fade;
+  }
+  @keyframes citation-fade {
+    0%, 65% { outline-color: hsl(var(--gold) / 0.85); }
+    100% { outline-color: hsl(var(--gold) / 0); }
+  }
+}
+
 /* Works Section - Large Typography Style */
 .works-title {
   font-size: clamp(28px, 6vw, 72px);

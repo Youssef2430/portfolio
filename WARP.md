@@ -26,6 +26,10 @@ npm run populate-db
 ```bash
 # Check TypeScript errors
 npx tsc --noEmit
+
+# Unit tests (Node strips the TypeScript types; lib modules under test must
+# only have type imports)
+node --test scripts/*.test.mjs
 ```
 
 ## Environment Setup
@@ -53,7 +57,8 @@ This is a Next.js 16 portfolio website with App Router, showcasing Youssef's wor
 - **Framework**: Next.js 16 (App Router, TypeScript, React 19)
 - **Styling**: Tailwind CSS v3 with custom animations
 - **Animations**: Framer Motion v12 for smooth interactions
-- **AI/Chat**: OpenRouter (`app/api/ask/route.ts`) with a hardcoded context prompt
+- **AI/Chat**: OpenRouter (`app/api/ask/route.ts`), grounded in the site's own
+  data and linking its answers back into the site
 - **Logging**: OpenTelemetry logs exported to PostHog (`instrumentation.ts`)
 - **Analytics**: PostHog + Vercel Analytics
 
@@ -71,6 +76,25 @@ This is a Next.js 16 portfolio website with App Router, showcasing Youssef's wor
 - **Streaming UI**: Real-time typing effects with particle animations
 - **Context Management**: Persistent chat history in localStorage
 - **Responsive Design**: Mobile-optimized with touch handling
+- **Knowledge**: there is no hand-written prompt, and the chat knows only what
+  the site displays. `lib/guide-knowledge.ts` builds the prompt per question
+  from the data the pages render (`lib/profile-data.ts`, field notes) and the
+  rendered text of the About section, footer and project case studies
+  (`lib/page-text.ts`), plus BM25-retrieved field note excerpts. Change the
+  site and the chat knows; `lib/site-knowledge.ts` loads it on the server,
+  fetching the pages from the public site (or from itself on localhost). Mark
+  mock UI the chat shouldn't read with `data-guide-skip`.
+- **Model**: `deepseek/deepseek-v4.1-flash` with reasoning off, up to 750
+  answer tokens (`DEFAULT_MODEL` in the route).
+- **Citations**: the model links claims as `[words](cite:<source id>)`, e.g.
+  `cite:experience/trend` or `cite:project/glui#architecture`. The home page
+  passes the id → page manifest to the chat at build time; clicking a citation
+  calls `followCitation` (`components/citation-focus.tsx`), which navigates
+  (through the project signature transition where there is one), waits for the
+  target to settle, scrolls to it and outlines it. Sections that hide content
+  (e.g. the Education tabs) listen for `CITATION_REVEAL_EVENT`.
+- **New linkable places**: give the element a stable `id`, then add a source for
+  it in `buildKnowledge`. `scripts/guide.test.mjs` checks the anchors exist.
 
 #### 3. API Routes (`app/api/ask/route.ts`)
 - **Provider**: OpenRouter chat completions (POST = non-streaming, GET = SSE streaming)
@@ -80,7 +104,10 @@ This is a Next.js 16 portfolio website with App Router, showcasing Youssef's wor
 - **Metrics**: token usage and cost logged via OpenTelemetry to PostHog
 
 #### 4. Data Management
-- **Project Data**: Centralized in `lib/project-data.ts` with TypeScript types
+- **Project Data**: Centralized in `lib/project-data.ts` with TypeScript types,
+  including each case study's section anchors (`chapters`)
+- **Experience & Education**: `lib/profile-data.ts`; bullets are strings with
+  `**bold**` and `[label](url)` markup so the chat can read them too
 - **Blog Data**: Metadata in `lib/blog-data.ts`, markdown content in `blogs/*.md`
   read server-side via `lib/blog-content.ts`
 - **Static Assets**: Images in `public/`; blog animations are MP4 (not GIF)
@@ -112,6 +139,11 @@ components/            # Reusable UI components (all actively used)
 
 lib/                   # Utilities and data
   project-data.ts      # Centralized project information
+  profile-data.ts      # Experience and education
+  guide-knowledge.ts   # Chat knowledge, retrieval and prompt (pure)
+  page-text.ts         # Visible text of a rendered page, for the chat (pure)
+  site-knowledge.ts    # Loads the chat knowledge on the server
+  citations.ts         # Citation types and helpers (client-safe)
   blog-data.ts         # Blog post metadata
   blog-content.ts      # Server-side markdown reading
   utils.ts             # Helper functions

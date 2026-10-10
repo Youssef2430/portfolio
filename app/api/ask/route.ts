@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { SeverityNumber } from "@opentelemetry/api-logs";
 import { loggerProvider } from "@/instrumentation";
+import { citedIds } from "@/lib/citations";
+import { buildGuidePrompt } from "@/lib/guide-knowledge";
+import { getSiteKnowledge, pagesOrigin } from "@/lib/site-knowledge";
 
 // --- PostHog Logger ---
 const logger = loggerProvider.getLogger("ai-chat-api");
@@ -9,8 +12,10 @@ const logger = loggerProvider.getLogger("ai-chat-api");
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 
-// Default model - can be easily switched for cost/speed tradeoffs
-const DEFAULT_MODEL = "google/gemini-3-flash-preview";
+// Default model - can be easily switched for cost/speed tradeoffs. Chosen in
+// October 2026 over GPT-6 Luna and Claude Haiku 5.5 on a small eval of site
+// questions: all accurate, this one the fastest with the most natural links.
+const DEFAULT_MODEL = "deepseek/deepseek-v4.1-flash";
 
 // --- Validate Environment Variables ---
 if (!OPENROUTER_API_KEY) {
@@ -24,6 +29,11 @@ if (!OPENROUTER_API_KEY) {
 const MAX_MESSAGE_LENGTH = 2000;
 const MAX_HISTORY_MESSAGES = 20;
 const MAX_HISTORY_CONTENT_LENGTH = 4000;
+// Answers stay short; the headroom is for the citation links and the odd list.
+const MAX_ANSWER_TOKENS = 750;
+// Answers come straight from the sources in the prompt, so thinking first
+// only adds latency. Every model in MODEL_PRICING accepts this.
+const REASONING = { effort: "none" };
 
 // Per-IP sliding-window rate limit. In-memory, so it's per serverless
 // instance, best-effort protection, not a hard guarantee.
@@ -102,13 +112,11 @@ export interface QueryMetrics {
   generationId: string | null;
 }
 
-// Model pricing (per 1M tokens) - update as needed
+// Model pricing (per 1M tokens, OpenRouter list prices, October 2026) - update as needed
 const MODEL_PRICING: Record<string, { input: number; output: number }> = {
-  "google/gemini-3-flash-preview": { input: 0.15, output: 0.6 },
-  "google/gemini-2.0-flash-lite-preview-02-05:free": { input: 0, output: 0 },
-  "google/gemini-2.0-flash-001": { input: 0.1, output: 0.4 },
-  "meta-llama/llama-3.3-70b-instruct": { input: 0.3, output: 0.3 },
-  "openai/gpt-4o-mini": { input: 0.15, output: 0.6 },
+  "deepseek/deepseek-v4.1-flash": { input: 0.3, output: 1.2 },
+  "openai/gpt-6-luna": { input: 0.1, output: 0.5 },
+  "anthropic/claude-haiku-5.5": { input: 0.1, output: 0.5 },
 };
 
 const ALLOWED_MODELS = new Set(Object.keys(MODEL_PRICING));
@@ -149,39 +157,26 @@ function calculateCost(
   return inputCost + outputCost;
 }
 
-// System prompt with Youssef's context
-const SYSTEM_PROMPT = `You are an AI assistant answering questions about Youssef based *primarily* on the provided context and the ongoing conversation. If the context doesn't contain the answer, state that you don't have that information based on the provided details. Refer to previous messages if relevant.
-
-IMPORTANT: Keep responses SHORT and COMPACT. Use 2-3 sentences max for simple questions. Avoid bullet points and long lists unless specifically asked. Be direct and to the point.
-Context about Youssef:
---- START CONTEXT ---
-Youssef Chouay is a software engineer and AI researcher pursuing a Master's in Computer Science at the University of Ottawa (Jan 2025–Dec 2026) under Prof. Vida Dujmović; he has received over $52,000 in research scholarships.
-He completed a BASc in Software Engineering (Sept 2020–Dec 2024) with coursework in DS&A, Embedded Systems, Databases, Discrete Math, Real-Time Systems Design, and Enterprise Architecture.
-Since Jan 2026, he has been a Software Engineer Intern at Trend Micro / TrendAI in Ottawa, working with the AI Security team. He migrated a prompt-scan engine to state-of-the-art detection models for LLM threat analysis, implemented chunking behavior for an inference engine in Rust and Go to support long prompts and document-style inputs, and owned the design, testing, and AWS deployment of a backend service that retrieves company profiles and market data through MCP-based integrations for cybersecurity research workflows.
-Since May 2024, he's an AI Researcher at Canada's National Research Council. He was first author on a peer-reviewed IEEE EPEC 2025 paper presenting live-building results for an AI agent layer for BAS; he built Python/LangChain agents that cut data-processing time and operator workload by 49%, a SQLite-backed ingestion pipeline for real-time BAS streams, and, through partnerships with Delta Controls and Carleton University, achieved a 56% maintenance-cost reduction via automated fault detection, predictive maintenance, and real-time alerts. He also built an enhanced, multi-agent utilities chatbot that explains bills, simulates alternative rate plans, and diagnoses anomalies by linking AMI data with weather/holidays/tariffs. The system includes a retrieval-augmented policy/tariff QA layer with deterministic function calling and inline citations, plus a time-series engine (seasonal decomposition + change-point detection) that flags spikes, persistent baseload, and overnight leaks and generates plain-English "why it happened" narratives and savings playbooks.
-Previously at Wind River Systems (Sept 2022–Aug 2023), he delivered an Angular/TypeScript/Django Automation Dashboard with PostgreSQL used by programs at NASA, Airbus, and Ford, and improved query/UI performance by over 90% through API and DB optimizations.
-As a University of Ottawa Software Developer (May 2022–Apr 2024), he redesigned the university search engine (PHP/MySQL/Apache), improving response times by 80% and saving $30,000+ annually; he also shipped PHP/Bash/Cron automations that further boosted search speed by 54% and streamlined data migration.
-Teaching Assistant (Sept 2023–present): supports graduate ML for Bio-informatics and undergraduate courses including Data Structures & Algorithms, Design & Analysis of Algorithms, Programming Paradigms, and Discrete Structures.
-Selected projects:
-• Ramelli (previously AtlasLLM): A multi-model AI chat platform supporting 30+ LLMs across 9 providers with Next.js, Convex, Redis, Cloudflare R2, and OpenRouter. Current name: Ramelli. Website: https://ramelli.chat/chat. Portfolio: /projects/ramelli.
-• NLP Phishing Detection (Bell Canada Research): CNN-based website classifier (98.4% accuracy), Chrome extension integration, and an AWS S3-driven retraining pipeline.
-• GeeGees Intramural Sports Hub: Next.js/TypeScript/Tailwind app with a Rust + Actix-web API (SQLx/PostgreSQL) streaming real-time standings, Elo ratings, and predictive analytics with sub-20 ms latency; built with async/await and strict type safety for scalable concurrency.
-• Distributed File Storage System (Go): Engineered a fault-tolerant, gRPC/Protocol Buffers-backed storage network using consistent hashing and replication, reducing transfer latency by 35 %.
-
-Skills: Python, Java, Go, Rust, C/C++, JavaScript/TypeScript, HTML/CSS, SQL, LaTeX; plus AWS CDK, React, Node.js, TensorFlow, Docker, Kubernetes, Firebase, Jira, Git, Mockito, Flask.
---- END CONTEXT ---
---- START META ADDENDUM ---
-Funding: $52,000+ in research scholarships. Publications: First-author, peer-reviewed IEEE EPEC 2025 paper (live-building BAS results).
-Impact (by the numbers):
-    49% cut in data-processing time & operator workload (BAS agents).
-    56% reduction in maintenance costs (predictive maintenance + alerts).
-    90% faster queries/UI (Automation Dashboard).
-    80% faster university search + $30k/yr savings.
-    98.4% phishing-classifier accuracy.
-    Sub-20 ms real-time API latency (Rust + Actix).
-Experience snapshot: Research & industry roles since 2022 (Trend Micro / TrendAI, NRC, Wind River, uOttawa; TA since 2023).
-Market value: $120k+.
---- END META ADDENDUM ---`;
+// The system prompt is built per question from what the site displays (see
+// lib/guide-knowledge.ts), with field note excerpts that match the question.
+async function buildMessages(req: Request, message: string, history: ChatMessage[]) {
+  const knowledge = await getSiteKnowledge(pagesOrigin(req.url));
+  // Follow-ups like "tell me more" lean on the previous turn: its question
+  // for retrieval, and the chapters its answer cited.
+  const previousQuestion = history.findLast((m) => m.role === "user")?.content ?? "";
+  const previousAnswer = history.findLast((m) => m.role === "assistant")?.content ?? "";
+  const { prompt, passageIds } = buildGuidePrompt(knowledge, {
+    query: `${previousQuestion}\n${message}`,
+    today: new Date(),
+    continuing: citedIds(previousAnswer),
+  });
+  const messages: ChatMessage[] = [
+    { role: "system", content: prompt },
+    ...history,
+    { role: "user", content: message },
+  ];
+  return { messages, passageIds };
+}
 
 // --- API Route Handler ---
 export async function POST(req: Request) {
@@ -225,11 +220,11 @@ export async function POST(req: Request) {
     const model = resolveModel(requestedModel);
 
     // --- Construct the full message list for the LLM ---
-    const messagesForAPI: ChatMessage[] = [
-      { role: "system", content: SYSTEM_PROMPT },
-      ...conversationHistory,
-      { role: "user", content: message },
-    ];
+    const { messages: messagesForAPI, passageIds } = await buildMessages(
+      req,
+      message,
+      conversationHistory
+    );
 
     // --- Call OpenRouter API ---
     const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
@@ -243,8 +238,9 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         model,
         messages: messagesForAPI,
-        max_tokens: 200,
+        max_tokens: MAX_ANSWER_TOKENS,
         temperature: 0.3,
+        reasoning: REASONING,
       }),
     });
 
@@ -303,6 +299,7 @@ export async function POST(req: Request) {
         estimated_cost_usd: metrics.estimatedCost,
         generation_id: metrics.generationId,
         conversation_length: conversationHistory.length,
+        retrieved_passages: passageIds.join(","),
       },
     });
 
@@ -381,13 +378,13 @@ export async function GET(req: Request) {
 
   const model = resolveModel(requestedModel);
 
-  const messagesForAPI: ChatMessage[] = [
-    { role: "system", content: SYSTEM_PROMPT },
-    ...conversationHistory,
-    { role: "user", content: message },
-  ];
-
   try {
+    const { messages: messagesForAPI } = await buildMessages(
+      req,
+      message,
+      conversationHistory
+    );
+
     const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
       method: "POST",
       headers: {
@@ -399,8 +396,9 @@ export async function GET(req: Request) {
       body: JSON.stringify({
         model,
         messages: messagesForAPI,
-        max_tokens: 200,
+        max_tokens: MAX_ANSWER_TOKENS,
         temperature: 0.3,
+        reasoning: REASONING,
         stream: true,
       }),
     });

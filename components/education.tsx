@@ -1,40 +1,15 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { MapPin } from "lucide-react";
 import { ThesisFigure } from "@/components/thesis-figure";
 import { useNow } from "@/components/experience";
+import { CITATION_REVEAL_EVENT } from "@/components/citation-focus";
+import { degrees, type Degree, type YearMonth } from "@/lib/profile-data";
 
-// ---------------------------------------------------------------------------
-// Data
-// ---------------------------------------------------------------------------
-
-type YearMonth = [year: number, month: number];
-
-type Degree = {
-  id: "msc" | "basc";
-  short: string;
-  field: string;
-  start: YearMonth;
-  end: YearMonth; // exclusive
-};
-
-const degrees: Degree[] = [
-  { id: "basc", short: "B.A.Sc.", field: "Software Engineering", start: [2020, 8], end: [2025, 0] },
-  { id: "msc", short: "M.Sc.", field: "Computer Science", start: [2025, 0], end: [2027, 0] },
-];
-
-const coursework = [
-  { name: "Data Structures & Algorithms", area: "Theory" },
-  { name: "Discrete Mathematics", area: "Theory" },
-  { name: "Embedded Systems", area: "Systems" },
-  { name: "Real-Time Systems Design", area: "Systems" },
-  { name: "Databases", area: "Data" },
-  { name: "Enterprise Architecture", area: "Architecture" },
-];
-
-const THESIS_TITLE = "Minimum Feature Size in Proper Triangulations: A tight logarithmic bound";
+const msc = degrees.find((d) => d.id === "msc")!;
+const basc = degrees.find((d) => d.id === "basc")!;
 
 // Ruler spans Jan 2020 → Jan 2027.
 const RULER_START = 2020;
@@ -76,32 +51,32 @@ function MscSpotlight({ progress }: { progress: number }) {
           <Eyebrow className="text-[hsl(var(--gold))]">
             In progress · {Math.round(progress * 100)}%
           </Eyebrow>
-          <Eyebrow>Jan 2025 — Dec 2026</Eyebrow>
+          <Eyebrow>{msc.period}</Eyebrow>
         </div>
 
         <h3 className="mt-6 text-4xl font-light leading-[1.05] text-foreground md:text-5xl">
-          Master of
+          {msc.title[0]}
           <br />
-          Computer Science
+          {msc.title[1]}
         </h3>
 
         <div className="mt-8 border-l border-[hsl(var(--gold))] pl-5">
           <Eyebrow>Thesis</Eyebrow>
           <p className="mt-2 text-lg font-light italic leading-snug text-[hsl(var(--foreground-soft))]">
-            {THESIS_TITLE}
+            {msc.thesis}
           </p>
         </div>
 
         <dl className="mt-10 grid grid-cols-2 gap-x-8 gap-y-6">
           <div>
             <dt><Eyebrow>Supervisor</Eyebrow></dt>
-            <dd className="mt-1.5 text-foreground">Vida Dujmović</dd>
+            <dd className="mt-1.5 text-foreground">{msc.supervisor}</dd>
           </div>
           <div>
             <dt><Eyebrow>Funding</Eyebrow></dt>
             <dd className="mt-1.5 text-foreground">
-              $52,000+{" "}
-              <span className="text-[hsl(var(--foreground-muted))]">in scholarships</span>
+              {msc.funding?.amount}{" "}
+              <span className="text-[hsl(var(--foreground-muted))]">{msc.funding?.label}</span>
             </dd>
           </div>
         </dl>
@@ -130,21 +105,21 @@ function BascDetail() {
       <div>
         <div className="flex items-center gap-3">
           <Eyebrow className="text-[hsl(var(--gold))]">✓ Conferred</Eyebrow>
-          <Eyebrow>Sept 2020 — Dec 2024</Eyebrow>
+          <Eyebrow>{basc.period}</Eyebrow>
         </div>
         <h3 className="mt-6 text-4xl font-light leading-[1.05] text-foreground md:text-5xl">
-          Bachelor of
+          {basc.title[0]}
           <br />
-          Applied Science
+          {basc.title[1]}
         </h3>
         <p className="mt-4 text-lg font-light text-[hsl(var(--foreground-soft))]">
-          Software Engineering
+          {basc.field}
         </p>
       </div>
       <div>
         <Eyebrow>Selected coursework</Eyebrow>
         <ol className="mt-4">
-          {coursework.map((c, i) => (
+          {basc.coursework?.map((c, i) => (
             <li
               key={c.name}
               className="flex items-baseline gap-4 border-b border-border py-3 text-sm text-[hsl(var(--foreground-soft))]"
@@ -174,7 +149,18 @@ export function Education() {
   const [active, setActive] = useState<Degree["id"]>("msc");
   const now = useNow([2026, 9]);
   const nowPct = toPct(now);
-  const mscProgress = progressOf(degrees[1], now);
+  const mscProgress = progressOf(msc, now);
+
+  // A citation from the site guide can point at either degree.
+  useEffect(() => {
+    const reveal = (event: Event) => {
+      const id = (event as CustomEvent<{ id: string }>).detail?.id;
+      const degree = degrees.find((d) => id === `education-${d.id}`);
+      if (degree) setActive(degree.id);
+    };
+    window.addEventListener(CITATION_REVEAL_EVENT, reveal);
+    return () => window.removeEventListener(CITATION_REVEAL_EVENT, reveal);
+  }, []);
 
   return (
     <section id="education" className="relative overflow-hidden py-32">
@@ -237,7 +223,7 @@ export function Education() {
             <div>
               <Eyebrow>Institution</Eyebrow>
               <h3 className="mt-2 text-3xl font-light text-foreground md:text-4xl">
-                University of Ottawa
+                {msc.institution}
               </h3>
             </div>
             <div className="flex items-center gap-2 font-mono text-xs tracking-wider text-[hsl(var(--foreground-muted))]">
@@ -337,6 +323,8 @@ export function Education() {
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={active}
+                id={`education-${active}`}
+                className="scroll-mt-28"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}

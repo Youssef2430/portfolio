@@ -32,11 +32,7 @@ import {
   breadcrumbSchema,
   SITE_URL,
 } from "@/lib/seo";
-import {
-  extractSidenotes,
-  noteIdentity,
-  splitNoteChapters,
-} from "@/lib/field-notes";
+import { noteIdentity, parseFieldNote } from "@/lib/field-notes";
 import {
   GameReplay,
   ParserLab,
@@ -500,14 +496,10 @@ export default async function BlogPostPage({
 
   // Read markdown content from file
   const content = await getPostContent(post);
-  const normalizedContent = content
-    .replace(/\\\(([\s\S]*?)\\\)/g, (_match, m) => `$${m}$`)
-    .replace(/\\\[([\s\S]*?)\\\]/g, (_match, m) => `$$${m}$$`);
 
   const note = noteIdentity(post);
-  const { content: body, notes } = extractSidenotes(normalizedContent);
+  const { intro, chapters, notes } = parseFieldNote(content);
   const components = withSidenotes(notes);
-  const { intro, chapters } = splitNoteChapters(body);
   const nextPost = getAllPosts().find((p) => p.slug !== post.slug);
 
   return (

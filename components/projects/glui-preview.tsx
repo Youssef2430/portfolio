@@ -28,7 +28,7 @@ export function GluiPreview() {
   const expandButton = useRef<HTMLButtonElement>(null);
   const settingsButton = useRef<HTMLButtonElement>(null);
 
-  return <div className="glui-demo" data-appearance={appearance} onKeyDown={event => {
+  return <div className="glui-demo" data-guide-skip data-appearance={appearance} onKeyDown={event => {
     if (event.altKey && event.code === "Space") { event.preventDefault(); setExpanded(value => !value); }
     if (event.key === "Escape" && settingsOpen) { setSettingsOpen(false); settingsButton.current?.focus(); }
   }}>

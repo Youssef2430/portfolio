@@ -27,7 +27,6 @@ import { Footer } from "@/components/footer";
 import { StudyNav, NextStudy } from "@/components/projects/case-study-chrome";
 import type { SerializableProject } from "@/components/project-detail";
 
-const CHAPTERS = [{id:"overview",label:"In the inbox"},{id:"scanner",label:"Try a message"},{id:"pipeline",label:"System"},{id:"models",label:"Models"}];
 const EASE = [0.16, 1, 0.3, 1] as const;
 const REPO_URL =
   "https://github.com/capstone-2024-T91/Image-Processing-and-NLP-for-Brand-Protection";
@@ -334,7 +333,7 @@ export function NLPPhishingExperience({
           </div>
         </div>
       </section>
-      <StudyNav name="NLP Phishing Detection" chapters={CHAPTERS} />
+      <StudyNav name="NLP Phishing Detection" chapters={project.chapters ?? []} />
 
       <section id="overview" className="px-6 py-24 md:px-12 md:py-32">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">

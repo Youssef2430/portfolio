@@ -24,7 +24,10 @@ This is a simple project to showcase my portfolio and have a big of fun! It's bu
 - Next.js 16 App Router with TypeScript (React 19)
 - Tailwind CSS styling + custom animations
 - Framer Motion interactions
-- AI chat powered by OpenRouter with usage/cost telemetry
+- AI chat powered by OpenRouter, grounded in the site's own content: answers cite
+  the role, project section or field note chapter they came from, and clicking a
+  citation takes you there
+- Usage/cost telemetry for the chat
 - PostHog analytics
 - Mobile-first, responsive design
 

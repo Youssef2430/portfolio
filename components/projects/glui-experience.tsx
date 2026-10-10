@@ -13,7 +13,6 @@ import { ProviderIcon } from "@/components/projects/glui-provider-icon";
 
 const SITE = "https://clui.app/";
 const REPO = "https://github.com/Youssef2430/glui";
-const CHAPTERS = [{ id: "idea", label: "The idea" }, { id: "experience", label: "The experience" }, { id: "appearance", label: "The aesthetic" }, { id: "architecture", label: "The engineering" }, { id: "get-started", label: "Get GLUI" }];
 const FEATURES = [
   { Icon: Command, title: "A shortcut back to your work", text: "Option + Space brings the floating pill into view. Hide it again and the runtime keeps going, with the conversation ready when you return." },
   { Icon: GitBranch, title: "Another agent. The same thread.", text: "Move between Claude Code, Codex, and OpenCode with a context handoff, or branch a conversation to explore a different direction." },
@@ -42,7 +41,7 @@ export function GluiExperience({ project }: { project: SerializableProject }) {
       <div className="glui-project-facts study-width"><div><span>My contribution</span><strong>Product design & integration</strong></div><div><span>Platform</span><strong>macOS · Apple Silicon</strong></div><div><span>The evolution</span><strong>Clui → GLUI</strong></div></div>
     </section>
 
-    <StudyNav name="GLUI" chapters={CHAPTERS} />
+    <StudyNav name="GLUI" chapters={project.chapters ?? []} />
 
     <section id="idea" className="study-section"><div className="study-width glui-story-grid">
       <div><span className="study-eyebrow">01 / The idea</span><h2 className="glui-heading">Less switching.<br /><em>More making.</em></h2></div>
