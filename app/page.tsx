@@ -11,8 +11,12 @@ import { AskInput } from "@/components/ask-input";
 import { PageTransition } from "@/components/page-transition";
 import { JsonLd } from "@/components/json-ld";
 import { jsonLdGraph, personSchema, websiteSchema, SITE_URL } from "@/lib/seo";
+import { getCitationSources } from "@/lib/site-knowledge";
 
-export default function Home() {
+export default async function Home() {
+  // Read at build time; the chat links its answers to these.
+  const citationSources = await getCitationSources();
+
   return (
     <PageTransition>
       <JsonLd
@@ -51,7 +55,7 @@ export default function Home() {
         <Footer />
 
         {/* Floating chat input */}
-        <AskInput />
+        <AskInput sources={citationSources} />
       </main>
     </PageTransition>
   );

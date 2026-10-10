@@ -1,12 +1,14 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X, Send, Trash2 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { AssistantMessage } from "@/components/assistant-message";
+import { followCitation } from "@/components/citation-focus";
+import type { CitationSource } from "@/lib/citations";
 
 // Utility function for combining class names
 export function cn(...inputs: ClassValue[]) {
@@ -49,8 +51,12 @@ interface Particle {
 }
 
 // --- Main AskInput Component ---
-export function AskInput() {
+export function AskInput({ sources }: { sources: CitationSource[] }) {
   const reduceMotion = useReducedMotion();
+  const sourcesById = useMemo(
+    () => new Map(sources.map((source) => [source.id, source])),
+    [sources],
+  );
   // States
   const [isVisible, setIsVisible] = useState(true);
   const [inputValue, setInputValue] = useState("");
@@ -466,6 +472,14 @@ export function AskInput() {
     ],
   );
 
+  // Fold the conversation away so the cited part of the page is in view; it
+  // is still there when the input is focused again.
+  const handleCite = useCallback((source: CitationSource) => {
+    setIsExpanded(false);
+    inputRef.current?.blur();
+    followCitation({ href: source.href, projectId: source.projectId });
+  }, []);
+
   const clearMessages = () => {
     setMessages([]);
     localStorage.removeItem("chatMessages");
@@ -578,7 +592,12 @@ export function AskInput() {
                               </p>
                             </div>
                           ) : (
-                            <AssistantMessage text={message.text} active={isActiveAnswer} />
+                            <AssistantMessage
+                              text={message.text}
+                              active={isActiveAnswer}
+                              sources={sourcesById}
+                              onCite={handleCite}
+                            />
                           )}
                         </motion.div>
                       );

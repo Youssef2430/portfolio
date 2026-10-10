@@ -24,6 +24,7 @@ import { PostHogProvider } from "./providers";
 import { CustomCursor } from "@/components/custom-cursor";
 import { ThemeFavicon, themeFaviconScript } from "@/components/theme-favicon";
 import { ProjectSignatureTransitionProvider } from "@/components/project-signature-transition";
+import { CitationFocusProvider } from "@/components/citation-focus";
 import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
@@ -201,6 +202,7 @@ export default function RootLayout({
             <CustomCursor />
             {children}
             <ProjectSignatureTransitionProvider />
+            <CitationFocusProvider />
           </ThemeProvider>
         </PostHogProvider>
         <Analytics />

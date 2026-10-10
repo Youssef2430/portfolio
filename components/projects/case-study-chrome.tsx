@@ -31,7 +31,7 @@ const NEXT = {
 };
 export function NextStudy({ current }: { current: keyof typeof NEXT }) {
   const next = NEXT[current];
-  return <section className="next-study">
+  return <section className="next-study" data-guide-skip>
     <Link href={`/projects/${next.id}`} onClick={event => {
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault(); startProjectSignatureTransition(next.id);

@@ -12,7 +12,6 @@ import { MugshotTechStack } from "@/components/projects/mugshot-tech-stack";
 import { MugshotJournal } from "@/components/projects/mugshot-journal";
 import { StudyNav, NextStudy } from "@/components/projects/case-study-chrome";
 
-const CHAPTERS = [{ id: "ritual", label: "The ritual" }, { id: "collection", label: "The app" }, { id: "daily", label: "Daily details" }, { id: "craft", label: "The craft" }];
 function Phone({ screen, alt, priority = false }: { screen: string; alt: string; priority?: boolean }) {
   return <div className="mug-device"><div>
     <Image src={`/mugshot/${screen}-light.PNG`} alt={alt} fill priority={priority} sizes="(max-width: 768px) 65vw, 300px" className="object-cover object-top dark:hidden" />
@@ -76,7 +75,7 @@ export function MugshotExperience({ project }: { project: SerializableProject })
       </div>
       <div className="mug-ribbon"><span>Snap your cup</span><Sparkles size={15} /><span>Keep the sticker</span><Sparkles size={15} /><span>Collect the little things</span><Sparkles size={15} /><span>Repeat tomorrow</span></div>
     </section>
-    <StudyNav name="Mugshot" chapters={CHAPTERS} />
+    <StudyNav name="Mugshot" chapters={project.chapters ?? []} />
 
     <section id="ritual" className="study-section"><div className="study-width"><MugshotJournal /></div></section>
     <section id="collection" className="study-section mug-collection-section"><div className="study-width"><AppCollection /></div></section>

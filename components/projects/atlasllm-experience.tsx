@@ -15,7 +15,6 @@ import { TechStack } from "@/components/projects/tech-stack";
 
 import { StudyNav, NextStudy } from "@/components/projects/case-study-chrome";
 
-const CHAPTERS = [{id:"overview",label:"The idea"},{id:"workflow",label:"Research engine"},{id:"product",label:"The product"},{id:"models",label:"The models"}];
 const EASE = [0.16, 1, 0.3, 1] as const;
 const REPO_URL = "https://github.com/Youssef2430/llmchat";
 
@@ -113,7 +112,7 @@ export function RamelliExperience({ project }: { project: SerializableProject })
           <div className="atlas-hero-stats">{[["30+", "Models, one conversation"], ["9", "Providers, one interface"], ["4", "Ways to find your answer"]].map(([value, label]) => <div key={value}><strong>{value}</strong><span>{label}</span></div>)}</div>
         </div>
       </section>
-      <StudyNav name="Ramelli" chapters={CHAPTERS} />
+      <StudyNav name="Ramelli" chapters={project.chapters ?? []} />
 
       {/* ── Overview ── */}
       <section id="overview" className="px-6 md:px-12 py-24 md:py-32">

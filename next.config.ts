@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  // The site guide reads the field notes at request time
+  outputFileTracingIncludes: {
+    "/api/ask": ["./blogs/*.md"],
+  },
   async redirects() {
     return [
       { source: "/projects/atlasllm", destination: "/projects/ramelli", permanent: true },
