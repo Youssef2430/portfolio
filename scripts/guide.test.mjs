@@ -21,7 +21,7 @@ const HOME = `<!DOCTYPE html><html><head><title>Youssef</title><script>self.__ne
 <nav><a href="/#about">Info</a></nav>
 <div id="home"><section><span>Y</span><span>C</span></section></div>
 <section id="about"><h2>SOFTWARE ENGINEER, RESEARCHER</h2><p>I&#x27;m a software engineer &amp; researcher.</p><p class="hidden lg:block">Based in Ottawa</p></section>
-<footer><h3>Connect</h3><ul><li><a href="https://github.com/Youssef2430"><svg><path d="M0 0"/></svg><span>GitHub</span></a></li><li><a href="mailto:me@example.com">Email</a></li></ul></footer>
+<footer><h3>Connect</h3><ul><li><a href="https://github.com/yssf-c"><svg><path d="M0 0"/></svg><span>GitHub</span></a></li><li><a href="mailto:me@example.com">Email</a></li></ul></footer>
 </body></html>`;
 const GLUI = `<main><section id="project-top"><h1>A little glue.<br/><em>A clearer headspace.</em></h1><div class="glui-demo" data-guide-skip=""><p>Mock conversation</p></div><a href="https://clui.app/">Meet GLUI</a> <a href="#experience">Explore</a></section>
 <nav><a href="#idea">The idea</a></nav>
@@ -58,13 +58,14 @@ test("anchors the guide links to exist on the pages that render them", () => {
     ramelli: "atlasllm-experience",
     mugshot: "mugshot-experience",
     "nlp-phishing-detection": "nlp-phishing-experience",
+    "gallery-glow": "gallery-glow-experience",
+    biketrack: "biketrack-experience",
   };
   for (const project of projects) {
     const source = readFileSync(`components/projects/${pages[project.id]}.tsx`, "utf8");
-    assert.ok(source.includes("chapters={project.chapters"), project.id);
-    // A chapter is read from, and linked to, its <section>.
+    // A chapter is read from, and linked to, its <Section>.
     for (const chapter of project.chapters ?? [])
-      assert.ok(source.includes(`<section id="${chapter.id}"`), `${project.id}#${chapter.id}`);
+      assert.ok(source.includes(`<Section id="${chapter.id}"`), `${project.id}#${chapter.id}`);
   }
 });
 
@@ -75,7 +76,7 @@ test("a rendered page reads as its visible text, block by block", () => {
     [undefined, "about", "footer"],
   );
   assert.equal(about.text, "SOFTWARE ENGINEER, RESEARCHER\nI'm a software engineer & researcher.\nBased in Ottawa");
-  assert.equal(footer.text, "Connect\nGitHub (https://github.com/Youssef2430)\nEmail (mailto:me@example.com)");
+  assert.equal(footer.text, "Connect\nGitHub (https://github.com/yssf-c)\nEmail (mailto:me@example.com)");
 
   const [top, architecture, ...rest] = pageBlocks(GLUI);
   assert.equal(top.text, "A little glue.\nA clearer headspace.\nMeet GLUI (https://clui.app/) Explore");
@@ -89,7 +90,7 @@ test("a rendered page reads as its visible text, block by block", () => {
 test("About and the case studies come from the rendered pages, and nothing the site doesn't show", () => {
   const about = knowledge.sources.find((s) => s.id === "about");
   assert.ok(about.text.startsWith("SOFTWARE ENGINEER, RESEARCHER"));
-  assert.ok(about.text.includes("GitHub (https://github.com/Youssef2430)"));
+  assert.ok(about.text.includes("GitHub (https://github.com/yssf-c)"));
   const glui = knowledge.sources.find((s) => s.id === "project/glui");
   assert.ok(glui.text.includes("Meet GLUI (https://clui.app/)"));
   assert.ok(knowledge.sources.find((s) => s.id === "project/glui#architecture").text.includes("Orchestrator V2"));

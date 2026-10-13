@@ -79,6 +79,14 @@ function HoverProjectPreview({ project }: { project: ProjectDetail }) {
     fit: "cover",
   } satisfies HoverPreview;
 
+  if (preview.device === "tv") {
+    return <div className="gallery-card-preview"><div><HoverPreviewShot preview={preview} title={project.title} sizes="420px" /></div></div>;
+  }
+
+  if (preview.device === "watch") {
+    return <div className="bike-card-preview"><div className="bike-watch"><div className="bike-watch-screen relative aspect-[416/496]"><HoverPreviewShot preview={preview} title={project.title} sizes="210px" /></div><span className="bike-watch-crown" aria-hidden="true" /></div></div>;
+  }
+
   if (preview.device === "iphone") {
     return (
       <div className="w-[150px] md:w-[174px] drop-shadow-[0_34px_60px_rgba(18,22,31,0.28)] dark:drop-shadow-[0_34px_70px_rgba(0,0,0,0.6)]">
@@ -175,13 +183,19 @@ export function Projects() {
       browserPreviewWidth /
         getAspectRatioValue(activeProject?.hoverPreview?.aspectRatio)
     );
-  const previewOffset = activePreviewDevice === "iphone"
+  const previewOffset = activePreviewDevice === "watch"
+    ? { x: 112, y: -150 }
+    : activePreviewDevice === "iphone"
     ? { x: 112, y: -180 }
     : activePreviewDevice === "browser"
       ? { x: 96, y: -92 }
     : { x: 120, y: -118 };
   const previewBounds = activeProject?.id === "glui"
     ? { width: 380, height: 335 }
+    : activePreviewDevice === "tv"
+    ? { width: 420, height: 252 }
+    : activePreviewDevice === "watch"
+    ? { width: 240, height: 290 }
     : activePreviewDevice === "iphone"
     ? { width: 174, height: 358 }
     : activePreviewDevice === "browser"

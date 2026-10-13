@@ -16,7 +16,7 @@ import {
   Roboto_Mono,
 } from "next/font/google";
 import "./globals.css";
-import "./project-studies.css";
+import "./project-pages.css";
 import "./glui.css";
 import "./field-notes.css";
 import { ThemeProvider } from "@/components/theme-provider";

@@ -98,7 +98,7 @@ export function Footer() {
                 <ul className="space-y-2">
                   <li>
                     <a
-                      href="https://github.com/Youssef2430"
+                      href="https://github.com/yssf-c"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-sm text-[hsl(var(--foreground-muted))] hover:text-foreground transition-colors group"
