@@ -4,7 +4,7 @@ export const SITE_DESCRIPTION =
   "Portfolio of Youssef Chouay, Software Engineer and AI Researcher based in Ottawa, Canada.";
 
 export const SOCIAL_LINKS = [
-  "https://github.com/Youssef2430",
+  "https://github.com/yssf-c",
   "https://linkedin.com/in/youssef-chouay",
 ];
 

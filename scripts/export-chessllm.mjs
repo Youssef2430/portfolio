@@ -353,7 +353,7 @@ const settings = manifest.settings ?? {};
 const out = {
   cohort,
   protocol: manifest.protocol ?? "2-subscription",
-  source: "github.com/Youssef2430/chessLLM",
+  source: "github.com/yssf-c/chessLLM",
   startedAt,
   snapshot,
   settings: {
