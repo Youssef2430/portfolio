@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useInView, useReducedMotion } from "framer-motion";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useInView } from "framer-motion";
 
 /**
  * Ramelli's real workflow orchestration (`@repo/orchestrator`), drawn as the
@@ -12,6 +12,15 @@ import { useInView, useReducedMotion } from "framer-motion";
  */
 
 const H = 34; // chip height
+
+const MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+const getReducedMotion = () => window.matchMedia(MOTION_QUERY).matches;
+const getServerReducedMotion = () => false;
+function subscribeReducedMotion(onChange: () => void) {
+  const media = window.matchMedia(MOTION_QUERY);
+  media.addEventListener("change", onChange);
+  return () => media.removeEventListener("change", onChange);
+}
 
 type Node = { label: string; x: number; y: number; w: number; purpose: string };
 
@@ -100,7 +109,8 @@ function fanPaths(): string[] {
 export function AtlasWorkflow() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: false, margin: "-20%" });
-  const reduced = useReducedMotion();
+  // Keep the first client render identical to SSR, then read the media preference.
+  const reduced = useSyncExternalStore(subscribeReducedMotion, getReducedMotion, getServerReducedMotion);
   const [frameIdx, setFrameIdx] = useState(0);
   const [mode, setMode] = useState(3);
   const [playing, setPlaying] = useState(true);

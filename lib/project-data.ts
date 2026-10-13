@@ -7,7 +7,7 @@ export type ProjectDetail = {
   image: string;
   imageLink?: string;
   hoverPreview?: {
-    device: "mac" | "iphone" | "browser";
+    device: "mac" | "iphone" | "browser" | "tv" | "watch";
     src: string;
     darkSrc?: string;
     fit?: "cover" | "contain";
@@ -55,15 +55,14 @@ export const projects: ProjectDetail[] = [
       "Local Voice Transcription",
     ],
     chapters: [
-      { id: "idea", label: "The idea" },
-      { id: "experience", label: "The experience" },
-      { id: "appearance", label: "The aesthetic" },
-      { id: "architecture", label: "The engineering" },
-      { id: "get-started", label: "Get GLUI" },
+      { id: "idea", label: "Why it exists" },
+      { id: "experience", label: "Using it" },
+      { id: "architecture", label: "How it works" },
+      { id: "get-started", label: "Install" },
     ],
     timeline: "Recent",
     contributors: ["Youssef Chouay"],
-    link: "https://github.com/Youssef2430/glui",
+    link: "https://github.com/yssf-c/glui",
     size: "large",
   },
   {
@@ -75,12 +74,12 @@ export const projects: ProjectDetail[] = [
       "Engineered a custom DAG-based workflow orchestration engine powering agentic research pipelines (deep research, pro search) with parallel task fan-out, typed event-driven state, retry/timeout policies, and Langfuse tracing per generation.",
       "Integrated Clerk for authentication and subscription billing, atomic Redis Lua scripts for thread-safe credit deduction, and a production observability stack spanning Sentry, PostHog, Axiom, and OpenTelemetry for error tracking, product analytics, and distributed tracing.",
     ],
-    image: "/atlasllm-welcome.png",
-    imageLink: "/atlasllm-conv.png",
+    image: "/ramelli/macbook-light.png",
+    imageLink: "/ramelli/ipad-light.png",
     hoverPreview: {
       device: "mac",
-      src: "/atlasllm/macbook-light.png",
-      darkSrc: "/atlasllm/macbook-dark.png",
+      src: "/ramelli/macbook-light.png",
+      darkSrc: "/ramelli/macbook-dark.png",
       objectPosition: "center top",
     },
     technologies: [
@@ -102,14 +101,62 @@ export const projects: ProjectDetail[] = [
     ],
     chapters: [
       { id: "overview", label: "The idea" },
-      { id: "workflow", label: "Research engine" },
-      { id: "product", label: "The product" },
+      { id: "workflow", label: "The research engine" },
+      { id: "product", label: "On every screen" },
       { id: "models", label: "The models" },
     ],
     timeline: "Recent",
     contributors: ["Youssef Chouay"],
     link: "https://ramelli.chat/chat",
     size: "large",
+  },
+  {
+    id: "gallery-glow",
+    title: "Gallery Glow",
+    category: "Apple TV Art Gallery",
+    description: [
+      "A private art gallery for Apple TV, pairing classic paintings with ambient gradients and a different free artwork every day.",
+      "Built in SwiftUI for tvOS, with remote-friendly focus navigation, light and dark appearances, and a Top Shelf extension that brings the collection to the Apple TV home screen.",
+      "Integrated a one-time Lifetime unlock with StoreKit, alongside full-screen artwork and five animated ambient scenes.",
+    ],
+    image: "/gallery-glow/home-light.webp",
+    hoverPreview: {
+      device: "tv",
+      src: "/gallery-glow/home-light.webp",
+      darkSrc: "/gallery-glow/home-dark.webp",
+      fit: "contain",
+      aspectRatio: "16 / 9",
+    },
+    technologies: ["Swift", "SwiftUI", "tvOS", "StoreKit", "TVServices"],
+    chapters: [
+      { id: "collection", label: "Inside the app" },
+      { id: "craft", label: "Behind the frame" },
+    ],
+    timeline: "2026",
+    contributors: ["Youssef Chouay"],
+    link: "https://yssf-c.github.io/Gallery-Glow/",
+    size: "large",
+  },
+  {
+    id: "biketrack",
+    title: "BikeTrack",
+    category: "Apple Watch Training App",
+    description: [
+      "An Apple Watch app that brings your equipment’s power and cadence together with live heart rate, training zones, and workout summaries.",
+      "Connected compatible bikes and treadmills over Core Bluetooth, with a separate RideCore Swift package for Bluetooth packet parsing and workout analytics.",
+      "Built a native SwiftUI interface with editable heart-rate and power zones, and HealthKit workout recording for Apple Health and Fitness. Free and open source, with no account or subscription.",
+    ],
+    image: "/biketrack/social.jpg",
+    hoverPreview: { device: "watch", src: "/biketrack/heart.webp", fit: "contain" },
+    technologies: ["Swift", "SwiftUI", "watchOS", "Core Bluetooth", "HealthKit", "Swift Package Manager"],
+    chapters: [
+      { id: "experience", label: "On the watch" },
+      { id: "engineering", label: "How it’s built" },
+    ],
+    timeline: "2026",
+    contributors: ["Youssef Chouay"],
+    link: "https://yssf-c.github.io/BikeTrack/",
+    size: "small",
   },
   // {
   //   id: "chess-llm-benchmark",
@@ -143,16 +190,15 @@ export const projects: ProjectDetail[] = [
     title: "Mugshot",
     category: "iOS Application",
     description: [
-      "Built a SwiftUI iOS coffee journal where the core loop is take a photo, let the app cut it into a die-cut sticker, then drop that sticker onto a calendar day: a warm cafe-scrapbook take on caffeine tracking.",
-      "Wrote an on-device sticker pipeline: Vision foreground lift on iOS 17+, a classical flood-fill background remover, and a rounded-crop fallback, plus an Apple Intelligence Foundation Model that names the drink and estimates its caffeine.",
-      "Persisted everything locally as JSON and image files with an atomic backup manifest, refreshed WidgetKit snapshots after each save, and added optional HealthKit caffeine sync, a daily-limit meter, and a shareable monthly Wrapped recap.",
+      "A quiet coffee journal for iPhone and iPad. Photograph a cup, save it to your calendar, and get to know your coffee habits.",
+      "Built with SwiftUI and on-device Vision for drink suggestions and photo cutouts. Local storage, WidgetKit, and optional Apple Health sync keep the daily ritual close.",
     ],
     image: "/mugshot/icon.png",
     imageLink: "/mugshot/wrapped-light.PNG",
     hoverPreview: {
       device: "iphone",
-      src: "/mugshot/home-light.PNG",
-      darkSrc: "/mugshot/home-dark.PNG",
+      src: "/mugshot/calendar-light.webp",
+      darkSrc: "/mugshot/calendar-dark.webp",
       objectPosition: "center top",
     },
     technologies: [
@@ -160,18 +206,16 @@ export const projects: ProjectDetail[] = [
       "SwiftUI",
       "Vision",
       "Core Image",
-      "Apple Intelligence",
       "WidgetKit",
       "HealthKit",
     ],
     chapters: [
-      { id: "ritual", label: "The ritual" },
-      { id: "collection", label: "The app" },
-      { id: "daily", label: "Daily details" },
-      { id: "craft", label: "The craft" },
+      { id: "ritual", label: "How it works" },
+      { id: "craft", label: "How it’s built" },
     ],
     timeline: "Jun 2026",
     contributors: ["Youssef Chouay"],
+    link: "https://yssf-c.github.io/Mugshot/",
     size: "small",
   },
   // {
@@ -195,7 +239,7 @@ export const projects: ProjectDetail[] = [
   //   ],
   //   timeline: "Jul 2025 - Present",
   //   contributors: ["Youssef Chouay"],
-  //   link: "https://github.com/Youssef2430/ledgerUI",
+  //   link: "https://github.com/yssf-c/ledgerUI",
   //   size: "small",
   // },
   {
@@ -235,8 +279,8 @@ export const projects: ProjectDetail[] = [
     chapters: [
       { id: "overview", label: "In the inbox" },
       { id: "scanner", label: "Try a message" },
-      { id: "pipeline", label: "System" },
-      { id: "models", label: "Models" },
+      { id: "pipeline", label: "The system" },
+      { id: "models", label: "The models" },
     ],
     timeline: "Jan 2024 - Dec 2024",
     contributors: ["Youssef Chouay", "Group 30 Capstone Team"],

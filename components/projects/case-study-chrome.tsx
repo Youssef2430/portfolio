@@ -1,47 +1,117 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
-import { ArrowUpRight, ArrowRight, Check, Copy } from "lucide-react";
-import { startProjectSignatureTransition } from "@/components/project-signature-transition";
+import { ArrowLeft, ArrowRight, Check, Copy } from "lucide-react";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
+import { PROJECT_SIGNATURES, startProjectSignatureTransition, type ProjectSignature } from "@/components/project-signature-transition";
 
-type Chapter = { id: string; label: string };
-export function StudyNav({ name, chapters }: { name: string; chapters: Chapter[] }) {
-  const [active, setActive] = useState(chapters[0]?.id ?? "");
-  useEffect(() => {
-    const update = () => {
-      const current = chapters.filter(chapter => (document.getElementById(chapter.id)?.getBoundingClientRect().top ?? Infinity) <= 180).at(-1);
-      setActive(current?.id ?? chapters[0]?.id ?? "");
-    };
-    window.addEventListener("scroll", update, { passive: true });
-    update();
-    return () => window.removeEventListener("scroll", update);
-  }, [chapters]);
-  return <nav aria-label={`${name} chapters`} className="study-nav">
-    <div><a className="study-nav-name" href="#project-top">{name}<span> / Case study</span></a>
-      <div className="study-nav-links">{chapters.map((chapter, i) => <a key={chapter.id} href={`#${chapter.id}`} aria-current={active === chapter.id ? "location" : undefined}><span>0{i + 1}</span>{chapter.label}</a>)}</div>
+/*
+ * The shared, quiet skeleton every project page is built from: a hero, a few
+ * short sections, a facts list, and a link to the next project. Each page
+ * brings its own palette and typeface through its theme class.
+ */
+
+type PageId = ProjectSignature["id"];
+const ORDER: PageId[] = ["glui", "ramelli", "gallery-glow", "biketrack", "mugshot", "nlp-phishing-detection"];
+
+export function ProjectPage({ id, theme, children }: { id: PageId; theme: string; children: ReactNode }) {
+  return (
+    <main className={`${theme} pp min-h-screen overflow-clip bg-background text-foreground`} data-project={id}>
+      <Navbar />
+      {children}
+      <NextProject current={id} />
+      <Footer />
+    </main>
+  );
+}
+
+const rise = (i: number) => ({ "--i": i }) as CSSProperties;
+
+export function Hero({ mark, name, title, lede, actions, meta, visual, layout = "split" }: {
+  mark?: ReactNode; name: string; title: ReactNode; lede: ReactNode; actions: ReactNode;
+  meta?: ReactNode; visual: ReactNode; layout?: "split" | "stacked";
+}) {
+  return (
+    <section id="project-top" className={`pp-hero pp-hero-${layout}`}>
+      <div className="pp-width">
+        <Link href="/#work" className="pp-back pp-rise" style={rise(0)}><ArrowLeft size={14} />All work</Link>
+        <div className="pp-hero-grid">
+          <div className="pp-hero-copy">
+            <p className="pp-name pp-rise" style={rise(1)}>{mark}<span>{name}</span></p>
+            <h1 className="pp-title pp-rise" style={rise(2)}>{title}</h1>
+            <p className="pp-lede pp-rise" style={rise(3)}>{lede}</p>
+            <div className="pp-actions pp-rise" style={rise(4)}>{actions}</div>
+            {meta && <p className="pp-meta pp-rise" style={rise(5)}>{meta}</p>}
+          </div>
+          <div className="pp-hero-visual pp-rise" style={rise(layout === "split" ? 3 : 5)}>{visual}</div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function Facts({ items }: { items: [string, ReactNode][] }) {
+  return (
+    <div className="pp-width">
+      <dl className="pp-facts">{items.map(([term, value]) => <div key={term}><dt>{term}</dt><dd>{value}</dd></div>)}</dl>
     </div>
-  </nav>;
+  );
 }
-const NEXT = {
-  ramelli: { id: "glui", name: "GLUI", note: "A little glue. A clearer headspace.", tag: "macOS agent workspace", number: "01" },
-  glui: { id: "mugshot", name: "Mugshot", note: "Your daily cup, turned into a keepsake.", tag: "iOS coffee journal", number: "03" },
-  mugshot: { id: "nlp-phishing-detection", name: "Phishing Detection", note: "Reading between the suspicious lines.", tag: "Applied NLP", number: "04" },
-  "nlp-phishing-detection": { id: "ramelli", name: "Ramelli", note: "Thirty models. One conversation.", tag: "AI workspace", number: "02" },
-};
-export function NextStudy({ current }: { current: keyof typeof NEXT }) {
-  const next = NEXT[current];
-  return <section className="next-study" data-guide-skip>
-    <Link href={`/projects/${next.id}`} onClick={event => {
-      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      event.preventDefault(); startProjectSignatureTransition(next.id);
-    }}>
-      <div className="study-eyebrow"><span>Keep exploring</span><span>Next project / {next.number}</span></div>
-      <div className="next-study-title"><h2>{next.name}</h2><ArrowUpRight aria-hidden="true" /></div>
-      <div className="next-study-note"><p>{next.note}</p><span>{next.tag}<ArrowRight size={14} /></span></div>
-    </Link>
-  </section>;
+
+/** A heading beside its prose; `wide` content spans the full measure below. */
+export function Section({ id, title, children, wide }: { id: string; title: ReactNode; children?: ReactNode; wide?: ReactNode }) {
+  return (
+    <section id={id} className="pp-section">
+      <div className="pp-width pp-section-grid pp-reveal">
+        <h2 className="pp-h2">{title}</h2>
+        {children && <div className="pp-prose">{children}</div>}
+      </div>
+      {wide && <div className="pp-width pp-wide pp-reveal">{wide}</div>}
+    </section>
+  );
 }
+
+/** Term and description rows, for the handful of details a project needs. */
+export function Rows({ items }: { items: [ReactNode, ReactNode][] }) {
+  return <dl className="pp-rows">{items.map(([term, text], i) => <div key={i}><dt>{term}</dt><dd>{text}</dd></div>)}</dl>;
+}
+
+/** Roving-focus tabs, shared by the pages that switch between screens. */
+export function TabList({ label, prefix, items, selected, onSelect }: {
+  label: string; prefix: string; items: { id: string; label: string }[]; selected: number; onSelect: (index: number) => void;
+}) {
+  return (
+    <div className="pp-tabs" role="tablist" aria-label={label}>
+      {items.map((item, index) => <button key={item.id} id={`${prefix}-tab-${item.id}`} type="button" role="tab" aria-selected={selected === index} aria-controls={`${prefix}-panel`} tabIndex={selected === index ? 0 : -1} onClick={() => onSelect(index)} onKeyDown={event => {
+        const last = items.length - 1;
+        const next = event.key === "ArrowRight" ? (index + 1) % items.length : event.key === "ArrowLeft" ? (index + last) % items.length : event.key === "Home" ? 0 : event.key === "End" ? last : null;
+        if (next === null) return;
+        event.preventDefault(); onSelect(next); document.getElementById(`${prefix}-tab-${items[next].id}`)?.focus();
+      }}>{item.label}</button>)}
+    </div>
+  );
+}
+
+/** The next project, previewed in the color its transition opens on. */
+function NextProject({ current }: { current: PageId }) {
+  const next = PROJECT_SIGNATURES[ORDER[(ORDER.indexOf(current) + 1) % ORDER.length]];
+  const style = { "--next-bg": next.bg, "--next-fg": next.fg, "--next-font": next.font } as CSSProperties;
+  return (
+    <section className="pp-next" data-guide-skip data-next={next.id} style={style}>
+      <Link href={`/projects/${next.id}`} onClick={event => {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault(); startProjectSignatureTransition(next.id);
+      }}>
+        <span className="pp-next-label">Next project</span>
+        <span className="pp-next-name">{next.title}</span>
+        <span className="pp-next-line">{next.line}<ArrowRight size={16} /></span>
+      </Link>
+    </section>
+  );
+}
+
 export function CopyCommand({ command }: { command: string }) {
   const [copied, setCopied] = useState(false);
   const [failed, setFailed] = useState(false);

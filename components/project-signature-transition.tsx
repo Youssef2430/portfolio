@@ -1,57 +1,64 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 
 // Preserve the public event API used by project cards and AI answer links.
 const PROJECT_SIGNATURE_EVENT = "portfolio:project-signature-transition";
-type ProjectId = "ramelli" | "glui" | "mugshot" | "nlp-phishing-detection";
-type ProjectConfig = {
+type ProjectId = "ramelli" | "glui" | "gallery-glow" | "biketrack" | "mugshot" | "nlp-phishing-detection";
+
+/** Each project opens on its own color, in its own typeface. */
+export type ProjectSignature = {
   id: ProjectId;
   title: string;
-  category: string;
-  description: string;
-  index: string;
-  theme: string;
-  stages: [string, string, string];
+  line: string;
+  bg: string;
+  fg: string;
+  accent: string;
+  font: string;
 };
-const PROJECTS: Record<ProjectId, ProjectConfig> = {
-  ramelli: {
-    id: "ramelli", title: "Ramelli", category: "AI workspace", index: "02", theme: "atlas-theme",
-    description: "A little space for big ideas.",
-    stages: ["Finding our bearings", "A world of possibilities", "Welcome to Ramelli"],
-  },
+export const PROJECT_SIGNATURES: Record<ProjectId, ProjectSignature> = {
   glui: {
-    id: "glui", title: "GLUI", category: "macOS agent workspace", index: "01", theme: "glui-theme",
-    description: "A little glue. A clearer headspace.",
-    stages: ["Bringing your agents together", "A little room to think", "Make yourself at home"],
+    id: "glui", title: "GLUI", line: "Coding agents for the Mac",
+    bg: "#800020", fg: "#fcefe4", accent: "#e4b7ae", font: "var(--font-hanken), sans-serif",
+  },
+  ramelli: {
+    id: "ramelli", title: "Ramelli", line: "An AI chat workspace",
+    bg: "#eb5823", fg: "#1f0e07", accent: "#fff1e8", font: "var(--font-newsreader), serif",
+  },
+  "gallery-glow": {
+    id: "gallery-glow", title: "Gallery Glow", line: "Paintings for Apple TV",
+    bg: "#edbd37", fg: "#1c1b17", accent: "#fffaf0", font: "var(--font-cormorant-garamond), serif",
+  },
+  biketrack: {
+    id: "biketrack", title: "BikeTrack", line: "Workouts for Apple Watch",
+    bg: "#0b0c0a", fg: "#c7f83a", accent: "#ff635b", font: "var(--font-oswald), sans-serif",
   },
   mugshot: {
-    id: "mugshot", title: "Mugshot", category: "Coffee & daily rituals", index: "03", theme: "mugshot-theme",
-    description: "Good things take a little brewing.",
-    stages: ["One moment, one coffee", "Almost brewed", "Made just for you"],
+    id: "mugshot", title: "Mugshot", line: "A coffee journal for iPhone",
+    bg: "#38564a", fg: "#f6efe3", accent: "#e2bb61", font: "var(--font-fraunces), serif",
   },
   "nlp-phishing-detection": {
-    id: "nlp-phishing-detection", title: "Phishing Detection", category: "Natural language processing", index: "04", theme: "phish-theme",
-    description: "Reading between the suspicious lines.",
-    stages: ["A closer look", "The details make the difference", "Let’s investigate"],
+    id: "nlp-phishing-detection", title: "Phishing Detection", line: "Applied NLP, in Gmail",
+    bg: "#0e1a2e", fg: "#f4ecdf", accent: "#f5a05c", font: "var(--font-ibm-plex-mono), monospace",
   },
 };
-type Transition = { key: number; config: ProjectConfig; href: string };
+
+type Transition = { key: number; config: ProjectSignature; href: string };
 type TransitionDetail = { projectId: string; href?: string };
 
-function getConfig(projectId: string): ProjectConfig | undefined {
+export function getProjectSignature(projectId: string): ProjectSignature | undefined {
   if (projectId === "atlasllm") projectId = "ramelli";
   if (projectId === "clui") projectId = "glui";
-  return Object.hasOwn(PROJECTS, projectId) ? PROJECTS[projectId as ProjectId] : undefined;
+  return Object.hasOwn(PROJECT_SIGNATURES, projectId) ? PROJECT_SIGNATURES[projectId as ProjectId] : undefined;
 }
 function getPathname(href: string) {
   try { const path = new URL(href, window.location.origin).pathname; return path === "/projects/atlasllm" ? "/projects/ramelli" : path === "/projects/clui" ? "/projects/glui" : path; }
   catch { return href.split("?")[0].split("#")[0]; }
 }
 export function hasProjectSignatureTransition(projectId: string): projectId is ProjectId | "atlasllm" | "clui" {
-  return Boolean(getConfig(projectId));
+  return Boolean(getProjectSignature(projectId));
 }
 export function startProjectSignatureTransition(projectId: string, href?: string) {
   if (typeof window !== "undefined") {
@@ -59,88 +66,91 @@ export function startProjectSignatureTransition(projectId: string, href?: string
   }
 }
 
-/** Integer coordinates keep the little illustrations crisp at every pixel step. */
-function ProjectPixels({ id, progress, still }: { id: ProjectId; progress: number; still: boolean }) {
-  const step = Math.floor(progress / 12);
+/** One small looping drawing per project, animated in CSS (see .pl-art in project-pages.css). */
+function SignatureArt({ id }: { id: ProjectId }) {
+  const clip = useId();
   return (
-    <svg viewBox="0 0 32 32" className="project-loader-sprite" shapeRendering="crispEdges" fill="currentColor" aria-hidden="true">
-      {id === "ramelli" && <>
-        <image href="/ramelli/logo-light.svg" width="32" height="32" className="dark:hidden" />
-        <image href="/ramelli/logo-dark.svg" width="32" height="32" className="hidden dark:block" />
+    <svg viewBox="0 0 64 64" className={`pl-art pl-art-${id}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {id === "glui" && <>
+        <path className="pl-draw" pathLength={1} d="M43 19A17 17 0 1 0 49 32H35" strokeWidth="7" />
+        <circle className="pl-blink" cx="51" cy="50" r="2.5" fill="var(--pl-accent)" stroke="none" />
       </>}
-      {id === "glui" && <image href="/glui/icon.svg" width="32" height="32" />}
+      {id === "ramelli" && <>
+        <path className="pl-draw" pathLength={1} d="M8 32h14" />
+        {["M22 32C34 32 36 16 50 16", "M22 32h28", "M22 32C34 32 36 48 50 48"].map((d, i) =>
+          <path key={d} className="pl-draw pl-branch" pathLength={1} d={d} style={{ "--n": i } as CSSProperties} />)}
+        <circle cx="8" cy="32" r="3" fill="currentColor" />
+        {[16, 32, 48].map((y, i) => <circle key={y} className="pl-pop" cx="52" cy={y} r="3.5" fill="var(--pl-accent)" stroke="currentColor" strokeWidth="1.5" style={{ "--n": i } as CSSProperties} />)}
+      </>}
+      {id === "gallery-glow" && <>
+        <defs><clipPath id={clip}><rect x="15" y="17" width="34" height="26" /></clipPath></defs>
+        <image className="pl-fade" href="/gallery-glow/venus.webp" x="11" y="17" width="42" height="26" preserveAspectRatio="xMidYMid slice" clipPath={`url(#${clip})`} />
+        <rect className="pl-draw" pathLength={1} x="10" y="12" width="44" height="36" strokeWidth="3" />
+        <path d="M27 56h10" opacity=".45" />
+      </>}
+      {id === "biketrack" && <>
+        <path d="M6 34h12l4-12 7 24 6-16 4 4h19" opacity=".18" />
+        <path className="pl-trace" pathLength={1} d="M6 34h12l4-12 7 24 6-16 4 4h19" strokeWidth="2.5" />
+        <circle className="pl-beat" cx="56" cy="16" r="3" fill="var(--pl-accent)" stroke="none" />
+      </>}
       {id === "mugshot" && <>
-        <g className={still ? "" : "project-loader-steam"}><path d="M10 3h1v2h-1v2H9V5h1z M16 2h1v2h-1v2h-1V4h1z M22 3h1v2h-1v2h-1V5h1z" opacity=".6" /></g>
-        <path d="M7 11h17v12h-2v2H9v-2H7z" opacity=".08" />
-        <rect x="8" y={23 - Math.floor(progress / 10)} width="15" height={Math.floor(progress / 10)} opacity=".5" />
-        <path d="M7 11h17v12h-2v2H9v-2H7z M24 13h4v1h1v6h-1v1h-4 M5 28h22" fill="none" stroke="currentColor" />
-        <path d="M12 16h2v1h2v-1h2v3h-1v1h-1v1h-1v-1h-1v-1h-2z" fill="hsl(var(--background))" opacity={progress > 62 ? 1 : 0} />
+        <defs><clipPath id={clip}><path d="M16 28h28v16a8 8 0 0 1-8 8H24a8 8 0 0 1-8-8z" /></clipPath></defs>
+        <rect className="pl-fill" x="16" y="28" width="28" height="24" fill="var(--pl-accent)" stroke="none" clipPath={`url(#${clip})`} />
+        <path d="M16 28h28v16a8 8 0 0 1-8 8H24a8 8 0 0 1-8-8z M44 32h3a5 5 0 0 1 0 10h-3" />
+        {[24, 30, 36].map((x, i) => <path key={x} className="pl-steam" d={`M${x} 22c-2-3 2-5 0-8`} style={{ "--n": i } as CSSProperties} />)}
       </>}
       {id === "nlp-phishing-detection" && <>
-        <path d="M15 4h2v1h4v1h4v1h2v10h-1v4h-2v3h-3v2h-3v2h-4v-2h-3v-2H8v-3H6v-4H5V7h2V6h4V5h4z" opacity=".08" />
-        <path d="M15 4h2v1h4v1h4v1h2v10h-1v4h-2v3h-3v2h-3v2h-4v-2h-3v-2H8v-3H6v-4H5V7h2V6h4V5h4z" fill="none" stroke="currentColor" />
-        {progress < 80 ? <>
-          {[11, 15, 19].map(y => <rect key={y} x="10" y={y} width={y === 19 ? 7 : 12} height="1" opacity=".3" />)}
-          <rect x="8" y={9 + (still ? 5 : step % 5) * 3} width="16" height="2" />
-        </> : <path d="M10 15h3v3h2v-2h2v-2h2v-2h3v3h-2v2h-2v2h-2v3h-3v-2h-2v-2h-1z" className="project-loader-secondary" />}
+        <rect x="10" y="16" width="44" height="32" rx="2" />
+        <path d="M10 18l22 16 22-16" />
+        <path className="pl-scan" d="M6 16h52" stroke="var(--pl-accent)" strokeWidth="2.5" />
+        <circle className="pl-pop pl-verdict" cx="50" cy="46" r="8" fill="var(--pl-bg)" stroke="var(--pl-accent)" />
+        <path className="pl-draw pl-verdict-tick" pathLength={1} d="M46.5 46l2.5 2.5 4.5-5" stroke="var(--pl-accent)" />
       </>}
     </svg>
   );
 }
 
-function PixelLoader({ transition, ready, skipped, reduceMotion, stalled, onComplete, onSkip, onCancel }: {
+const EASE = [0.76, 0, 0.24, 1] as const;
+const MIN_OPEN_MS = 1150;
+
+function SignatureLoader({ transition, ready, skipped, reduceMotion, stalled, onComplete, onSkip, onCancel }: {
   transition: Transition; ready: boolean; skipped: boolean; reduceMotion: boolean; stalled: boolean;
   onComplete: () => void; onSkip: () => void; onCancel: () => void;
 }) {
   const { config } = transition;
   const titleId = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
   const actionRef = useRef<HTMLButtonElement>(null);
-  const [progress, setProgress] = useState(0);
-  const progressRef = useRef(0);
-  const startedRef = useRef<number | null>(null);
-  const completionRef = useRef<{ time: number; progress: number } | null>(null);
+  const startedRef = useRef(0);
 
-  useEffect(() => { actionRef.current?.focus({ preventScroll: true }); }, []);
+  useEffect(() => { startedRef.current = performance.now(); actionRef.current?.focus({ preventScroll: true }); }, []);
 
+  // Hold the color long enough for one loop of the drawing, then lift once the
+  // destination route is mounted. Skipping or reduced motion lifts right away.
   useEffect(() => {
-    let frame: number;
-    let finishedAt: number | null = null;
-    const tick = (now: number) => {
-      startedRef.current ??= now;
-      const elapsed = now - startedRef.current;
-      const instant = reduceMotion || skipped;
-      let next: number;
-      if (ready && (instant || elapsed >= 1200)) {
-        completionRef.current ??= { time: now, progress: progressRef.current };
-        const completion = completionRef.current;
-        next = instant ? 100 : Math.min(100, Math.floor(completion.progress + (100 - completion.progress) * (now - completion.time) / 180));
-      } else {
-        // This measures the opening transition, not downloaded bytes. Wait below
-        // completion until Next confirms the destination pathname is mounted.
-        next = Math.min(92, Math.floor(92 * (1 - Math.exp(-elapsed / 510))));
-      }
-      next = Math.max(progressRef.current, next);
-      progressRef.current = next;
-      setProgress(next);
-      if (next === 100) {
-        finishedAt ??= now;
-        if (instant || now - finishedAt >= 200) { onComplete(); return; }
-      }
-      frame = window.requestAnimationFrame(tick);
-    };
-    frame = window.requestAnimationFrame(tick);
-    return () => window.cancelAnimationFrame(frame);
+    if (!ready) return;
+    const wait = skipped || reduceMotion ? 0 : Math.max(0, MIN_OPEN_MS - (performance.now() - startedRef.current));
+    const timer = window.setTimeout(() => {
+      // Lets the page's entrance play while the color lifts away.
+      rootRef.current?.setAttribute("data-leaving", "");
+      onComplete();
+    }, wait);
+    return () => window.clearTimeout(timer);
   }, [ready, skipped, reduceMotion, onComplete]);
 
-  const stage = progress === 100 ? 2 : progress >= 48 ? 1 : 0;
+  const style = { "--pl-bg": config.bg, "--pl-fg": config.fg, "--pl-accent": config.accent, "--pl-font": config.font } as CSSProperties;
+  const wipe = reduceMotion
+    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: .12 } }
+    : { initial: { clipPath: "inset(100% 0 0 0)" }, animate: { clipPath: "inset(0% 0 0 0)" }, exit: { clipPath: "inset(0 0 100% 0)" }, transition: { duration: .6, ease: EASE } };
 
   return (
     <motion.div
-      className={`project-loader fixed inset-0 z-[10000] isolate overflow-clip bg-background text-foreground ${config.theme}`}
+      ref={rootRef}
+      className="project-loader"
       data-project-loader={config.id}
+      style={style}
       role="dialog" aria-modal="true" aria-labelledby={titleId}
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      transition={{ duration: reduceMotion ? .08 : .22 }}
+      {...wipe}
       onKeyDown={event => {
         if (event.key === "Escape") onCancel();
         if (event.key === "Tab") {
@@ -151,60 +161,15 @@ function PixelLoader({ transition, ready, skipped, reduceMotion, stalled, onComp
         }
       }}
     >
-      <div className="project-loader-grid" aria-hidden="true" />
-      <div className="relative flex h-full min-h-[420px] flex-col px-6 py-7 sm:px-12 sm:py-10">
-        <header className="project-loader-meta flex items-center justify-between">
-          <span>YC <span className="mx-2 opacity-30">/</span> Selected work</span>
-          <span>{config.index}<span className="mx-2 opacity-30">/</span>04</span>
-        </header>
-        <div className="flex flex-1 items-center justify-center py-10">
-          <div className="w-full max-w-[440px]">
-            <div className="project-loader-art">
-              <span className="project-loader-corner" /><span className="project-loader-corner" />
-              <span className="project-loader-corner" /><span className="project-loader-corner" />
-              <ProjectPixels id={config.id} progress={progress} still={reduceMotion || progress === 100} />
-            </div>
-            <p className="project-loader-meta mt-8 text-center text-[hsl(var(--gold))]">{config.category}</p>
-            <h2 id={titleId} className={`project-loader-title ${config.id === "nlp-phishing-detection" ? "project-loader-title-long" : ""}`}>{config.title}<span className="text-[hsl(var(--gold))]">.</span></h2>
-            <p className="project-loader-description">{config.description}</p>
-            <div className="mt-10 sm:mt-12">
-              <div className="mb-3 flex items-end justify-between">
-                <span className="project-loader-meta">Opening project</span>
-                <span className="project-loader-count" aria-hidden="true">{String(progress).padStart(2, "0")}<span className="ml-1 text-xs opacity-40">%</span></span>
-              </div>
-              <div className="project-loader-track" role="progressbar" aria-label={`Opening ${config.title}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
-                <svg className="project-loader-matrix" width="100%" height="24" aria-hidden="true">
-                  <defs>
-                    <pattern id={`${titleId}-pixels`} width="4" height="4" patternUnits="userSpaceOnUse">
-                      <rect x=".5" y=".5" width="2.7" height="2.7" rx=".35" fill="white" />
-                    </pattern>
-                    <mask id={`${titleId}-matrix`}><rect width="100%" height="100%" fill={`url(#${titleId}-pixels)`} /></mask>
-                    <linearGradient id={`${titleId}-glow`}>
-                      <stop offset="0" stopColor="currentColor" stopOpacity=".05" />
-                      <stop offset=".55" stopColor="currentColor" stopOpacity=".5" />
-                      <stop offset=".9" stopColor="currentColor" />
-                      <stop offset="1" stopColor="hsl(var(--loader-highlight))" stopOpacity=".85" />
-                    </linearGradient>
-                  </defs>
-                  <g mask={`url(#${titleId}-matrix)`}>
-                    <rect width="100%" height="24" fill="currentColor" opacity=".06" />
-                    <rect data-pixel-fill width={`${progress}%`} height="24" fill={`url(#${titleId}-glow)`} />
-                  </g>
-                </svg>
-              </div>
-              <div className="mt-3 flex min-h-8 items-start justify-between gap-3">
-                <p role="status" className="project-loader-status">{stalled ? "Taking a little longer…" : config.stages[stage]}</p>
-                <span className="project-loader-meta shrink-0 opacity-40" aria-hidden="true">{String(stage + 1).padStart(2, "0")} / 03</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <footer className="project-loader-meta flex items-center justify-between gap-4">
-          <span>Made by Youssef Chouay</span>
-          {stalled ? <a href={transition.href} className="project-loader-action">Open project ↗</a> :
-            <button ref={actionRef} type="button" onClick={skipped ? onCancel : onSkip} className="project-loader-action">{skipped ? "Dismiss" : "Skip"} ↗</button>}
-        </footer>
+      <div className="pl-center">
+        <SignatureArt id={config.id} />
+        <h2 id={titleId} className="pl-title"><span>{config.title}</span></h2>
+        <p className="pl-line">{config.line}</p>
+        <p role="status" className="sr-only">{stalled ? "Taking a little longer to open." : `Opening ${config.title}`}</p>
       </div>
+      {stalled
+        ? <a href={transition.href} className="pl-action">Still loading. Open it directly</a>
+        : <button ref={actionRef} type="button" onClick={skipped ? onCancel : onSkip} className="pl-action">{skipped ? "Dismiss" : "Skip"}</button>}
     </motion.div>
   );
 }
@@ -233,7 +198,7 @@ export function ProjectSignatureTransitionProvider() {
   useEffect(() => {
     const handleStart = (event: Event) => {
       const detail = (event as CustomEvent<TransitionDetail>).detail;
-      const config = getConfig(detail?.projectId ?? "");
+      const config = getProjectSignature(detail?.projectId ?? "");
       if (!config || activeRef.current) return;
       activeRef.current = true;
       navigatedRef.current = false;
@@ -250,6 +215,7 @@ export function ProjectSignatureTransitionProvider() {
 
   useEffect(() => {
     if (!transition) return;
+    // Navigate once the color has covered the page.
     const routeTimer = window.setTimeout(navigate, reduceMotion ? 0 : 650);
     const stallTimer = window.setTimeout(() => setStalled(true), 8000);
     return () => { window.clearTimeout(routeTimer); window.clearTimeout(stallTimer); };
@@ -278,7 +244,7 @@ export function ProjectSignatureTransitionProvider() {
         if (heading) { heading.setAttribute("tabindex", "-1"); heading.focus({ preventScroll: true }); }
       }
     }}>
-      {transition && <PixelLoader key={transition.key} transition={transition} ready={pathname === getPathname(transition.href)} skipped={skipped} reduceMotion={reduceMotion} stalled={stalled} onComplete={dismiss} onSkip={() => { setSkipped(true); navigate(); }} onCancel={dismiss} />}
+      {transition && <SignatureLoader key={transition.key} transition={transition} ready={pathname === getPathname(transition.href)} skipped={skipped} reduceMotion={reduceMotion} stalled={stalled} onComplete={dismiss} onSkip={() => { setSkipped(true); navigate(); }} onCancel={dismiss} />}
     </AnimatePresence>
   );
 }
